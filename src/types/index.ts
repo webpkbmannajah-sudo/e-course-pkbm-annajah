@@ -1,0 +1,83 @@
+// Database types for the Course Management System
+
+export type UserRole = 'student' | 'admin'
+
+export interface User {
+    id: string
+    email: string
+    name: string
+    role: UserRole
+    created_at: string
+}
+
+export interface Material {
+    id: string
+    title: string
+    description: string | null
+    file_url: string
+    file_name: string
+    uploaded_by: string
+    created_at: string
+}
+
+export type ExamType = 'pdf' | 'questions'
+
+export interface Exam {
+    id: string
+    title: string
+    description: string | null
+    type: ExamType
+    pdf_url: string | null
+    created_by: string
+    created_at: string
+    questions?: Question[]
+}
+
+export interface Question {
+    id: string
+    exam_id: string
+    question_text: string
+    order_number: number
+    choices?: Choice[]
+}
+
+export interface Choice {
+    id: string
+    question_id: string
+    choice_text: string
+    is_correct: boolean
+}
+
+export interface ExamAttempt {
+    id: string
+    user_id: string
+    exam_id: string
+    answers: Record<string, string> // question_id -> choice_id
+    score: number | null
+    submitted_at: string
+}
+
+// Form types
+export interface MaterialFormData {
+    title: string
+    description: string
+    file: File | null
+}
+
+export interface ExamFormData {
+    title: string
+    description: string
+    type: ExamType
+    file?: File | null
+    questions?: QuestionFormData[]
+}
+
+export interface QuestionFormData {
+    question_text: string
+    choices: ChoiceFormData[]
+}
+
+export interface ChoiceFormData {
+    choice_text: string
+    is_correct: boolean
+}
