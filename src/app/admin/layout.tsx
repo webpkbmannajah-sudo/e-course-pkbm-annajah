@@ -12,7 +12,9 @@ import {
   LogOut, 
   Menu, 
   X,
-  BookOpen
+  BookOpen,
+  Settings,
+  UserCircle
 } from 'lucide-react'
 
 const adminNavItems = [
@@ -20,6 +22,8 @@ const adminNavItems = [
   { href: '/admin/materials', label: 'Materials', icon: FileText },
   { href: '/admin/exams', label: 'Exams', icon: ClipboardList },
   { href: '/admin/students', label: 'Students', icon: Users },
+  { href: '/admin/profile', label: 'Profile', icon: UserCircle },
+  { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

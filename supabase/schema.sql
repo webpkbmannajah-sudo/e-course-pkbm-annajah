@@ -184,3 +184,61 @@ CREATE TRIGGER on_auth_user_created
 -- CREATE POLICY "Admins can upload materials" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'materials' AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'));
 -- CREATE POLICY "Anyone can view exams" ON storage.objects FOR SELECT USING (bucket_id = 'exams');
 -- CREATE POLICY "Admins can upload exams" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'exams' AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'));
+
+-- ==========================================
+-- PHASE 1: Authentication & User Management
+-- ==========================================
+
+-- Login history tracking
+CREATE TABLE IF NOT EXISTS public.login_history (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  login_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  ip_address TEXT,
+  user_agent TEXT,
+  status TEXT CHECK (status IN ('success', 'failed')),
+  failure_reason TEXT
+);
+
+-- Audit logs
+CREATE TABLE IF NOT EXISTS public.audit_logs (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  entity_type TEXT,
+  entity_id UUID,
+  details JSONB DEFAULT '{}',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Extend profiles table
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+
+-- Enable RLS for new tables
+ALTER TABLE public.login_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+
+-- Login History Policies
+CREATE POLICY "Users can view their own login history" ON public.login_history
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can view all login history" ON public.login_history
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+CREATE POLICY "Service role can insert login history" ON public.login_history
+  FOR INSERT WITH CHECK (true); -- Usually inserted by backend/middleware
+
+-- Audit Logs Policies
+CREATE POLICY "Admins can view audit logs" ON public.audit_logs
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+CREATE POLICY "Service role can insert audit logs" ON public.audit_logs
+  FOR INSERT WITH CHECK (true);
+

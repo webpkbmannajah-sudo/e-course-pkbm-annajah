@@ -38,6 +38,16 @@ export default function LoginPage() {
 
       if (signInError) throw signInError
 
+      // Log login activity
+      await fetch('/api/auth/log-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'success',
+          user_agent: navigator.userAgent,
+        }),
+      });
+
       // Redirect based on user role
       const role = data.user?.user_metadata?.role || 'student'
       router.push(role === 'admin' ? '/admin/dashboard' : '/student/dashboard')
@@ -109,6 +119,16 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+
+            </div>
+
+            <div className="flex justify-end">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+              >
+                Forgot Password?
+              </Link>
             </div>
 
             <button
@@ -129,7 +149,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-slate-400">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link href="/register" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
                 Register here
               </Link>

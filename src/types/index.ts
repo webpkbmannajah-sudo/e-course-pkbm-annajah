@@ -7,6 +7,30 @@ export interface User {
     email: string
     name: string
     role: UserRole
+    avatar_url?: string
+    phone?: string
+    last_login_at?: string
+    is_active?: boolean
+    created_at: string
+}
+
+export interface LoginHistory {
+    id: string
+    user_id: string
+    login_at: string
+    ip_address?: string
+    user_agent?: string
+    status: 'success' | 'failed'
+    failure_reason?: string
+}
+
+export interface AuditLog {
+    id: string
+    user_id: string
+    action: string
+    entity_type?: string
+    entity_id?: string
+    details?: Record<string, unknown>
     created_at: string
 }
 
