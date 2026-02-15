@@ -11,14 +11,15 @@ import {
   LogOut, 
   Menu, 
   X,
-  BookOpen,
-  GraduationCap
+  GraduationCap,
+  TrendingUp,
 } from 'lucide-react'
 
 const studentNavItems = [
   { href: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/student/materials', label: 'Materials', icon: FileText },
   { href: '/student/exams', label: 'Exams', icon: ClipboardList },
+  { href: '/student/progress', label: 'My Progress', icon: TrendingUp },
 ]
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {

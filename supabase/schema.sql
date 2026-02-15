@@ -287,3 +287,83 @@ CREATE POLICY "Admins can manage scores" ON public.scores
 CREATE POLICY "Service role can manage scores" ON public.scores
   FOR INSERT WITH CHECK (true);
 
+-- ==========================================
+-- PHASE 4: Reporting & Analytics
+-- ==========================================
+
+-- Function: Get exam statistics summary
+CREATE OR REPLACE FUNCTION get_exam_statistics(p_exam_id UUID)
+RETURNS JSON AS $$
+  SELECT json_build_object(
+    'total_attempts', COUNT(s.id),
+    'avg_score', ROUND(AVG(s.percentage), 2),
+    'max_score', MAX(s.percentage),
+    'min_score', MIN(s.percentage),
+    'pass_count', COUNT(*) FILTER (WHERE s.is_passed = TRUE),
+    'fail_count', COUNT(*) FILTER (WHERE s.is_passed = FALSE),
+    'pass_rate', ROUND(
+      COUNT(*) FILTER (WHERE s.is_passed = TRUE)::NUMERIC / NULLIF(COUNT(*), 0) * 100, 2
+    )
+  )
+  FROM scores s
+  WHERE s.exam_id = p_exam_id;
+$$ LANGUAGE SQL STABLE;
+
+-- Function: Get score distribution for an exam (for histogram)
+CREATE OR REPLACE FUNCTION get_score_distribution(p_exam_id UUID)
+RETURNS TABLE(score_range TEXT, count BIGINT) AS $$
+  SELECT
+    CASE
+      WHEN percentage < 10 THEN '0-9'
+      WHEN percentage < 20 THEN '10-19'
+      WHEN percentage < 30 THEN '20-29'
+      WHEN percentage < 40 THEN '30-39'
+      WHEN percentage < 50 THEN '40-49'
+      WHEN percentage < 60 THEN '50-59'
+      WHEN percentage < 70 THEN '60-69'
+      WHEN percentage < 80 THEN '70-79'
+      WHEN percentage < 90 THEN '80-89'
+      ELSE '90-100'
+    END AS score_range,
+    COUNT(*) AS count
+  FROM scores
+  WHERE exam_id = p_exam_id
+  GROUP BY score_range
+  ORDER BY score_range;
+$$ LANGUAGE SQL STABLE;
+
+-- Function: Get student performance summary
+CREATE OR REPLACE FUNCTION get_student_performance(p_user_id UUID)
+RETURNS JSON AS $$
+  SELECT json_build_object(
+    'total_exams_taken', COUNT(s.id),
+    'avg_score', ROUND(AVG(s.percentage), 2),
+    'highest_score', MAX(s.percentage),
+    'lowest_score', MIN(s.percentage),
+    'pass_count', COUNT(*) FILTER (WHERE s.is_passed = TRUE),
+    'fail_count', COUNT(*) FILTER (WHERE s.is_passed = FALSE),
+    'total_exams_available', (SELECT COUNT(*) FROM exams WHERE type = 'questions')
+  )
+  FROM scores s
+  WHERE s.user_id = p_user_id;
+$$ LANGUAGE SQL STABLE;
+
+-- Function: Get platform-wide overview stats
+CREATE OR REPLACE FUNCTION get_platform_overview()
+RETURNS JSON AS $$
+  SELECT json_build_object(
+    'total_students', (SELECT COUNT(*) FROM profiles WHERE role = 'student'),
+    'total_exams', (SELECT COUNT(*) FROM exams),
+    'total_question_exams', (SELECT COUNT(*) FROM exams WHERE type = 'questions'),
+    'total_attempts', (SELECT COUNT(*) FROM exam_attempts),
+    'total_graded', (SELECT COUNT(*) FROM scores),
+    'avg_platform_score', (SELECT ROUND(AVG(percentage), 2) FROM scores),
+    'overall_pass_rate', (
+      SELECT ROUND(
+        COUNT(*) FILTER (WHERE is_passed = TRUE)::NUMERIC / NULLIF(COUNT(*), 0) * 100, 2
+      ) FROM scores
+    ),
+    'total_materials', (SELECT COUNT(*) FROM materials)
+  );
+$$ LANGUAGE SQL STABLE;
+

@@ -133,3 +133,73 @@ export interface ChoiceFormData {
     choice_text: string
     is_correct: boolean
 }
+
+// Analytics types (Phase 4)
+export interface PlatformOverview {
+    total_students: number
+    total_exams: number
+    total_question_exams: number
+    total_attempts: number
+    total_graded: number
+    avg_platform_score: number | null
+    overall_pass_rate: number | null
+    total_materials: number
+}
+
+export interface ExamStats {
+    total_attempts: number
+    avg_score: number | null
+    max_score: number | null
+    min_score: number | null
+    pass_count: number
+    fail_count: number
+    pass_rate: number | null
+}
+
+export interface ScoreDistribution {
+    score_range: string
+    count: number
+}
+
+export interface ExamAnalytics {
+    exam: Exam
+    stats: ExamStats
+    distribution: ScoreDistribution[]
+    attempts: ExamAttemptWithStudent[]
+}
+
+export interface ExamAttemptWithStudent {
+    id: string
+    user_id: string
+    exam_id: string
+    student_name: string
+    student_email: string
+    score: number | null
+    percentage: number | null
+    is_passed: boolean | null
+    submitted_at: string
+    graded_at: string | null
+}
+
+export interface StudentPerformance {
+    total_exams_taken: number
+    avg_score: number | null
+    highest_score: number | null
+    lowest_score: number | null
+    pass_count: number
+    fail_count: number
+    total_exams_available: number
+}
+
+export interface StudentAnalytics {
+    student: User
+    performance: StudentPerformance
+    score_history: ScoreWithExam[]
+}
+
+export interface ScoreWithExam extends Score {
+    exam_title: string
+}
+
+export type ExportFormat = 'excel' | 'pdf'
+export type ReportType = 'exam' | 'student' | 'overview'

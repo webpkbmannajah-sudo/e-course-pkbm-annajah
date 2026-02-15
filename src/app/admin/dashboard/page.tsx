@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { FileText, ClipboardList, Users, Plus, TrendingUp } from 'lucide-react'
+import { FileText, ClipboardList, Users, Plus, TrendingUp, Target, Percent } from 'lucide-react'
 
 interface DashboardStats {
   totalMaterials: number
   totalExams: number
   totalStudents: number
+  avgScore: number | null
+  passRate: number | null
 }
 
 export default function AdminDashboard() {
@@ -17,6 +19,8 @@ export default function AdminDashboard() {
     totalMaterials: 0,
     totalExams: 0,
     totalStudents: 0,
+    avgScore: null,
+    passRate: null,
   })
   const [recentMaterials, setRecentMaterials] = useState<{id: string; title: string; created_at: string}[]>([])
   const [loading, setLoading] = useState(true)
@@ -47,10 +51,26 @@ export default function AdminDashboard() {
           .order('created_at', { ascending: false })
           .limit(5)
 
+        // Fetch score analytics
+        let avgScore: number | null = null
+        let passRate: number | null = null
+        const { data: scores } = await supabase
+          .from('scores')
+          .select('percentage, is_passed')
+
+        if (scores && scores.length > 0) {
+          const sum = scores.reduce((acc, s) => acc + (Number(s.percentage) || 0), 0)
+          avgScore = Math.round((sum / scores.length) * 10) / 10
+          const passCount = scores.filter(s => s.is_passed).length
+          passRate = Math.round((passCount / scores.length) * 100 * 10) / 10
+        }
+
         setStats({
           totalMaterials: materialsCount || 0,
           totalExams: examsCount || 0,
           totalStudents: studentsCount || 0,
+          avgScore,
+          passRate,
         })
         setRecentMaterials(materials || [])
       } catch (error) {
@@ -85,6 +105,20 @@ export default function AdminDashboard() {
       color: 'from-emerald-500 to-teal-500',
       href: '/admin/students',
     },
+    {
+      title: 'Avg Score',
+      value: stats.avgScore !== null ? `${stats.avgScore}%` : '-',
+      icon: Target,
+      color: 'from-indigo-500 to-violet-500',
+      href: '/admin/reports',
+    },
+    {
+      title: 'Pass Rate',
+      value: stats.passRate !== null ? `${stats.passRate}%` : '-',
+      icon: Percent,
+      color: 'from-rose-500 to-pink-500',
+      href: '/admin/reports',
+    },
   ]
 
   if (loading) {
@@ -101,7 +135,7 @@ export default function AdminDashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-slate-400">Welcome back! Here's an overview of your platform.</p>
+          <p className="text-slate-400">Welcome back! Here&apos;s an overview of your platform.</p>
         </div>
         <div className="flex gap-3">
           <Link
