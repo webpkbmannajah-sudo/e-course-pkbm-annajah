@@ -36,56 +36,72 @@ export default function TakeExamPage({ params }: PageProps) {
   const [score, setScore] = useState<number | null>(null)
 
   useEffect(() => {
-    fetchExam()
-  }, [id])
-
-  const fetchExam = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      // Fetch exam with questions
-      const { data: examData, error: examError } = await supabase
-        .from('exams')
-        .select(`
-          *,
-          questions (
+    const fetchExam = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+  
+        // Fetch exam with questions
+        const { data: examData, error: examError } = await supabase
+          .from('exams')
+          .select(`
             *,
-            choices (*)
-          )
-        `)
-        .eq('id', id)
-        .single()
-
-      if (examError) throw examError
-
-      // Sort questions by order_number
-      if (examData.questions) {
-        examData.questions.sort((a: Question, b: Question) => a.order_number - b.order_number)
+            questions (
+              *,
+              choices (*)
+            )
+          `)
+          .eq('id', id)
+          .single()
+  
+        if (examError) throw examError
+  
+        // Sort questions by order_number
+        if (examData.questions) {
+          examData.questions.sort((a: Question, b: Question) => a.order_number - b.order_number)
+        }
+  
+        setExam(examData)
+  
+        // Check for existing attempt
+        const { data: attempt } = await supabase
+          .from('exam_attempts')
+          .select('*')
+          .eq('exam_id', id)
+          .eq('user_id', user.id)
+          .single()
+  
+        if (attempt) {
+          setExistingAttempt(attempt)
+          setAnswers(attempt.answers || {})
+          setSubmitted(true)
+          setScore(attempt.score)
+        }
+      } catch (error) {
+        console.error('Error fetching exam:', error)
+      } finally {
+        setLoading(false)
       }
-
-      setExam(examData)
-
-      // Check for existing attempt
-      const { data: attempt } = await supabase
-        .from('exam_attempts')
-        .select('*')
-        .eq('exam_id', id)
-        .eq('user_id', user.id)
-        .single()
-
-      if (attempt) {
-        setExistingAttempt(attempt)
-        setAnswers(attempt.answers || {})
-        setSubmitted(true)
-        setScore(attempt.score)
-      }
-    } catch (error) {
-      console.error('Error fetching exam:', error)
-    } finally {
-      setLoading(false)
     }
-  }
+
+    // Load answers from localStorage
+    const saved = localStorage.getItem(`exam_answers_${id}`)
+    if (saved) {
+      try {
+        setAnswers(JSON.parse(saved))
+      } catch (e) {
+        console.error('Failed to parse saved answers', e)
+      }
+    }
+    fetchExam()
+  }, [id, supabase])
+
+  useEffect(() => {
+    // Save answers to localStorage
+    if (Object.keys(answers).length > 0) {
+      localStorage.setItem(`exam_answers_${id}`, JSON.stringify(answers))
+    }
+  }, [answers, id])
 
   const handleAnswerChange = (questionId: string, choiceId: string) => {
     setAnswers(prev => ({
@@ -142,6 +158,7 @@ export default function TakeExamPage({ params }: PageProps) {
 
       setScore(calculatedScore)
       setSubmitted(true)
+      localStorage.removeItem(`exam_answers_${id}`)
     } catch (err) {
       console.error('Error submitting exam:', err)
       alert('Failed to submit exam')
@@ -166,6 +183,7 @@ export default function TakeExamPage({ params }: PageProps) {
       setAnswers({})
       setSubmitted(false)
       setScore(null)
+      localStorage.removeItem(`exam_answers_${id}`)
     } catch (err) {
       console.error('Error deleting attempt:', err)
     }

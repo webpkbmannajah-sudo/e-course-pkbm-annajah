@@ -38,6 +38,10 @@ export default function UploadMaterialPage() {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const droppedFile = e.dataTransfer.files[0]
       if (droppedFile.type === 'application/pdf') {
+        if (droppedFile.size > 10 * 1024 * 1024) {
+          setError('File size must be less than 10MB')
+          return
+        }
         setFile(droppedFile)
         if (!formData.title) {
           setFormData(prev => ({
@@ -55,6 +59,10 @@ export default function UploadMaterialPage() {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0]
       if (selectedFile.type === 'application/pdf') {
+        if (selectedFile.size > 10 * 1024 * 1024) {
+          setError('File size must be less than 10MB')
+          return
+        }
         setFile(selectedFile)
         if (!formData.title) {
           setFormData(prev => ({
