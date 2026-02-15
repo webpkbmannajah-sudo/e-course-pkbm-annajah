@@ -242,3 +242,48 @@ CREATE POLICY "Admins can view audit logs" ON public.audit_logs
 CREATE POLICY "Service role can insert audit logs" ON public.audit_logs
   FOR INSERT WITH CHECK (true);
 
+-- ==========================================
+-- PHASE 3: Penilaian Otomatis MCQ
+-- ==========================================
+
+-- Scores table with breakdown
+CREATE TABLE IF NOT EXISTS public.scores (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  attempt_id UUID REFERENCES public.exam_attempts(id) ON DELETE CASCADE,
+  exam_id UUID REFERENCES public.exams(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  total_score DECIMAL(5,2) NOT NULL DEFAULT 0,
+  max_score DECIMAL(5,2) NOT NULL DEFAULT 100,
+  percentage DECIMAL(5,2),
+  is_passed BOOLEAN DEFAULT FALSE,
+  grading_type TEXT CHECK (grading_type IN ('auto', 'manual', 'mixed')),
+  graded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  breakdown JSONB DEFAULT '[]',
+  UNIQUE(attempt_id)
+);
+
+-- Add weight and question_type to questions table
+ALTER TABLE public.questions ADD COLUMN IF NOT EXISTS weight DECIMAL(5,2) DEFAULT 1.0;
+ALTER TABLE public.questions ADD COLUMN IF NOT EXISTS question_type TEXT DEFAULT 'mcq'
+  CHECK (question_type IN ('mcq', 'essay'));
+
+-- Enable RLS for scores
+ALTER TABLE public.scores ENABLE ROW LEVEL SECURITY;
+
+-- Scores RLS Policies
+CREATE POLICY "Users can view their own scores" ON public.scores
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can view all scores" ON public.scores
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+CREATE POLICY "Admins can manage scores" ON public.scores
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+CREATE POLICY "Service role can manage scores" ON public.scores
+  FOR INSERT WITH CHECK (true);
+

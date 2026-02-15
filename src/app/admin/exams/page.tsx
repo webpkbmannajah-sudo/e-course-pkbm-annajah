@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { ClipboardList, Plus, Trash2, Eye, Search, Calendar, FileText, HelpCircle } from 'lucide-react'
+import { ClipboardList, Plus, Trash2, Eye, Search, Calendar, FileText, HelpCircle, Award } from 'lucide-react'
 import { Exam } from '@/types'
 
 export default function AdminExamsPage() {
@@ -165,6 +165,15 @@ export default function AdminExamsPage() {
                   >
                     <Eye className="w-5 h-5" />
                   </Link>
+                  {exam.type === 'questions' && (
+                    <Link
+                      href={`/admin/exams/${exam.id}/grading`}
+                      className="p-2 text-slate-400 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
+                      title="Grade Exam"
+                    >
+                      <Award className="w-5 h-5" />
+                    </Link>
+                  )}
                   <button
                     onClick={() => handleDelete(exam.id, exam.pdf_url)}
                     disabled={deleting === exam.id}

@@ -14,13 +14,15 @@ import {
   X,
   BookOpen,
   Settings,
-  UserCircle
+  UserCircle,
+  Award
 } from 'lucide-react'
 
 const adminNavItems = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/materials', label: 'Materials', icon: FileText },
   { href: '/admin/exams', label: 'Exams', icon: ClipboardList },
+  { href: '/admin/grading', label: 'Grading', icon: Award },
   { href: '/admin/students', label: 'Students', icon: Users },
   { href: '/admin/profile', label: 'Profile', icon: UserCircle },
   { href: '/admin/settings', label: 'Settings', icon: Settings },

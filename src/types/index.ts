@@ -62,6 +62,8 @@ export interface Question {
     exam_id: string
     question_text: string
     order_number: number
+    weight?: number
+    question_type?: 'mcq' | 'essay'
     choices?: Choice[]
 }
 
@@ -79,6 +81,32 @@ export interface ExamAttempt {
     answers: Record<string, string> // question_id -> choice_id
     score: number | null
     submitted_at: string
+}
+
+// Scoring types (Phase 3)
+export interface Score {
+    id: string
+    attempt_id: string
+    exam_id: string
+    user_id: string
+    total_score: number
+    max_score: number
+    percentage: number
+    is_passed: boolean
+    grading_type: 'auto' | 'manual' | 'mixed'
+    graded_at: string
+    breakdown: ScoreBreakdownItem[]
+}
+
+export interface ScoreBreakdownItem {
+    question_id: string
+    question_text: string
+    weight: number
+    is_correct: boolean
+    selected_choice_id: string | null
+    correct_choice_id: string
+    selected_choice_text: string | null
+    correct_choice_text: string
 }
 
 // Form types

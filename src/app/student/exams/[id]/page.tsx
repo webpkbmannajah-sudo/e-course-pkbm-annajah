@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { 
   ArrowLeft, FileText, ClipboardList, CheckCircle, 
@@ -27,6 +28,7 @@ interface ExistingAttempt {
 export default function TakeExamPage({ params }: PageProps) {
   const { id } = use(params)
   const supabase = createClient()
+  const router = useRouter()
   const [exam, setExam] = useState<ExamWithQuestions | null>(null)
   const [existingAttempt, setExistingAttempt] = useState<ExistingAttempt | null>(null)
   const [loading, setLoading] = useState(true)
@@ -110,23 +112,6 @@ export default function TakeExamPage({ params }: PageProps) {
     }))
   }
 
-  const calculateScore = () => {
-    if (!exam?.questions) return 0
-
-    let correct = 0
-    for (const question of exam.questions) {
-      const selectedChoiceId = answers[question.id]
-      if (selectedChoiceId) {
-        const correctChoice = question.choices.find(c => c.is_correct)
-        if (correctChoice && correctChoice.id === selectedChoiceId) {
-          correct++
-        }
-      }
-    }
-
-    return Math.round((correct / exam.questions.length) * 100)
-  }
-
   const handleSubmit = async () => {
     if (!exam) return
 
@@ -143,26 +128,35 @@ export default function TakeExamPage({ params }: PageProps) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const calculatedScore = exam.type === 'questions' ? calculateScore() : null
-
-      const { error } = await supabase
+      // Insert attempt (without score — backend will calculate)
+      const { data: attempt, error } = await supabase
         .from('exam_attempts')
         .insert({
           user_id: user.id,
           exam_id: exam.id,
           answers,
-          score: calculatedScore,
         })
+        .select('id')
+        .single()
 
       if (error) throw error
 
-      setScore(calculatedScore)
-      setSubmitted(true)
+      // Auto-grade via backend API
+      if (exam.type === 'questions' && attempt) {
+        await fetch('/api/grading/auto', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ attemptId: attempt.id }),
+        })
+      }
+
       localStorage.removeItem(`exam_answers_${id}`)
+
+      // Redirect to result page
+      router.push(`/student/exams/${id}/result`)
     } catch (err) {
       console.error('Error submitting exam:', err)
       alert('Failed to submit exam')
-    } finally {
       setSubmitting(false)
     }
   }
