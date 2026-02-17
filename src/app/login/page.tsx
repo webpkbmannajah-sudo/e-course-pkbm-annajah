@@ -53,22 +53,22 @@ export default function LoginPage() {
       router.push(role === 'admin' ? '/admin/dashboard' : '/student/dashboard')
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign in')
+      setError(err instanceof Error ? err.message : 'Gagal masuk')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-emerald-900/20 to-slate-900 p-4">
       <div className="w-full max-w-md">
         {/* Logo/Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 mb-4 shadow-lg shadow-purple-500/30">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 mb-4 shadow-lg shadow-emerald-500/30">
             <BookOpen className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-slate-400">Sign in to access your courses</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Selamat Datang</h1>
+          <p className="text-slate-400">Masuk ke akun PKBM An-Najah</p>
         </div>
 
         {/* Login Form */}
@@ -82,7 +82,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-                Email Address
+                Email
               </label>
               <input
                 type="email"
@@ -91,8 +91,8 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                placeholder="you@example.com"
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                placeholder="email@contoh.com"
               />
             </div>
 
@@ -108,7 +108,7 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all pr-12"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all pr-12"
                   placeholder="••••••••"
                 />
                 <button
@@ -125,33 +125,33 @@ export default function LoginPage() {
             <div className="flex justify-end">
               <Link
                 href="/forgot-password"
-                className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
               >
-                Forgot Password?
+                Lupa Password?
               </Link>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Signing in...
+                  Masuk...
                 </>
               ) : (
-                'Sign In'
+                'Masuk'
               )}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-slate-400">
-              Don&apos;t have an account?{' '}
-              <Link href="/register" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
-                Register here
+              Belum punya akun?{' '}
+              <Link href="/register" className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
+                Daftar di sini
               </Link>
             </p>
           </div>

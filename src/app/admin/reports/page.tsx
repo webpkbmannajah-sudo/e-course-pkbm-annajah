@@ -123,13 +123,13 @@ export default function AdminReportsPage() {
     fetchData()
   }, [fetchData])
 
-  const handleExport = async (type: 'excel' | 'pdf') => {
+  const handleExport = async () => {
     setExporting(true)
     try {
       const res = await fetch('/api/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, report: 'overview' }),
+        body: JSON.stringify({ report: 'overview' }),
       })
       if (!res.ok) throw new Error('Export failed')
 
@@ -137,7 +137,7 @@ export default function AdminReportsPage() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `laporan-ringkasan.${type === 'excel' ? 'xlsx' : 'pdf'}`
+      a.download = 'laporan-ringkasan.xlsx'
       a.click()
       URL.revokeObjectURL(url)
     } catch (error) {
@@ -212,26 +212,18 @@ export default function AdminReportsPage() {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
             <BarChart3 className="w-7 h-7 text-purple-400" />
-            Reports & Analytics
+            Laporan & Analitik
           </h1>
           <p className="text-slate-400 mt-1">Ringkasan performa platform dan ujian</p>
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => handleExport('excel')}
+            onClick={() => handleExport()}
             disabled={exporting}
             className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors disabled:opacity-50"
           >
             <FileSpreadsheet className="w-4 h-4" />
-            Excel
-          </button>
-          <button
-            onClick={() => handleExport('pdf')}
-            disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl transition-colors disabled:opacity-50"
-          >
-            <Download className="w-4 h-4" />
-            PDF
+            Unduh Excel
           </button>
         </div>
       </div>

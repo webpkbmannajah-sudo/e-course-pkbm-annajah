@@ -117,7 +117,7 @@ export default function TakeExamPage({ params }: PageProps) {
 
     const unanswered = exam.questions?.filter(q => !answers[q.id])
     if (unanswered && unanswered.length > 0) {
-      if (!confirm(`You have ${unanswered.length} unanswered question(s). Submit anyway?`)) {
+      if (!confirm(`Anda memiliki ${unanswered.length} soal yang belum dijawab. Kirim sekarang?`)) {
         return
       }
     }
@@ -156,14 +156,14 @@ export default function TakeExamPage({ params }: PageProps) {
       router.push(`/student/exams/${id}/result`)
     } catch (err) {
       console.error('Error submitting exam:', err)
-      alert('Failed to submit exam')
+      alert('Gagal mengirim ujian')
       setSubmitting(false)
     }
   }
 
   const handleRetake = async () => {
     if (!existingAttempt) return
-    if (!confirm('Are you sure you want to retake this exam? Your previous score will be replaced.')) return
+    if (!confirm('Apakah Anda yakin ingin mengulang ujian ini? Nilai sebelumnya akan diganti.')) return
 
     try {
       const { error } = await supabase
@@ -195,9 +195,9 @@ export default function TakeExamPage({ params }: PageProps) {
     return (
       <div className="text-center py-12">
         <ClipboardList className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-white mb-2">Exam not found</h3>
+        <h3 className="text-lg font-medium text-white mb-2">Ujian tidak ditemukan</h3>
         <Link href="/student/exams" className="text-emerald-400 hover:text-emerald-300">
-          ← Back to exams
+          ← Kembali ke daftar ujian
         </Link>
       </div>
     )
@@ -227,7 +227,7 @@ export default function TakeExamPage({ params }: PageProps) {
         <div className="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden">
           <div className="bg-slate-700/50 px-4 py-3 border-b border-slate-600 flex items-center gap-2 text-slate-400">
             <FileText className="w-5 h-5" />
-            <span className="text-sm">Exam PDF</span>
+            <span className="text-sm">File PDF Ujian</span>
           </div>
           <div className="aspect-[4/3] bg-slate-900">
             <iframe
@@ -255,7 +255,7 @@ export default function TakeExamPage({ params }: PageProps) {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-white">{exam.title}</h1>
-            <p className="text-slate-400 mt-1">Exam completed</p>
+            <p className="text-slate-400 mt-1">Ujian selesai</p>
           </div>
         </div>
 
@@ -268,7 +268,7 @@ export default function TakeExamPage({ params }: PageProps) {
           <Trophy className={`w-16 h-16 mx-auto mb-4 ${
             score !== null && score >= 70 ? 'text-emerald-400' : 'text-orange-400'
           }`} />
-          <h2 className="text-lg text-slate-300 mb-2">Your Score</h2>
+          <h2 className="text-lg text-slate-300 mb-2">Nilai Anda</h2>
           <p className={`text-5xl font-bold ${
             score !== null && score >= 70 ? 'text-emerald-400' : 'text-orange-400'
           }`}>
@@ -276,29 +276,29 @@ export default function TakeExamPage({ params }: PageProps) {
           </p>
           <p className="text-slate-400 mt-4">
             {score !== null && score >= 70 
-              ? 'Great job! You passed the exam!' 
-              : 'Keep studying and try again!'}
+              ? 'Bagus! Pertahankan prestasi Anda!' 
+              : 'Terus belajar dan coba lagi!'}
           </p>
           <div className="flex gap-3 justify-center mt-6">
             <Link
               href="/student/exams"
               className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
             >
-              Back to Exams
+              Kembali ke Ujian
             </Link>
             <button
               onClick={handleRetake}
               className="flex items-center gap-2 px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
-              Retake Exam
+              Kerjakan Ulang
             </button>
           </div>
         </div>
 
         {/* Review Answers */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-white">Review Your Answers</h3>
+          <h3 className="text-lg font-semibold text-white">Tinjau Jawaban Anda</h3>
           {exam.questions?.map((question, index) => {
             const selectedChoiceId = answers[question.id]
             const correctChoice = question.choices.find(c => c.is_correct)
@@ -332,8 +332,8 @@ export default function TakeExamPage({ params }: PageProps) {
                         }`}
                       >
                         {choice.choice_text}
-                        {isCorrectChoice && <span className="ml-2 text-xs">(Correct)</span>}
-                        {isSelected && !isCorrectChoice && <span className="ml-2 text-xs">(Your answer)</span>}
+                        {isCorrectChoice && <span className="ml-2 text-xs">(Benar)</span>}
+                        {isSelected && !isCorrectChoice && <span className="ml-2 text-xs">(Jawaban Anda)</span>}
                       </div>
                     )
                   })}
@@ -366,7 +366,7 @@ export default function TakeExamPage({ params }: PageProps) {
           </div>
         </div>
         <div className="bg-slate-800 px-4 py-2 rounded-xl text-slate-300">
-          {Object.keys(answers).length} / {exam.questions?.length || 0} answered
+          {Object.keys(answers).length} / {exam.questions?.length || 0} dijawab
         </div>
       </div>
 
@@ -420,7 +420,7 @@ export default function TakeExamPage({ params }: PageProps) {
       {/* Submit Button */}
       <div className="sticky bottom-6 bg-slate-900/95 backdrop-blur border border-slate-700 rounded-xl p-4 flex items-center justify-between">
         <p className="text-slate-400">
-          {Object.keys(answers).length} of {exam.questions?.length || 0} questions answered
+          {Object.keys(answers).length} dari {exam.questions?.length || 0} soal dijawab
         </p>
         <button
           onClick={handleSubmit}
@@ -430,12 +430,12 @@ export default function TakeExamPage({ params }: PageProps) {
           {submitting ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
-              Submitting...
+              Mengirim...
             </>
           ) : (
             <>
               <CheckCircle className="w-5 h-5" />
-              Submit Exam
+              Kirim Jawaban
             </>
           )}
         </button>

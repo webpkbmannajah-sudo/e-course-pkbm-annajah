@@ -34,7 +34,7 @@ export default function AdminExamsPage() {
   }
 
   const handleDelete = async (id: string, pdfUrl: string | null) => {
-    if (!confirm('Are you sure you want to delete this exam?')) return
+    if (!confirm('Apakah Anda yakin ingin menghapus ujian ini?')) return
 
     setDeleting(id)
     try {
@@ -57,7 +57,7 @@ export default function AdminExamsPage() {
       setExams(prev => prev.filter(e => e.id !== id))
     } catch (error) {
       console.error('Error deleting exam:', error)
-      alert('Failed to delete exam')
+      alert('Gagal menghapus ujian')
     } finally {
       setDeleting(null)
     }
@@ -81,15 +81,15 @@ export default function AdminExamsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Exams</h1>
-          <p className="text-slate-400">Manage your course exams</p>
+          <h1 className="text-2xl font-bold text-white">Ujian</h1>
+          <p className="text-slate-400">Kelola ujian dan latihan soal</p>
         </div>
         <Link
           href="/admin/exams/create"
           className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors w-fit"
         >
           <Plus className="w-4 h-4" />
-          Create Exam
+          Buat Ujian
         </Link>
       </div>
 
@@ -98,7 +98,7 @@ export default function AdminExamsPage() {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
         <input
           type="text"
-          placeholder="Search exams..."
+          placeholder="Cari ujian..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -109,14 +109,14 @@ export default function AdminExamsPage() {
       {filteredExams.length === 0 ? (
         <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center">
           <ClipboardList className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">No exams yet</h3>
-          <p className="text-slate-400 mb-6">Create your first exam to get started</p>
+          <h3 className="text-lg font-medium text-white mb-2">Belum ada ujian</h3>
+          <p className="text-slate-400 mb-6">Buat ujian pertama Anda untuk memulai</p>
           <Link
             href="/admin/exams/create"
             className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Create Exam
+            Buat Ujian
           </Link>
         </div>
       ) : (
@@ -148,7 +148,7 @@ export default function AdminExamsPage() {
                           ? 'bg-orange-500/20 text-orange-400'
                           : 'bg-purple-500/20 text-purple-400'
                       }`}>
-                        {exam.type === 'pdf' ? 'PDF Exam' : 'Question-based'}
+                        {exam.type === 'pdf' ? 'Ujian PDF' : 'Pilihan Ganda'}
                       </span>
                       <span className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
@@ -161,7 +161,7 @@ export default function AdminExamsPage() {
                   <Link
                     href={`/admin/exams/${exam.id}`}
                     className="p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
-                    title="View Exam"
+                    title="Lihat Ujian"
                   >
                     <Eye className="w-5 h-5" />
                   </Link>
@@ -169,7 +169,7 @@ export default function AdminExamsPage() {
                     <Link
                       href={`/admin/exams/${exam.id}/grading`}
                       className="p-2 text-slate-400 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
-                      title="Grade Exam"
+                      title="Penilaian"
                     >
                       <Award className="w-5 h-5" />
                     </Link>
@@ -178,7 +178,7 @@ export default function AdminExamsPage() {
                     onClick={() => handleDelete(exam.id, exam.pdf_url)}
                     disabled={deleting === exam.id}
                     className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
-                    title="Delete"
+                    title="Hapus"
                   >
                     {deleting === exam.id ? (
                       <div className="w-5 h-5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />

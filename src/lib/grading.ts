@@ -28,13 +28,13 @@ interface GradingResult {
  */
 export function calculateAutoScore(
     answers: Record<string, string>, // question_id -> choice_id
-    questions: QuestionWithChoices[],
-    passingScore: number = 60
+    questions: QuestionWithChoices[]
 ): GradingResult {
     const breakdown = generateScoreBreakdown(answers, questions)
     const { totalScore, maxScore } = calculateWeightedScore(breakdown)
     const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 10000) / 100 : 0
-    const isPassed = percentage >= passingScore
+    // No KKM — always considered "passed" once submitted
+    const isPassed = true
 
     return {
         totalScore,
@@ -100,11 +100,11 @@ export function generateScoreBreakdown(
 }
 
 /**
- * Determine if a score meets the passing threshold.
+ * Always returns true — no minimum passing score (KKM) per PRD.
  */
 export function determinePassStatus(
-    percentage: number,
-    passingScore: number = 60
+    _percentage: number,
+    _passingScore: number = 60
 ): boolean {
-    return percentage >= passingScore
+    return true
 }

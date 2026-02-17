@@ -1,109 +1,75 @@
+// Export utilities for admin reports — Excel only (per PRD)
+
 import * as XLSX from 'xlsx'
-import { jsPDF } from 'jspdf'
-import autoTable from 'jspdf-autotable'
 
 export interface ColumnDef {
-    header: string
     key: string
+    label: string
     width?: number
 }
 
+// Column definitions for different report types
+export const examReportColumns: ColumnDef[] = [
+    { key: 'student_name', label: 'Nama Siswa', width: 25 },
+    { key: 'email', label: 'Email', width: 25 },
+    { key: 'exam_title', label: 'Judul Ujian', width: 30 },
+    { key: 'score', label: 'Nilai', width: 10 },
+    { key: 'submitted_at', label: 'Tanggal Pengerjaan', width: 20 },
+]
+
+export const studentReportColumns: ColumnDef[] = [
+    { key: 'name', label: 'Nama Siswa', width: 25 },
+    { key: 'email', label: 'Email', width: 25 },
+    { key: 'education_level', label: 'Jenjang', width: 15 },
+    { key: 'exams_taken', label: 'Ujian Dikerjakan', width: 18 },
+    { key: 'avg_score', label: 'Rata-rata Nilai', width: 15 },
+]
+
+export const overviewReportColumns: ColumnDef[] = [
+    { key: 'metric', label: 'Metrik', width: 30 },
+    { key: 'value', label: 'Nilai', width: 20 },
+]
+
 /**
- * Generate Excel file from data
- * Returns a Uint8Array buffer
+ * Generate an Excel file from data and column definitions.
+ * Returns a Uint8Array that can be downloaded as .xlsx
  */
 export function generateExcel(
     data: Record<string, unknown>[],
     columns: ColumnDef[],
-    sheetName: string = 'Report'
+    title: string = 'Laporan'
 ): Uint8Array {
-    // Map data to column headers
-    const mappedData = data.map((row) => {
-        const obj: Record<string, unknown> = {}
-        for (const col of columns) {
-            obj[col.header] = row[col.key] ?? ''
-        }
-        return obj
-    })
+    const headers = columns.map(c => c.label)
+    const rows = data.map(row =>
+        columns.map(col => {
+            const val = row[col.key]
+            return val !== null && val !== undefined ? String(val) : ''
+        })
+    )
 
-    const ws = XLSX.utils.json_to_sheet(mappedData)
+    const wsData = [headers, ...rows]
+    const ws = XLSX.utils.aoa_to_sheet(wsData)
 
     // Set column widths
-    ws['!cols'] = columns.map((col) => ({ wch: col.width || 15 }))
+    ws['!cols'] = columns.map(col => ({ wch: col.width || 15 }))
 
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, sheetName)
+    XLSX.utils.book_append_sheet(wb, ws, title)
 
-    return XLSX.write(wb, { bookType: 'xlsx', type: 'array' }) as Uint8Array
+    return XLSX.write(wb, { type: 'array', bookType: 'xlsx' }) as Uint8Array
 }
 
 /**
- * Generate PDF file from data
- * Returns a Uint8Array buffer
+ * Trigger download of a file in the browser
  */
-export function generatePDF(
-    data: Record<string, unknown>[],
-    columns: ColumnDef[],
-    title: string = 'Report'
-): Uint8Array {
-    const doc = new jsPDF()
-
-    // Title
-    doc.setFontSize(18)
-    doc.text(title, 14, 22)
-
-    // Subtitle with date
-    doc.setFontSize(10)
-    doc.setTextColor(128)
-    doc.text(`Generated: ${new Date().toLocaleDateString('id-ID', {
-        day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-    })}`, 14, 30)
-
-    // Table
-    const headers = columns.map((col) => col.header)
-    const rows = data.map((row) =>
-        columns.map((col) => String(row[col.key] ?? ''))
-    )
-
-    autoTable(doc, {
-        head: [headers],
-        body: rows,
-        startY: 36,
-        styles: { fontSize: 9, cellPadding: 3 },
-        headStyles: {
-            fillColor: [88, 28, 135], // purple-900
-            textColor: [255, 255, 255],
-            fontStyle: 'bold',
-        },
-        alternateRowStyles: { fillColor: [245, 243, 255] }, // purple-50
-        margin: { top: 36, left: 14, right: 14 },
+export function downloadFile(data: Uint8Array, filename: string) {
+    const blob = new Blob([data.buffer as ArrayBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     })
-
-    return doc.output('arraybuffer') as unknown as Uint8Array
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
 }
-
-// ---- Column definitions for different report types ----
-
-export const examReportColumns: ColumnDef[] = [
-    { header: 'Nama Siswa', key: 'student_name', width: 25 },
-    { header: 'Email', key: 'student_email', width: 30 },
-    { header: 'Skor', key: 'score', width: 10 },
-    { header: 'Persentase', key: 'percentage', width: 12 },
-    { header: 'Status', key: 'status', width: 12 },
-    { header: 'Tanggal', key: 'graded_at', width: 20 },
-]
-
-export const studentReportColumns: ColumnDef[] = [
-    { header: 'Ujian', key: 'exam_title', width: 30 },
-    { header: 'Skor', key: 'total_score', width: 10 },
-    { header: 'Persentase', key: 'percentage', width: 12 },
-    { header: 'Status', key: 'status', width: 12 },
-    { header: 'Tanggal', key: 'graded_at', width: 20 },
-]
-
-export const overviewReportColumns: ColumnDef[] = [
-    { header: 'Ujian', key: 'exam_title', width: 30 },
-    { header: 'Total Peserta', key: 'total_attempts', width: 15 },
-    { header: 'Rata-rata Skor', key: 'avg_score', width: 15 },
-    { header: 'Tingkat Kelulusan', key: 'pass_rate', width: 18 },
-]

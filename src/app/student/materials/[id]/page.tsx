@@ -49,9 +49,9 @@ export default function MaterialDetailPage({ params }: PageProps) {
     return (
       <div className="text-center py-12">
         <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-white mb-2">Material not found</h3>
+        <h3 className="text-lg font-medium text-white mb-2">Materi tidak ditemukan</h3>
         <Link href="/student/materials" className="text-emerald-400 hover:text-emerald-300">
-          ← Back to materials
+          ← Kembali ke daftar materi
         </Link>
       </div>
     )
@@ -74,19 +74,19 @@ export default function MaterialDetailPage({ params }: PageProps) {
               <p className="text-slate-400 mt-1">{material.description}</p>
             )}
             <p className="text-sm text-slate-500 mt-2">
-              Uploaded on {new Date(material.created_at).toLocaleDateString()}
+              Diunggah pada {new Date(material.created_at).toLocaleDateString('id-ID')}
             </p>
           </div>
         </div>
         <div className="flex gap-2">
           <a
-            href={material.file_url}
+            href={material.file_url || undefined}
             download={material.file_name}
             target="_blank"
             className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors"
           >
             <Download className="w-4 h-4" />
-            Download
+            Unduh
           </a>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { generateExcel, generatePDF, examReportColumns, studentReportColumns, overviewReportColumns } from '@/lib/export'
+import { generateExcel, examReportColumns, studentReportColumns, overviewReportColumns } from '@/lib/export'
 
 export async function POST(request: NextRequest) {
     try {
@@ -23,10 +23,10 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json()
-        const { type, report, id } = body as { type: 'excel' | 'pdf'; report: 'exam' | 'student' | 'overview'; id?: string }
+        const { report, id } = body as { report: 'exam' | 'student' | 'overview'; id?: string }
 
-        if (!type || !report) {
-            return NextResponse.json({ error: 'Missing type or report' }, { status: 400 })
+        if (!report) {
+            return NextResponse.json({ error: 'Missing report type' }, { status: 400 })
         }
 
         let data: Record<string, unknown>[] = []
@@ -160,25 +160,13 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid report type or missing id' }, { status: 400 })
         }
 
-        // Generate file
-        let buffer: Uint8Array
-        let contentType: string
-        let ext: string
-
-        if (type === 'excel') {
-            buffer = generateExcel(data, columns, title)
-            contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            ext = 'xlsx'
-        } else {
-            buffer = generatePDF(data, columns, title)
-            contentType = 'application/pdf'
-            ext = 'pdf'
-        }
+        // Generate Excel file only
+        const buffer = generateExcel(data, columns, title)
 
         return new Response(Buffer.from(buffer), {
             headers: {
-                'Content-Type': contentType,
-                'Content-Disposition': `attachment; filename="${fileName}.${ext}"`,
+                'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition': `attachment; filename="${fileName}.xlsx"`,
             },
         })
     } catch (error) {

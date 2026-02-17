@@ -12,6 +12,10 @@ export interface User {
     last_login_at?: string
     is_active?: boolean
     created_at: string
+    education_level?: string | null
+    status?: 'active' | 'rejected'
+    enrollment_year?: string | null
+    address?: string | null
 }
 
 export interface LoginHistory {
@@ -34,14 +38,33 @@ export interface AuditLog {
     created_at: string
 }
 
+export interface Level {
+    id: string
+    name: string
+    slug: string
+    created_at: string
+}
+
+export interface Subject {
+    id: string
+    level_id: string
+    name: string
+    icon_url?: string | null
+    created_at: string
+    level?: Level
+}
+
 export interface Material {
     id: string
     title: string
     description: string | null
-    file_url: string
-    file_name: string
+    file_url: string | null
+    file_name: string | null
     uploaded_by: string
     created_at: string
+    type: 'pdf' | 'image'
+    subject_id?: string | null
+    subject?: Subject
 }
 
 export type ExamType = 'pdf' | 'questions'
@@ -55,6 +78,10 @@ export interface Exam {
     created_by: string
     created_at: string
     questions?: Question[]
+    subject_id?: string | null
+    material_id?: string | null
+    subject?: Subject
+    material?: Material
 }
 
 export interface Question {
@@ -64,6 +91,7 @@ export interface Question {
     order_number: number
     weight?: number
     question_type?: 'mcq' | 'essay'
+    image_url?: string | null
     choices?: Choice[]
 }
 

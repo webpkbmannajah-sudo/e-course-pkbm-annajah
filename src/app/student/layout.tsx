@@ -16,10 +16,10 @@ import {
 } from 'lucide-react'
 
 const studentNavItems = [
-  { href: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/student/materials', label: 'Materials', icon: FileText },
-  { href: '/student/exams', label: 'Exams', icon: ClipboardList },
-  { href: '/student/progress', label: 'My Progress', icon: TrendingUp },
+  { href: '/student/dashboard', label: 'Beranda', icon: LayoutDashboard },
+  { href: '/student/materials', label: 'Materi', icon: FileText },
+  { href: '/student/exams', label: 'Latihan Soal', icon: ClipboardList },
+  { href: '/student/progress', label: 'Progress Saya', icon: TrendingUp },
 ]
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
@@ -34,7 +34,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setUser({
-          name: user.user_metadata?.name || 'Student',
+          name: user.user_metadata?.name || 'Siswa',
           email: user.email || ''
         })
       }
@@ -67,8 +67,8 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-white">Student Portal</h1>
-              <p className="text-xs text-slate-400">Learning Platform</p>
+              <h1 className="font-bold text-white">Portal Siswa</h1>
+              <p className="text-xs text-slate-400">PKBM An-Najah</p>
             </div>
             <button 
               onClick={() => setSidebarOpen(false)}
@@ -110,7 +110,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
               className="flex items-center gap-3 w-full px-4 py-3 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
             >
               <LogOut className="w-5 h-5" />
-              Sign Out
+              Keluar
             </button>
           </div>
         </div>
@@ -127,7 +127,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
             >
               <Menu className="w-6 h-6" />
             </button>
-            <span className="font-semibold text-white">Student Portal</span>
+            <span className="font-semibold text-white">Portal Siswa</span>
           </div>
         </header>
 

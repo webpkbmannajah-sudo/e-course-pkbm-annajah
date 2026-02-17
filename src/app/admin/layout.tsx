@@ -20,14 +20,15 @@ import {
 } from 'lucide-react'
 
 const adminNavItems = [
-  { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/materials', label: 'Materials', icon: FileText },
-  { href: '/admin/exams', label: 'Exams', icon: ClipboardList },
-  { href: '/admin/grading', label: 'Grading', icon: Award },
-  { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
-  { href: '/admin/students', label: 'Students', icon: Users },
-  { href: '/admin/profile', label: 'Profile', icon: UserCircle },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
+  { href: '/admin/dashboard', label: 'Beranda', icon: LayoutDashboard },
+  { href: '/admin/subjects', label: 'Mata Pelajaran', icon: BookOpen },
+  { href: '/admin/materials', label: 'Materi', icon: FileText },
+  { href: '/admin/exams', label: 'Ujian', icon: ClipboardList },
+  { href: '/admin/grading', label: 'Penilaian', icon: Award },
+  { href: '/admin/reports', label: 'Laporan', icon: BarChart3 },
+  { href: '/admin/users', label: 'Pengguna', icon: Users },
+  { href: '/admin/profile', label: 'Profil', icon: UserCircle },
+  { href: '/admin/settings', label: 'Pengaturan', icon: Settings },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -75,8 +76,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <BookOpen className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-white">Admin Panel</h1>
-              <p className="text-xs text-slate-400">Course Management</p>
+              <h1 className="font-bold text-white">Panel Admin</h1>
+              <p className="text-xs text-slate-400">PKBM An-Najah</p>
             </div>
             <button 
               onClick={() => setSidebarOpen(false)}
@@ -118,7 +119,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               className="flex items-center gap-3 w-full px-4 py-3 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
             >
               <LogOut className="w-5 h-5" />
-              Sign Out
+              Keluar
             </button>
           </div>
         </div>
@@ -135,7 +136,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               <Menu className="w-6 h-6" />
             </button>
-            <span className="font-semibold text-white">Admin Panel</span>
+            <span className="font-semibold text-white">Panel Admin</span>
           </div>
         </header>
 
