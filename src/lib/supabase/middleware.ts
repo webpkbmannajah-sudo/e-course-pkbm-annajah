@@ -61,25 +61,6 @@ export async function updateSession(request: NextRequest) {
     // If user is logged in, check role-based access
     if (user) {
         const role = user.user_metadata?.role || 'student'
-        const status = user.user_metadata?.status || 'active' // Default to active for old users
-        const isWaitingApprovalRoute = request.nextUrl.pathname === '/waiting-approval'
-
-        // Check approval status for students
-        if (role === 'student' && status === 'pending') {
-            if (!isWaitingApprovalRoute) {
-                const url = request.nextUrl.clone()
-                url.pathname = '/waiting-approval'
-                return NextResponse.redirect(url)
-            }
-            return supabaseResponse
-        }
-
-        // If active student tries to access waiting page, redirect to dashboard
-        if (role === 'student' && status === 'active' && isWaitingApprovalRoute) {
-            const url = request.nextUrl.clone()
-            url.pathname = '/student/dashboard'
-            return NextResponse.redirect(url)
-        }
 
 
         // Student trying to access admin routes

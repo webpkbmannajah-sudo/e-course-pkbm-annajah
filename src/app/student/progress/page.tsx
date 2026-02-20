@@ -21,7 +21,6 @@ import {
   Target,
   BookOpen,
   CheckCircle,
-  XCircle,
 } from 'lucide-react'
 import { formatPercentage } from '@/lib/analytics'
 
@@ -85,10 +84,6 @@ export default function StudentProgressPage() {
     ? Math.round((performance.total_exams_taken / performance.total_exams_available) * 100)
     : 0
 
-  const passRate = performance && performance.total_exams_taken > 0
-    ? Math.round((performance.pass_count / performance.total_exams_taken) * 100)
-    : 0
-
   // Line chart
   const lineData = {
     labels: scoreHistory.map(s =>
@@ -146,13 +141,6 @@ export default function StudentProgressPage() {
             sub: 'pencapaian terbaik',
             icon: TrendingUp,
             color: 'from-emerald-500 to-teal-500',
-          },
-          {
-            label: 'Kelulusan',
-            value: `${performance?.pass_count || 0} Lulus`,
-            sub: `${passRate}% tingkat kelulusan`,
-            icon: Award,
-            color: 'from-amber-500 to-orange-500',
           },
         ].map((card) => (
           <div key={card.label} className="bg-slate-800 border border-slate-700 rounded-2xl p-5">
@@ -238,18 +226,14 @@ export default function StudentProgressPage() {
                     </td>
                     <td className="py-3 pr-4 text-center text-slate-300">{Number(score.total_score).toFixed(1)}</td>
                     <td className="py-3 pr-4 text-center">
-                      <span className={`font-medium ${
-                        Number(score.percentage) >= 60 ? 'text-emerald-400' : 'text-red-400'
-                      }`}>
+                      <span className="font-medium text-emerald-400">
                         {Number(score.percentage).toFixed(1)}%
                       </span>
                     </td>
                     <td className="py-3 pr-4 text-center">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                        score.is_passed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
-                      }`}>
-                        {score.is_passed ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                        {score.is_passed ? 'Lulus' : 'Tidak Lulus'}
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">
+                        <CheckCircle className="w-3 h-3" />
+                        Selesai
                       </span>
                     </td>
                     <td className="py-3 text-right text-slate-400 text-sm">

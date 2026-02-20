@@ -12,7 +12,6 @@ import {
   LogOut, 
   Menu, 
   X,
-  BookOpen,
   Settings,
   UserCircle,
   Award,
@@ -21,7 +20,7 @@ import {
 
 const adminNavItems = [
   { href: '/admin/dashboard', label: 'Beranda', icon: LayoutDashboard },
-  { href: '/admin/subjects', label: 'Mata Pelajaran', icon: BookOpen },
+  { href: '/admin/subjects', label: 'Mata Pelajaran', icon: FileText },
   { href: '/admin/materials', label: 'Materi', icon: FileText },
   { href: '/admin/exams', label: 'Ujian', icon: ClipboardList },
   { href: '/admin/grading', label: 'Penilaian', icon: Award },
@@ -72,8 +71,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-700">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center overflow-hidden p-1">
+              <img src="/logo.png" alt="PKBM An-Najah Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="font-bold text-white">Panel Admin</h1>

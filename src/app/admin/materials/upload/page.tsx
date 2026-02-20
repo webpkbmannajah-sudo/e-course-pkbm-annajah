@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Upload, FileText, X, Loader2, ArrowLeft, Check, Youtube, AlignLeft, BookOpen } from 'lucide-react'
+import { Upload, FileText, Loader2, ArrowLeft, Check } from 'lucide-react'
 import Link from 'next/link'
 import { Level, Subject } from '@/types'
 
@@ -14,11 +14,9 @@ export default function UploadMaterialPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    videoUrl: '',
-    textContent: '',
   })
   const [file, setFile] = useState<File | null>(null)
-  const [type, setType] = useState<'pdf' | 'video' | 'text'>('pdf')
+  const [type, setType] = useState<'pdf' | 'image'>('pdf')
   
   const [levels, setLevels] = useState<Level[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
@@ -70,11 +68,12 @@ export default function UploadMaterialPage() {
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const droppedFile = e.dataTransfer.files[0]
-      if (droppedFile.type === 'application/pdf') {
+      const isValid = type === 'pdf' ? droppedFile.type === 'application/pdf' : droppedFile.type.startsWith('image/')
+      if (isValid) {
         setFile(droppedFile)
-        if (!formData.title) setFormData(prev => ({ ...prev, title: droppedFile.name.replace('.pdf', '') }))
+        if (!formData.title) setFormData(prev => ({ ...prev, title: droppedFile.name.replace(/\.[^/.]+$/, "") }))
       } else {
-        setError('Please upload a PDF file')
+        setError(`Please upload a valid ${type.toUpperCase()} file`)
       }
     }
   }, [formData.title])
@@ -82,11 +81,12 @@ export default function UploadMaterialPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0]
-      if (selectedFile.type === 'application/pdf') {
+      const isValid = type === 'pdf' ? selectedFile.type === 'application/pdf' : selectedFile.type.startsWith('image/')
+      if (isValid) {
         setFile(selectedFile)
-        if (!formData.title) setFormData(prev => ({ ...prev, title: selectedFile.name.replace('.pdf', '') }))
+        if (!formData.title) setFormData(prev => ({ ...prev, title: selectedFile.name.replace(/\.[^/.]+$/, "") }))
       } else {
-        setError('Please upload a PDF file')
+        setError(`Please upload a valid ${type.toUpperCase()} file`)
       }
     }
   }
@@ -94,8 +94,7 @@ export default function UploadMaterialPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedSubjectId) return setError('Please select a subject')
-    if (type === 'pdf' && !file) return setError('Please select a file')
-    if (type === 'video' && !formData.videoUrl) return setError('Please enter a Video URL')
+    if (!file) return setError('Please select a file')
 
     setError(null)
     setUploading(true)
@@ -104,27 +103,19 @@ export default function UploadMaterialPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      let fileUrl = null
-      let fileName = null
-
-      if (type === 'pdf' && file) {
-        const fileExt = file.name.split('.').pop()
-        const uniqueFileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-        const { error: uploadError } = await supabase.storage.from('materials').upload(uniqueFileName, file)
-        if (uploadError) throw uploadError
-        const { data: { publicUrl } } = supabase.storage.from('materials').getPublicUrl(uniqueFileName)
-        fileUrl = publicUrl
-        fileName = file.name
-      }
+      const fileExt = file.name.split('.').pop()
+      const uniqueFileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+      const { error: uploadError } = await supabase.storage.from('materials').upload(uniqueFileName, file)
+      if (uploadError) throw uploadError
+      const { data: { publicUrl } } = supabase.storage.from('materials').getPublicUrl(uniqueFileName)
 
       const { error: dbError } = await supabase.from('materials').insert({
         title: formData.title,
-        description: type === 'text' ? formData.textContent : formData.description,
-        file_url: fileUrl,
-        file_name: fileName,
+        description: formData.description,
+        file_url: publicUrl,
+        file_name: file.name,
         uploaded_by: user.id,
         type: type,
-        video_url: type === 'video' ? formData.videoUrl : null,
         subject_id: selectedSubjectId
       })
 
@@ -182,8 +173,8 @@ export default function UploadMaterialPage() {
         <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">Type</label>
             <div className="flex bg-slate-700 p-1 rounded-xl gap-1">
-                {['pdf', 'video', 'text'].map((t) => (
-                    <button key={t} type="button" onClick={() => setType(t as any)} 
+                {['pdf', 'image'].map((t) => (
+                    <button key={t} type="button" onClick={() => setType(t as 'pdf' | 'image')} 
                         className={`flex-1 py-2 rounded-lg capitalize ${type === t ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'}`}>
                         {t}
                     </button>
@@ -191,41 +182,25 @@ export default function UploadMaterialPage() {
             </div>
         </div>
 
-        {type === 'pdf' && (
-            <div
-                onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-xl p-8 text-center ${dragActive ? 'border-purple-500 bg-purple-500/10' : 'border-slate-600'}`}
-            >
-                <input type="file" accept=".pdf" onChange={handleFileChange} className="hidden" id="file-upload" />
-                <label htmlFor="file-upload" className="cursor-pointer">
-                    {file ? <div className="text-white">{file.name}</div> : <div className="text-slate-400">Click or Drag PDF here</div>}
-                </label>
-            </div>
-        )}
-
-        {type === 'video' && (
-            <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">YouTube URL</label>
-                <input type="url" value={formData.videoUrl} onChange={(e) => setFormData({...formData, videoUrl: e.target.value})} className="w-full px-4 py-3 bg-slate-700 rounded-xl text-white" />
-            </div>
-        )}
+        <div
+            onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-xl p-8 text-center ${dragActive ? 'border-purple-500 bg-purple-500/10' : 'border-slate-600'}`}
+        >
+            <input type="file" accept={type === 'pdf' ? '.pdf' : 'image/*'} onChange={handleFileChange} className="hidden" id="file-upload" />
+            <label htmlFor="file-upload" className="cursor-pointer">
+                {file ? <div className="text-white">{file.name}</div> : <div className="text-slate-400">Click or Drag {type.toUpperCase()} here</div>}
+            </label>
+        </div>
 
         <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">Title</label>
             <input type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required className="w-full px-4 py-3 bg-slate-700 rounded-xl text-white" />
         </div>
 
-        {type === 'text' ? (
-            <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Content</label>
-                <textarea value={formData.textContent} onChange={(e) => setFormData({...formData, textContent: e.target.value})} rows={8} className="w-full px-4 py-3 bg-slate-700 rounded-xl text-white font-mono" />
-            </div>
-        ) : (
-            <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Description</label>
-                <textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={3} className="w-full px-4 py-3 bg-slate-700 rounded-xl text-white" />
-            </div>
-        )}
+        <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Description</label>
+            <textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={3} className="w-full px-4 py-3 bg-slate-700 rounded-xl text-white" />
+        </div>
 
         <button type="submit" disabled={uploading} className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-xl disabled:opacity-50">
             {uploading ? 'Creating...' : 'Create Material'}
