@@ -75,8 +75,8 @@ export default function AdminUsersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">User Management</h1>
-          <p className="text-slate-400">Manage student registrations</p>
+          <h1 className="text-2xl font-bold text-white">Manajemen Pengguna</h1>
+          <p className="text-slate-400">Kelola pendaftaran siswa</p>
         </div>
         <div className="flex bg-slate-800 p-1 rounded-lg">
           <button
@@ -87,7 +87,7 @@ export default function AdminUsersPage() {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Pending Approval
+            Menunggu Persetujuan
           </button>
           <button
             onClick={() => setActiveTab('active')}
@@ -97,7 +97,7 @@ export default function AdminUsersPage() {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Active Students
+            Siswa Aktif
           </button>
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function AdminUsersPage() {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
         <input
           type="text"
-          placeholder="Search users..."
+          placeholder="Cari pengguna..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -122,9 +122,9 @@ export default function AdminUsersPage() {
       ) : filteredUsers.length === 0 ? (
         <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center">
           <Users className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">No users found</h3>
+          <h3 className="text-lg font-medium text-white mb-2">Pengguna tidak ditemukan</h3>
           <p className="text-slate-400">
-            {activeTab === 'pending' ? 'No pending registrations' : 'No active students found'}
+            {activeTab === 'pending' ? 'Tidak ada pendaftaran tertunda' : 'Siswa aktif tidak ditemukan'}
           </p>
         </div>
       ) : (
@@ -133,11 +133,11 @@ export default function AdminUsersPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-700">
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Student</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Education Level</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Joined</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Siswa</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Tingkat Pendidikan</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Bergabung</th>
                   {activeTab === 'pending' && (
-                    <th className="text-right px-6 py-4 text-sm font-medium text-slate-400">Actions</th>
+                    <th className="text-right px-6 py-4 text-sm font-medium text-slate-400">Aksi</th>
                   )}
                 </tr>
               </thead>
@@ -162,7 +162,7 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium uppercase ${getLevelBadgeColor(user.education_level)}`}>
-                        {user.education_level || 'Unknown'}
+                        {user.education_level || 'Tidak diketahui'}
                       </span>
                     </td>
                     <td className="px-6 py-4">

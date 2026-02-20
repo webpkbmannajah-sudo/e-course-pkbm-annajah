@@ -25,9 +25,9 @@ export default function ResetPasswordPage() {
 
       const data = await res.json()
 
-      if (!res.ok) throw new Error(data.error || 'Failed to update password')
+      if (!res.ok) throw new Error(data.error || 'Gagal memperbarui password')
 
-      setMessage({ type: 'success', text: 'Password updated successfully. Redirecting to login...' })
+      setMessage({ type: 'success', text: 'Password berhasil diperbarui. Mengalihkan ke halaman login...' })
       setTimeout(() => router.push('/login'), 2000)
     } catch (err) {
       setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Something went wrong' })

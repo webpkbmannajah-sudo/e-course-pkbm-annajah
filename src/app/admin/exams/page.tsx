@@ -109,7 +109,7 @@ export default function AdminExamsPage() {
       {filteredExams.length === 0 ? (
         <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center">
           <ClipboardList className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">Belum ada ujian</h3>
+          <h3 className="text-lg font-medium text-white mb-2">Ujian tidak ditemukan</h3>
           <p className="text-slate-400 mb-6">Buat ujian pertama Anda untuk memulai</p>
           <Link
             href="/admin/exams/create"

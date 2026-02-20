@@ -102,7 +102,7 @@ export default function AdminSubjectsPage() {
       setSubjects(subjects.filter(s => s.id !== id))
     } catch (error) {
       console.error('Error deleting subject:', error)
-      alert('Failed to delete subject')
+      alert('Gagal menghapus mata pelajaran')
     } finally {
       setProcessingId(null)
     }
@@ -145,7 +145,7 @@ export default function AdminSubjectsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search subjects..."
+              placeholder="Cari mata pelajaran..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -185,7 +185,7 @@ export default function AdminSubjectsPage() {
                 type="button"
                 onClick={() => setIsAddingString(false)}
                 className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                title="Cancel"
+                title="Batal"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -199,7 +199,7 @@ export default function AdminSubjectsPage() {
             </div>
         ) : filteredSubjects.length === 0 ? (
             <div className="text-center py-12 text-slate-500">
-                No subjects found in this level.
+                Mata pelajaran tidak ditemukan pada tingkat ini.
             </div>
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -215,7 +215,7 @@ export default function AdminSubjectsPage() {
                             onClick={() => handleDeleteSubject(subject.id)}
                             disabled={processingId === subject.id}
                             className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                            title="Delete"
+                            title="Hapus"
                         >
                             <Trash2 className="w-4 h-4" />
                         </button>

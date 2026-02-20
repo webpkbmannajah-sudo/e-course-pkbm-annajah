@@ -23,9 +23,9 @@ export default function ForgotPasswordPage() {
 
       const data = await res.json()
 
-      if (!res.ok) throw new Error(data.error || 'Failed to send reset email')
+      if (!res.ok) throw new Error(data.error || 'Gagal mengirim email reset')
 
-      setMessage({ type: 'success', text: 'Password reset link has been sent to your email.' })
+      setMessage({ type: 'success', text: 'Tautan reset password telah dikirim ke email Anda.' })
       setEmail('')
     } catch (err) {
       setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Something went wrong' })

@@ -105,7 +105,7 @@ export default function CreateExamPage() {
         }
         setFile(droppedFile)
       } else {
-        setError('Silakan upload file PDF')
+        setError('Silakan unggah file PDF')
       }
     }
   }, [])
@@ -120,7 +120,7 @@ export default function CreateExamPage() {
         }
         setFile(selectedFile)
       } else {
-        setError('Silakan upload file PDF')
+        setError('Silakan unggah file PDF')
       }
     }
   }
@@ -174,7 +174,7 @@ export default function CreateExamPage() {
     setError(null)
 
     // Validation
-    if (examType === 'pdf' && !file) return setError('Silakan upload file PDF')
+    if (examType === 'pdf' && !file) return setError('Silakan unggah file PDF')
 
     if (examType === 'questions') {
       for (let i = 0; i < questions.length; i++) {
@@ -317,7 +317,7 @@ export default function CreateExamPage() {
             </button>
             <button type="button" onClick={() => setExamType('pdf')} className={`flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all ${examType === 'pdf' ? 'border-orange-500 bg-orange-500/10' : 'border-slate-700 hover:border-slate-600'}`}>
               <FileUp className={`w-8 h-8 ${examType === 'pdf' ? 'text-orange-400' : 'text-slate-400'}`} />
-              <div className="text-center"><p className={`font-medium ${examType === 'pdf' ? 'text-white' : 'text-slate-300'}`}>Upload PDF</p><p className="text-sm text-slate-500 mt-1">Upload ujian sebagai PDF</p></div>
+              <div className="text-center"><p className={`font-medium ${examType === 'pdf' ? 'text-white' : 'text-slate-300'}`}>Unggah PDF</p><p className="text-sm text-slate-500 mt-1">Unggah ujian sebagai PDF</p></div>
             </button>
           </div>
         </div>
@@ -328,7 +328,7 @@ export default function CreateExamPage() {
           <div><label className="block text-sm font-medium text-slate-300 mb-2">Deskripsi</label><textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={3} className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white" placeholder="Masukkan deskripsi ujian" /></div>
         </div>
 
-        {/* PDF Upload */}
+        {/* Unggah PDF */}
         {examType === 'pdf' && (
           <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
             <label className="block text-sm font-medium text-slate-300 mb-3">File PDF Ujian (Maks. 5MB)</label>

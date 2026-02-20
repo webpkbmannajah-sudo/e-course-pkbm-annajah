@@ -73,7 +73,7 @@ export default function UploadMaterialPage() {
         setFile(droppedFile)
         if (!formData.title) setFormData(prev => ({ ...prev, title: droppedFile.name.replace(/\.[^/.]+$/, "") }))
       } else {
-        setError(`Please upload a valid ${type.toUpperCase()} file`)
+        setError(`Harap unggah file ${type.toUpperCase()} yang valid`)
       }
     }
   }, [formData.title])
@@ -86,7 +86,7 @@ export default function UploadMaterialPage() {
         setFile(selectedFile)
         if (!formData.title) setFormData(prev => ({ ...prev, title: selectedFile.name.replace(/\.[^/.]+$/, "") }))
       } else {
-        setError(`Please upload a valid ${type.toUpperCase()} file`)
+        setError(`Harap unggah file ${type.toUpperCase()} yang valid`)
       }
     }
   }
@@ -123,7 +123,7 @@ export default function UploadMaterialPage() {
       setSuccess(true)
       setTimeout(() => router.push('/admin/materials'), 1500)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload material')
+      setError(err instanceof Error ? err.message : 'Gagal mengunggah materi')
     } finally {
       setUploading(false)
     }
@@ -203,7 +203,7 @@ export default function UploadMaterialPage() {
         </div>
 
         <button type="submit" disabled={uploading} className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-xl disabled:opacity-50">
-            {uploading ? 'Creating...' : 'Create Material'}
+            {uploading ? 'Membuat...' : 'Buat Materi'}
         </button>
       </form>
     </div>

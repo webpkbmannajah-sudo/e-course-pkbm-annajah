@@ -125,7 +125,7 @@ export default function ExamResultPage({ params }: PageProps) {
           <span>Total: <strong className="text-white">{totalQuestions}</strong></span>
         </div>
         <p className="text-slate-500 text-xs mt-3">
-          Weighted Score: {score.total_score}/{score.max_score} • Graded: {new Date(score.graded_at).toLocaleDateString('id-ID', {
+          Nilai Aktual: {score.total_score}/{score.max_score} • Dinilai: {new Date(score.graded_at).toLocaleDateString('id-ID', {
             day: 'numeric', month: 'long', year: 'numeric'
           })}
         </p>

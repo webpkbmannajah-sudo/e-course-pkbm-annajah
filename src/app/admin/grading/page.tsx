@@ -82,7 +82,7 @@ export default function GradingIndexPage() {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
         <input
           type="text"
-          placeholder="Search exams..."
+          placeholder="Cari ujian..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -93,7 +93,7 @@ export default function GradingIndexPage() {
       {filteredExams.length === 0 ? (
         <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center">
           <ClipboardList className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">No exams to grade</h3>
+          <h3 className="text-lg font-medium text-white mb-2">Tidak ada ujian untuk dinilai</h3>
           <p className="text-slate-400">Question-based exams will appear here</p>
         </div>
       ) : (

@@ -34,7 +34,7 @@ export default function AdminMaterialsPage() {
   }
 
   const handleDelete = async (id: string, fileUrl: string | null) => {
-    if (!confirm('Are you sure you want to delete this material?')) return
+    if (!confirm('Apakah Anda yakin ingin menghapus materi ini?')) return
 
     setDeleting(id)
     try {
@@ -116,7 +116,7 @@ export default function AdminMaterialsPage() {
       {filteredMaterials.length === 0 ? (
         <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center">
           <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">Belum ada materi</h3>
+          <h3 className="text-lg font-medium text-white mb-2">Materi tidak ditemukan</h3>
           <p className="text-slate-400 mb-6">Upload materi pertama Anda untuk memulai</p>
           <Link
             href="/admin/materials/upload"

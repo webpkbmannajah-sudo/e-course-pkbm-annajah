@@ -113,7 +113,7 @@ export default function StudentProgressPage() {
       <div>
         <h1 className="text-2xl font-bold text-white flex items-center gap-3">
           <TrendingUp className="w-7 h-7 text-emerald-400" />
-          My Progress
+          Progress Saya
         </h1>
         <p className="text-slate-400 mt-1">Pantau perkembangan belajarmu</p>
       </div>

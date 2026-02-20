@@ -64,7 +64,7 @@ export default function AdminStudentsPage() {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
         <input
           type="text"
-          placeholder="Search students..."
+          placeholder="Cari siswa..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -88,7 +88,7 @@ export default function AdminStudentsPage() {
       {filteredStudents.length === 0 ? (
         <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center">
           <Users className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">No students found</h3>
+          <h3 className="text-lg font-medium text-white mb-2">Siswa tidak ditemukan</h3>
           <p className="text-slate-400">Students will appear here when they register</p>
         </div>
       ) : (

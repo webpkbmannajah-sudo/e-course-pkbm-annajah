@@ -44,7 +44,7 @@ export default function StudentProfilePage() {
 
       if (!res.ok) throw new Error('Failed to update profile')
       
-      setMessage({ type: 'success', text: 'Profile updated successfully' })
+      setMessage({ type: 'success', text: 'Profil berhasil diperbarui' })
     } catch {
       setMessage({ type: 'error', text: 'Failed to update profile' })
     } finally {
@@ -132,12 +132,12 @@ export default function StudentProfilePage() {
                 {saving ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Saving...
+                    Menyimpan...
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    Save Changes
+                    Simpan Perubahan
                   </>
                 )}
               </button>

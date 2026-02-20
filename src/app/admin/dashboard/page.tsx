@@ -85,35 +85,35 @@ export default function AdminDashboard() {
 
   const statCards = [
     {
-      title: 'Total Materials',
+      title: 'Total Materi',
       value: stats.totalMaterials,
       icon: FileText,
       color: 'from-blue-500 to-cyan-500',
       href: '/admin/materials',
     },
     {
-      title: 'Total Exams',
+      title: 'Total Ujian',
       value: stats.totalExams,
       icon: ClipboardList,
       color: 'from-purple-500 to-pink-500',
       href: '/admin/exams',
     },
     {
-      title: 'Total Students',
+      title: 'Total Siswa',
       value: stats.totalStudents,
       icon: Users,
       color: 'from-emerald-500 to-teal-500',
       href: '/admin/students',
     },
     {
-      title: 'Avg Score',
+      title: 'Rata-rata Nilai',
       value: stats.avgScore !== null ? `${stats.avgScore}%` : '-',
       icon: Target,
       color: 'from-indigo-500 to-violet-500',
       href: '/admin/reports',
     },
     {
-      title: 'Pass Rate',
+      title: 'Tingkat Kelulusan',
       value: stats.passRate !== null ? `${stats.passRate}%` : '-',
       icon: Percent,
       color: 'from-rose-500 to-pink-500',
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-slate-400">Welcome back! Here&apos;s an overview of your platform.</p>
+          <p className="text-slate-400">Selamat datang kembali! Berikut adalah ringkasan platform Anda.</p>
         </div>
         <div className="flex gap-3">
           <Link
@@ -143,14 +143,14 @@ export default function AdminDashboard() {
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Add Material
+            Tambah Materi
           </Link>
           <Link
             href="/admin/exams/create"
             className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Create Exam
+            Buat Ujian
           </Link>
         </div>
       </div>
@@ -181,19 +181,19 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-white flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-purple-400" />
-            Recent Materials
+            Materi Terbaru
           </h2>
           <Link href="/admin/materials" className="text-sm text-purple-400 hover:text-purple-300">
-            View all →
+            Lihat semua →
           </Link>
         </div>
         
         {recentMaterials.length === 0 ? (
           <div className="text-center py-8">
             <FileText className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-            <p className="text-slate-400">No materials yet</p>
+            <p className="text-slate-400">Belum ada materi</p>
             <Link href="/admin/materials/upload" className="text-purple-400 hover:text-purple-300 text-sm">
-              Upload your first material →
+              Unggah materi pertama Anda →
             </Link>
           </div>
         ) : (
