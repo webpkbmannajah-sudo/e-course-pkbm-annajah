@@ -68,8 +68,8 @@ export default function ExamResultPage({ params }: PageProps) {
     return (
       <div className="text-center py-12">
         <Award className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-white mb-2">Results not available yet</h3>
-        <p className="text-slate-400 mb-4">Your exam hasn&apos;t been graded yet. Please check back later.</p>
+        <h3 className="text-lg font-medium text-slate-900 mb-2">Results not available yet</h3>
+        <p className="text-slate-500 mb-4">Your exam hasn&apos;t been graded yet. Please check back later.</p>
         <Link
           href="/student/exams"
           className="text-emerald-400 hover:text-emerald-300"
@@ -89,13 +89,13 @@ export default function ExamResultPage({ params }: PageProps) {
       <div className="flex items-start gap-4">
         <Link
           href="/student/exams"
-          className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors mt-1"
+          className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg transition-colors mt-1"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">{examTitle}</h1>
-          <p className="text-slate-400 mt-1">Exam Results</p>
+          <h1 className="text-2xl font-bold text-slate-900">{examTitle}</h1>
+          <p className="text-slate-500 mt-1">Exam Results</p>
         </div>
       </div>
 
@@ -108,7 +108,7 @@ export default function ExamResultPage({ params }: PageProps) {
         <Trophy className={`w-16 h-16 mx-auto mb-4 ${
           score.is_passed ? 'text-emerald-400' : 'text-orange-400'
         }`} />
-        <h2 className="text-lg text-slate-300 mb-2">Your Score</h2>
+        <h2 className="text-lg text-slate-600 mb-2">Your Score</h2>
         <p className={`text-5xl font-bold ${
           score.is_passed ? 'text-emerald-400' : 'text-orange-400'
         }`}>
@@ -119,10 +119,10 @@ export default function ExamResultPage({ params }: PageProps) {
         }`}>
           {score.is_passed ? '✓ PASSED' : '✗ FAILED'}
         </p>
-        <div className="flex items-center justify-center gap-6 mt-4 text-slate-300 text-sm">
+        <div className="flex items-center justify-center gap-6 mt-4 text-slate-600 text-sm">
           <span>Correct: <strong className="text-emerald-400">{correctCount}</strong></span>
           <span>Incorrect: <strong className="text-red-400">{totalQuestions - correctCount}</strong></span>
-          <span>Total: <strong className="text-white">{totalQuestions}</strong></span>
+          <span>Total: <strong className="text-slate-900">{totalQuestions}</strong></span>
         </div>
         <p className="text-slate-500 text-xs mt-3">
           Nilai Aktual: {score.total_score}/{score.max_score} • Dinilai: {new Date(score.graded_at).toLocaleDateString('id-ID', {
@@ -132,7 +132,7 @@ export default function ExamResultPage({ params }: PageProps) {
         <div className="flex gap-3 justify-center mt-6">
           <Link
             href="/student/exams"
-            className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
+            className="px-6 py-2 bg-slate-200 hover:bg-slate-600 text-slate-900 rounded-xl transition-colors"
           >
             Back to Exams
           </Link>
@@ -141,12 +141,12 @@ export default function ExamResultPage({ params }: PageProps) {
 
       {/* Answer Breakdown */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white">Answer Review</h3>
+        <h3 className="text-lg font-semibold text-slate-900">Answer Review</h3>
 
         {score.breakdown.map((item, index) => (
           <div
             key={item.question_id}
-            className="bg-slate-800 border border-slate-700 rounded-xl p-5"
+            className="bg-white border border-slate-200 rounded-xl p-5"
           >
             <div className="flex items-start gap-3 mb-4">
               <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -160,7 +160,7 @@ export default function ExamResultPage({ params }: PageProps) {
                 }
               </span>
               <div className="flex-1">
-                <p className="text-white font-medium">{index + 1}. {item.question_text}</p>
+                <p className="text-slate-900 font-medium">{index + 1}. {item.question_text}</p>
                 {item.weight !== 1 && (
                   <p className="text-slate-500 text-xs mt-1">Weight: {item.weight} point(s)</p>
                 )}
@@ -181,7 +181,7 @@ export default function ExamResultPage({ params }: PageProps) {
                   </span>
                 </div>
               ) : (
-                <div className="px-4 py-2 rounded-lg border border-slate-700 text-slate-500">
+                <div className="px-4 py-2 rounded-lg border border-slate-200 text-slate-500">
                   No answer selected
                 </div>
               )}

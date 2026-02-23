@@ -76,10 +76,10 @@ export default function AdminProfilePage() {
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
-                    <UserIcon className="w-12 h-12 text-slate-400" />
+                    <UserIcon className="w-12 h-12 text-slate-500" />
                   )}
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                    <Camera className="w-8 h-8 text-white" />
+                    <Camera className="w-8 h-8 text-slate-900" />
                   </div>
                 </div>
                 <button type="button" className="text-sm text-purple-600 font-medium hover:text-purple-700">
@@ -134,7 +134,7 @@ export default function AdminProfilePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+                className="px-6 py-2 bg-purple-600 text-slate-900 rounded-lg hover:bg-purple-700 font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
               >
                 {saving ? (
                   <>

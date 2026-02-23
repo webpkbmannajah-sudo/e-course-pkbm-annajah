@@ -42,7 +42,7 @@ export default function AdminDashboard() {
         const { count: studentsCount } = await supabase
           .from('profiles')
           .select('*', { count: 'exact', head: true })
-          .eq('role', 'student')
+          .or('role.eq.student,role.is.null')
 
         // Fetch recent materials
         const { data: materials } = await supabase
@@ -134,8 +134,8 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-slate-400">Selamat datang kembali! Berikut adalah ringkasan platform Anda.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+          <p className="text-slate-500">Selamat datang kembali! Berikut adalah ringkasan platform Anda.</p>
         </div>
         <div className="flex gap-3">
           <Link
@@ -161,12 +161,12 @@ export default function AdminDashboard() {
           <Link
             key={card.title}
             href={card.href}
-            className="group bg-slate-800 border border-slate-700 rounded-2xl p-6 hover:border-slate-600 transition-all"
+            className="group bg-white border border-slate-200 rounded-2xl p-6 hover:border-slate-600 transition-all"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">{card.title}</p>
-                <p className="text-3xl font-bold text-white mt-1">{card.value}</p>
+                <p className="text-slate-500 text-sm">{card.title}</p>
+                <p className="text-3xl font-bold text-slate-900 mt-1">{card.value}</p>
               </div>
               <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                 <card.icon className="w-6 h-6 text-white" />
@@ -177,9 +177,9 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Materials */}
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-purple-400" />
             Materi Terbaru
           </h2>
@@ -191,7 +191,7 @@ export default function AdminDashboard() {
         {recentMaterials.length === 0 ? (
           <div className="text-center py-8">
             <FileText className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-            <p className="text-slate-400">Belum ada materi</p>
+            <p className="text-slate-500">Belum ada materi</p>
             <Link href="/admin/materials/upload" className="text-purple-400 hover:text-purple-300 text-sm">
               Unggah materi pertama Anda →
             </Link>
@@ -201,15 +201,15 @@ export default function AdminDashboard() {
             {recentMaterials.map((material) => (
               <div
                 key={material.id}
-                className="flex items-center justify-between py-3 px-4 bg-slate-700/50 rounded-xl"
+                className="flex items-center justify-between py-3 px-4 bg-slate-100 rounded-xl"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
                     <FileText className="w-5 h-5 text-blue-400" />
                   </div>
-                  <span className="text-white">{material.title}</span>
+                  <span className="text-slate-900">{material.title}</span>
                 </div>
-                <span className="text-sm text-slate-400">
+                <span className="text-sm text-slate-500">
                   {new Date(material.created_at).toLocaleDateString()}
                 </span>
               </div>

@@ -81,12 +81,12 @@ export default function AdminExamsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Ujian</h1>
-          <p className="text-slate-400">Kelola ujian dan latihan soal</p>
+          <h1 className="text-2xl font-bold text-slate-900">Ujian</h1>
+          <p className="text-slate-500">Kelola ujian dan latihan soal</p>
         </div>
         <Link
           href="/admin/exams/create"
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors w-fit"
+          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-slate-900 rounded-xl transition-colors w-fit"
         >
           <Plus className="w-4 h-4" />
           Buat Ujian
@@ -95,25 +95,25 @@ export default function AdminExamsPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
         <input
           type="text"
           placeholder="Cari ujian..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
       </div>
 
       {/* Exams List */}
       {filteredExams.length === 0 ? (
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center">
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <ClipboardList className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">Ujian tidak ditemukan</h3>
-          <p className="text-slate-400 mb-6">Buat ujian pertama Anda untuk memulai</p>
+          <h3 className="text-lg font-medium text-slate-900 mb-2">Ujian tidak ditemukan</h3>
+          <p className="text-slate-500 mb-6">Buat ujian pertama Anda untuk memulai</p>
           <Link
             href="/admin/exams/create"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-slate-900 rounded-xl transition-colors"
           >
             <Plus className="w-4 h-4" />
             Buat Ujian
@@ -124,7 +124,7 @@ export default function AdminExamsPage() {
           {filteredExams.map((exam) => (
             <div
               key={exam.id}
-              className="bg-slate-800 border border-slate-700 rounded-xl p-5 hover:border-slate-600 transition-all"
+              className="bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-600 transition-all"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
@@ -138,9 +138,9 @@ export default function AdminExamsPage() {
                     )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white">{exam.title}</h3>
+                    <h3 className="font-semibold text-slate-900">{exam.title}</h3>
                     {exam.description && (
-                      <p className="text-slate-400 text-sm mt-1 line-clamp-2">{exam.description}</p>
+                      <p className="text-slate-500 text-sm mt-1 line-clamp-2">{exam.description}</p>
                     )}
                     <div className="flex items-center gap-4 mt-3 text-sm text-slate-500">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -160,7 +160,7 @@ export default function AdminExamsPage() {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/admin/exams/${exam.id}`}
-                    className="p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                    className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
                     title="Lihat Ujian"
                   >
                     <Eye className="w-5 h-5" />
@@ -168,7 +168,7 @@ export default function AdminExamsPage() {
                   {exam.type === 'questions' && (
                     <Link
                       href={`/admin/exams/${exam.id}/grading`}
-                      className="p-2 text-slate-400 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
+                      className="p-2 text-slate-500 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
                       title="Penilaian"
                     >
                       <Award className="w-5 h-5" />
@@ -177,7 +177,7 @@ export default function AdminExamsPage() {
                   <button
                     onClick={() => handleDelete(exam.id, exam.pdf_url)}
                     disabled={deleting === exam.id}
-                    className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
+                    className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
                     title="Hapus"
                   >
                     {deleting === exam.id ? (

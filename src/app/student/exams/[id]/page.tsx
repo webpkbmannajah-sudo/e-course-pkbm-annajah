@@ -195,7 +195,7 @@ export default function TakeExamPage({ params }: PageProps) {
     return (
       <div className="text-center py-12">
         <ClipboardList className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-white mb-2">Ujian tidak ditemukan</h3>
+        <h3 className="text-lg font-medium text-slate-900 mb-2">Ujian tidak ditemukan</h3>
         <Link href="/student/exams" className="text-emerald-400 hover:text-emerald-300">
           ← Kembali ke daftar ujian
         </Link>
@@ -211,25 +211,25 @@ export default function TakeExamPage({ params }: PageProps) {
         <div className="flex items-start gap-4">
           <Link
             href="/student/exams"
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors mt-1"
+            className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg transition-colors mt-1"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-white">{exam.title}</h1>
+            <h1 className="text-2xl font-bold text-slate-900">{exam.title}</h1>
             {exam.description && (
-              <p className="text-slate-400 mt-1">{exam.description}</p>
+              <p className="text-slate-500 mt-1">{exam.description}</p>
             )}
           </div>
         </div>
 
         {/* PDF Viewer */}
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden">
-          <div className="bg-slate-700/50 px-4 py-3 border-b border-slate-600 flex items-center gap-2 text-slate-400">
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <div className="bg-slate-100 px-4 py-3 border-b border-slate-600 flex items-center gap-2 text-slate-500">
             <FileText className="w-5 h-5" />
             <span className="text-sm">File PDF Ujian</span>
           </div>
-          <div className="aspect-[4/3] bg-slate-900">
+          <div className="aspect-[4/3] bg-slate-50">
             <iframe
               src={`${exam.pdf_url}#toolbar=0&navpanes=0`}
               className="w-full h-full"
@@ -249,13 +249,13 @@ export default function TakeExamPage({ params }: PageProps) {
         <div className="flex items-start gap-4">
           <Link
             href="/student/exams"
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors mt-1"
+            className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg transition-colors mt-1"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-white">{exam.title}</h1>
-            <p className="text-slate-400 mt-1">Ujian selesai</p>
+            <h1 className="text-2xl font-bold text-slate-900">{exam.title}</h1>
+            <p className="text-slate-500 mt-1">Ujian selesai</p>
           </div>
         </div>
 
@@ -268,13 +268,13 @@ export default function TakeExamPage({ params }: PageProps) {
           <Trophy className={`w-16 h-16 mx-auto mb-4 ${
             score !== null && score >= 70 ? 'text-emerald-400' : 'text-orange-400'
           }`} />
-          <h2 className="text-lg text-slate-300 mb-2">Nilai Anda</h2>
+          <h2 className="text-lg text-slate-600 mb-2">Nilai Anda</h2>
           <p className={`text-5xl font-bold ${
             score !== null && score >= 70 ? 'text-emerald-400' : 'text-orange-400'
           }`}>
             {score}%
           </p>
-          <p className="text-slate-400 mt-4">
+          <p className="text-slate-500 mt-4">
             {score !== null && score >= 70 
               ? 'Bagus! Pertahankan prestasi Anda!' 
               : 'Terus belajar dan coba lagi!'}
@@ -282,13 +282,13 @@ export default function TakeExamPage({ params }: PageProps) {
           <div className="flex gap-3 justify-center mt-6">
             <Link
               href="/student/exams"
-              className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
+              className="px-6 py-2 bg-slate-200 hover:bg-slate-600 text-slate-900 rounded-xl transition-colors"
             >
               Kembali ke Ujian
             </Link>
             <button
               onClick={handleRetake}
-              className="flex items-center gap-2 px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors"
+              className="flex items-center gap-2 px-6 py-2 bg-purple-600 hover:bg-purple-500 text-slate-900 rounded-xl transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
               Kerjakan Ulang
@@ -298,21 +298,21 @@ export default function TakeExamPage({ params }: PageProps) {
 
         {/* Review Answers */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-white">Tinjau Jawaban Anda</h3>
+          <h3 className="text-lg font-semibold text-slate-900">Tinjau Jawaban Anda</h3>
           {exam.questions?.map((question, index) => {
             const selectedChoiceId = answers[question.id]
             const correctChoice = question.choices.find(c => c.is_correct)
             const isCorrect = selectedChoiceId === correctChoice?.id
 
             return (
-              <div key={question.id} className="bg-slate-800 border border-slate-700 rounded-xl p-5">
+              <div key={question.id} className="bg-white border border-slate-200 rounded-xl p-5">
                 <div className="flex items-start gap-3 mb-4">
                   <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                     isCorrect ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
                   }`}>
                     {isCorrect ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                   </span>
-                  <p className="text-white font-medium">{index + 1}. {question.question_text}</p>
+                  <p className="text-slate-900 font-medium">{index + 1}. {question.question_text}</p>
                 </div>
 
                 <div className="space-y-2 pl-11">
@@ -328,7 +328,7 @@ export default function TakeExamPage({ params }: PageProps) {
                             ? 'bg-green-500/10 border-green-500/50 text-green-400'
                             : isSelected
                             ? 'bg-red-500/10 border-red-500/50 text-red-400'
-                            : 'border-slate-700 text-slate-400'
+                            : 'border-slate-200 text-slate-500'
                         }`}
                       >
                         {choice.choice_text}
@@ -354,18 +354,18 @@ export default function TakeExamPage({ params }: PageProps) {
         <div className="flex items-start gap-4">
           <Link
             href="/student/exams"
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors mt-1"
+            className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg transition-colors mt-1"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-white">{exam.title}</h1>
+            <h1 className="text-2xl font-bold text-slate-900">{exam.title}</h1>
             {exam.description && (
-              <p className="text-slate-400 mt-1">{exam.description}</p>
+              <p className="text-slate-500 mt-1">{exam.description}</p>
             )}
           </div>
         </div>
-        <div className="bg-slate-800 px-4 py-2 rounded-xl text-slate-300">
+        <div className="bg-white px-4 py-2 rounded-xl text-slate-600">
           {Object.keys(answers).length} / {exam.questions?.length || 0} dijawab
         </div>
       </div>
@@ -373,8 +373,8 @@ export default function TakeExamPage({ params }: PageProps) {
       {/* Questions */}
       <div className="space-y-4">
         {exam.questions?.map((question, index) => (
-          <div key={question.id} className="bg-slate-800 border border-slate-700 rounded-xl p-5">
-            <p className="text-white font-medium mb-4">
+          <div key={question.id} className="bg-white border border-slate-200 rounded-xl p-5">
+            <p className="text-slate-900 font-medium mb-4">
               {index + 1}. {question.question_text}
             </p>
 
@@ -385,7 +385,7 @@ export default function TakeExamPage({ params }: PageProps) {
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all border ${
                     answers[question.id] === choice.id
                       ? 'bg-emerald-500/10 border-emerald-500/50'
-                      : 'border-slate-700 hover:border-slate-600 hover:bg-slate-700/50'
+                      : 'border-slate-200 hover:border-slate-600 hover:bg-slate-100'
                   }`}
                 >
                   <input
@@ -402,11 +402,11 @@ export default function TakeExamPage({ params }: PageProps) {
                       : 'border-slate-500'
                   }`}>
                     {answers[question.id] === choice.id && (
-                      <CheckCircle className="w-4 h-4 text-white" />
+                      <CheckCircle className="w-4 h-4 text-slate-900" />
                     )}
                   </span>
                   <span className={`${
-                    answers[question.id] === choice.id ? 'text-white' : 'text-slate-300'
+                    answers[question.id] === choice.id ? 'text-slate-900' : 'text-slate-600'
                   }`}>
                     {String.fromCharCode(65 + cIndex)}. {choice.choice_text}
                   </span>
@@ -418,14 +418,14 @@ export default function TakeExamPage({ params }: PageProps) {
       </div>
 
       {/* Submit Button */}
-      <div className="sticky bottom-6 bg-slate-900/95 backdrop-blur border border-slate-700 rounded-xl p-4 flex items-center justify-between">
-        <p className="text-slate-400">
+      <div className="sticky bottom-6 bg-slate-50/95 backdrop-blur border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+        <p className="text-slate-500">
           {Object.keys(answers).length} dari {exam.questions?.length || 0} soal dijawab
         </p>
         <button
           onClick={handleSubmit}
           disabled={submitting || Object.keys(answers).length === 0}
-          className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-900 font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           {submitting ? (
             <>

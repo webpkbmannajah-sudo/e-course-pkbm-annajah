@@ -31,15 +31,34 @@ export default function StudentDashboard() {
         if (user) {
           setUserName(user.user_metadata?.name || 'Siswa')
 
+          // Get user education level
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('education_level')
+            .eq('id', user.id)
+            .single()
+          
+          const level = profile?.education_level
+
           // Fetch materials count
-          const { count: materialsCount } = await supabase
+          let materialsQuery = supabase
             .from('materials')
-            .select('*', { count: 'exact', head: true })
+            .select('*, subjects!inner(levels!inner(slug))', { count: 'exact', head: true })
+
+          if (level) {
+            materialsQuery = materialsQuery.eq('subjects.levels.slug', level)
+          }
+          const { count: materialsCount } = await materialsQuery
 
           // Fetch exams count
-          const { count: examsCount } = await supabase
+          let examsQuery = supabase
             .from('exams')
-            .select('*', { count: 'exact', head: true })
+            .select('*, subjects!inner(levels!inner(slug))', { count: 'exact', head: true })
+
+          if (level) {
+            examsQuery = examsQuery.eq('subjects.levels.slug', level)
+          }
+          const { count: examsCount } = await examsQuery
 
           // Fetch completed exams count
           const { count: completedCount } = await supabase
@@ -48,18 +67,28 @@ export default function StudentDashboard() {
             .eq('user_id', user.id)
 
           // Fetch recent materials
-          const { data: materials } = await supabase
+          let recentMaterialsQuery = supabase
             .from('materials')
-            .select('id, title, created_at')
+            .select('id, title, created_at, subjects!inner(levels!inner(slug))')
             .order('created_at', { ascending: false })
             .limit(3)
 
+          if (level) {
+            recentMaterialsQuery = recentMaterialsQuery.eq('subjects.levels.slug', level)
+          }
+          const { data: materials } = await recentMaterialsQuery
+
           // Fetch upcoming exams (exams not yet taken)
-          const { data: exams } = await supabase
+          let upcomingExamsQuery = supabase
             .from('exams')
-            .select('id, title, type')
+            .select('id, title, type, subjects!inner(levels!inner(slug))')
             .order('created_at', { ascending: false })
             .limit(3)
+
+          if (level) {
+            upcomingExamsQuery = upcomingExamsQuery.eq('subjects.levels.slug', level)
+          }
+          const { data: exams } = await upcomingExamsQuery
 
           setStats({
             totalMaterials: materialsCount || 0,
@@ -91,44 +120,44 @@ export default function StudentDashboard() {
     <div className="space-y-8">
       {/* Welcome Header */}
       <div className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-2xl p-6">
-        <h1 className="text-2xl font-bold text-white">Halo, {userName}! 👋</h1>
-        <p className="text-slate-300 mt-1">Siap untuk melanjutkan belajar hari ini?</p>
+        <h1 className="text-2xl font-bold text-slate-900">Halo, {userName}! 👋</h1>
+        <p className="text-slate-600 mt-1">Siap untuk melanjutkan belajar hari ini?</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-400 text-sm">Materi Tersedia</p>
-              <p className="text-3xl font-bold text-white mt-1">{stats.totalMaterials}</p>
+              <p className="text-slate-500 text-sm">Materi Tersedia</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.totalMaterials}</p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-              <FileText className="w-6 h-6 text-white" />
+              <FileText className="w-6 h-6 text-slate-900" />
             </div>
           </div>
         </div>
 
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-400 text-sm">Total Ujian</p>
-              <p className="text-3xl font-bold text-white mt-1">{stats.totalExams}</p>
+              <p className="text-slate-500 text-sm">Total Ujian</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.totalExams}</p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <ClipboardList className="w-6 h-6 text-white" />
+              <ClipboardList className="w-6 h-6 text-slate-900" />
             </div>
           </div>
         </div>
 
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-400 text-sm">Ujian Selesai</p>
-              <p className="text-3xl font-bold text-white mt-1">{stats.completedExams}</p>
+              <p className="text-slate-500 text-sm">Ujian Selesai</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.completedExams}</p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-white" />
+              <CheckCircle className="w-6 h-6 text-slate-900" />
             </div>
           </div>
         </div>
@@ -137,9 +166,9 @@ export default function StudentDashboard() {
       {/* Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Materials */}
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-400" />
               Materi Terbaru
             </h2>
@@ -151,7 +180,7 @@ export default function StudentDashboard() {
           {recentMaterials.length === 0 ? (
             <div className="text-center py-8">
               <FileText className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-400">Belum ada materi</p>
+              <p className="text-slate-500">Belum ada materi</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -159,15 +188,15 @@ export default function StudentDashboard() {
                 <Link
                   key={material.id}
                   href={`/student/materials/${material.id}`}
-                  className="flex items-center justify-between py-3 px-4 bg-slate-700/50 rounded-xl hover:bg-slate-700 transition-colors"
+                  className="flex items-center justify-between py-3 px-4 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
                       <FileText className="w-5 h-5 text-blue-400" />
                     </div>
-                    <span className="text-white">{material.title}</span>
+                    <span className="text-slate-900">{material.title}</span>
                   </div>
-                  <span className="text-sm text-slate-400">
+                  <span className="text-sm text-slate-500">
                     {new Date(material.created_at).toLocaleDateString()}
                   </span>
                 </Link>
@@ -177,9 +206,9 @@ export default function StudentDashboard() {
         </div>
 
         {/* Available Exams */}
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
               <ClipboardList className="w-5 h-5 text-purple-400" />
               Ujian Tersedia
             </h2>
@@ -191,7 +220,7 @@ export default function StudentDashboard() {
           {upcomingExams.length === 0 ? (
             <div className="text-center py-8">
               <ClipboardList className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-400">Belum ada ujian</p>
+              <p className="text-slate-500">Belum ada ujian</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -199,18 +228,18 @@ export default function StudentDashboard() {
                 <Link
                   key={exam.id}
                   href={`/student/exams/${exam.id}`}
-                  className="flex items-center justify-between py-3 px-4 bg-slate-700/50 rounded-xl hover:bg-slate-700 transition-colors"
+                  className="flex items-center justify-between py-3 px-4 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
                       <ClipboardList className="w-5 h-5 text-purple-400" />
                     </div>
                     <div>
-                      <span className="text-white block">{exam.title}</span>
-                      <span className="text-xs text-slate-400 capitalize">Ujian {exam.type}</span>
+                      <span className="text-slate-900 block">{exam.title}</span>
+                      <span className="text-xs text-slate-500 capitalize">Ujian {exam.type}</span>
                     </div>
                   </div>
-                  <Clock className="w-5 h-5 text-slate-400" />
+                  <Clock className="w-5 h-5 text-slate-500" />
                 </Link>
               ))}
             </div>

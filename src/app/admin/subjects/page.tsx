@@ -116,21 +116,21 @@ export default function AdminSubjectsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Subjects</h1>
-          <p className="text-slate-400">Manage learning subjects per level</p>
+          <h1 className="text-2xl font-bold text-slate-900">Subjects</h1>
+          <p className="text-slate-500">Manage learning subjects per level</p>
         </div>
       </div>
 
       {/* Level Tabs */}
-      <div className="flex bg-slate-800 p-1 rounded-xl overflow-x-auto">
+      <div className="flex bg-white p-1 rounded-xl overflow-x-auto">
         {levels.map(level => (
           <button
             key={level.id}
             onClick={() => setSelectedLevelId(level.id)}
             className={`flex-1 min-w-[120px] px-4 py-3 rounded-lg text-sm font-medium transition-all ${
               selectedLevelId === level.id
-                ? 'bg-purple-500 text-white shadow-lg'
-                : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                ? 'bg-purple-500 text-slate-900 shadow-lg'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             {level.name}
@@ -139,21 +139,21 @@ export default function AdminSubjectsPage() {
       </div>
 
       {/* Content Area */}
-      <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
+      <div className="bg-white border border-slate-200 rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               type="text"
               placeholder="Cari mata pelajaran..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
           <button
             onClick={() => setIsAddingString(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-slate-900 rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add Subject
@@ -161,7 +161,7 @@ export default function AdminSubjectsPage() {
         </div>
 
         {isAddingString && (
-          <form onSubmit={handleAddSubject} className="mb-6 p-4 bg-slate-900/50 rounded-xl border border-purple-500/30 flex items-center gap-4">
+          <form onSubmit={handleAddSubject} className="mb-6 p-4 bg-slate-50/50 rounded-xl border border-purple-500/30 flex items-center gap-4">
             <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
               <Folder className="w-5 h-5 text-purple-400" />
             </div>
@@ -171,7 +171,7 @@ export default function AdminSubjectsPage() {
               value={newSubjectName}
               onChange={(e) => setNewSubjectName(e.target.value)}
               autoFocus
-              className="flex-1 px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="flex-1 px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             <div className="flex items-center gap-2">
               <button
@@ -204,12 +204,12 @@ export default function AdminSubjectsPage() {
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredSubjects.map(subject => (
-                    <div key={subject.id} className="group flex items-center justify-between p-4 bg-slate-900 border border-slate-700 rounded-xl hover:border-purple-500/50 transition-all">
+                    <div key={subject.id} className="group flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-purple-500/50 transition-all">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
-                                <BookOpen className="w-5 h-5 text-slate-400 group-hover:text-purple-400" />
+                            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
+                                <BookOpen className="w-5 h-5 text-slate-500 group-hover:text-purple-400" />
                             </div>
-                            <span className="font-medium text-white">{subject.name}</span>
+                            <span className="font-medium text-slate-900">{subject.name}</span>
                         </div>
                         <button
                             onClick={() => handleDeleteSubject(subject.id)}

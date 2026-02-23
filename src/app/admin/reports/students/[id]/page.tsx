@@ -106,7 +106,7 @@ export default function StudentReportPage({ params }: { params: Promise<{ id: st
 
   if (!data) {
     return (
-      <div className="text-center py-12 text-slate-400">
+      <div className="text-center py-12 text-slate-500">
         <AlertTriangle className="w-12 h-12 mx-auto mb-3 text-amber-400" />
         <p>Data siswa tidak ditemukan</p>
         <Link href="/admin/reports" className="text-purple-400 hover:text-purple-300 mt-2 inline-block">← Kembali</Link>
@@ -148,26 +148,26 @@ export default function StudentReportPage({ params }: { params: Promise<{ id: st
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <Link href="/admin/reports" className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-white mb-2 transition-colors">
+          <Link href="/admin/reports" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900 mb-2 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Kembali
           </Link>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <User className="w-6 h-6 text-white" />
+              <User className="w-6 h-6 text-slate-900" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">{student.name}</h1>
-              <p className="text-slate-400 text-sm">{student.email}</p>
+              <h1 className="text-2xl font-bold text-slate-900">{student.name}</h1>
+              <p className="text-slate-500 text-sm">{student.email}</p>
             </div>
           </div>
         </div>
         <div className="flex gap-2">
           <button onClick={() => handleExport('excel')} disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors disabled:opacity-50">
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-900 rounded-xl transition-colors disabled:opacity-50">
             <FileSpreadsheet className="w-4 h-4" /> Excel
           </button>
           <button onClick={() => handleExport('pdf')} disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl transition-colors disabled:opacity-50">
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-slate-900 rounded-xl transition-colors disabled:opacity-50">
             <Download className="w-4 h-4" /> PDF
           </button>
         </div>
@@ -181,18 +181,18 @@ export default function StudentReportPage({ params }: { params: Promise<{ id: st
           { label: 'Skor Tertinggi', value: formatPercentage(performance.highest_score), sub: 'best performance', icon: TrendingUp, color: 'text-emerald-400' },
           { label: 'Kelulusan', value: `${performance.pass_count} / ${performance.total_exams_taken}`, sub: performance.total_exams_taken > 0 ? `${Math.round((performance.pass_count / performance.total_exams_taken) * 100)}%` : '-', icon: Award, color: 'text-amber-400' },
         ].map((card) => (
-          <div key={card.label} className="bg-slate-800 border border-slate-700 rounded-2xl p-5">
+          <div key={card.label} className="bg-white border border-slate-200 rounded-2xl p-5">
             <card.icon className={`w-5 h-5 ${card.color} mb-3`} />
-            <p className="text-xl font-bold text-white">{card.value}</p>
-            <p className="text-xs text-slate-400 mt-1">{card.label}</p>
+            <p className="text-xl font-bold text-slate-900">{card.value}</p>
+            <p className="text-xs text-slate-500 mt-1">{card.label}</p>
             <p className="text-xs text-slate-500 mt-0.5">{card.sub}</p>
           </div>
         ))}
       </div>
 
       {/* Score Timeline Chart */}
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-purple-400" /> Riwayat Skor
         </h2>
         {score_history.length > 0 ? (
@@ -224,8 +224,8 @@ export default function StudentReportPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Exam Results Table */}
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
           <Award className="w-5 h-5 text-purple-400" /> Detail Hasil Ujian
         </h2>
         {score_history.length === 0 ? (
@@ -234,7 +234,7 @@ export default function StudentReportPage({ params }: { params: Promise<{ id: st
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-sm text-slate-400 border-b border-slate-700">
+                <tr className="text-left text-sm text-slate-500 border-b border-slate-200">
                   <th className="pb-3 pr-4">Ujian</th>
                   <th className="pb-3 pr-4 text-center">Skor</th>
                   <th className="pb-3 pr-4 text-center">Persentase</th>
@@ -244,14 +244,14 @@ export default function StudentReportPage({ params }: { params: Promise<{ id: st
               </thead>
               <tbody>
                 {score_history.map((score) => (
-                  <tr key={score.id} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                  <tr key={score.id} className="border-b border-slate-200/50 hover:bg-slate-200/30 transition-colors">
                     <td className="py-3 pr-4">
                       <Link href={`/admin/reports/exams/${score.exam_id}`}
-                        className="text-white font-medium hover:text-purple-400 transition-colors">
+                        className="text-slate-900 font-medium hover:text-purple-400 transition-colors">
                         {score.exam_title}
                       </Link>
                     </td>
-                    <td className="py-3 pr-4 text-center text-slate-300">{Number(score.total_score).toFixed(1)}</td>
+                    <td className="py-3 pr-4 text-center text-slate-600">{Number(score.total_score).toFixed(1)}</td>
                     <td className="py-3 pr-4 text-center">
                       <span className={`font-medium ${
                         Number(score.percentage) >= 60 ? 'text-emerald-400' : 'text-red-400'
@@ -267,7 +267,7 @@ export default function StudentReportPage({ params }: { params: Promise<{ id: st
                         {score.is_passed ? 'Lulus' : 'Tidak Lulus'}
                       </span>
                     </td>
-                    <td className="py-3 text-right text-slate-400 text-sm">
+                    <td className="py-3 text-right text-slate-500 text-sm">
                       {score.graded_at ? new Date(score.graded_at).toLocaleDateString('id-ID') : '-'}
                     </td>
                   </tr>

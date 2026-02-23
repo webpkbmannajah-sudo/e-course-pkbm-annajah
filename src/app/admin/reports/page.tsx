@@ -210,17 +210,17 @@ export default function AdminReportsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
             <BarChart3 className="w-7 h-7 text-purple-400" />
             Laporan & Analitik
           </h1>
-          <p className="text-slate-400 mt-1">Ringkasan performa platform dan ujian</p>
+          <p className="text-slate-500 mt-1">Ringkasan performa platform dan ujian</p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => handleExport()}
             disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-900 rounded-xl transition-colors disabled:opacity-50"
           >
             <FileSpreadsheet className="w-4 h-4" />
             Unduh Excel
@@ -238,14 +238,14 @@ export default function AdminReportsPage() {
           { label: 'Rata-rata Skor', value: formatPercentage(overview?.avg_platform_score ?? null), icon: Target, color: 'from-indigo-500 to-violet-500' },
           { label: 'Tingkat Kelulusan', value: formatPercentage(overview?.overall_pass_rate ?? null), icon: Percent, color: 'from-rose-500 to-pink-500' },
         ].map((card) => (
-          <div key={card.label} className="bg-slate-800 border border-slate-700 rounded-2xl p-4">
+          <div key={card.label} className="bg-white border border-slate-200 rounded-2xl p-4">
             <div className="flex items-center gap-3 mb-2">
               <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center`}>
-                <card.icon className="w-4 h-4 text-white" />
+                <card.icon className="w-4 h-4 text-slate-900" />
               </div>
             </div>
-            <p className="text-xl font-bold text-white">{card.value}</p>
-            <p className="text-xs text-slate-400 mt-0.5">{card.label}</p>
+            <p className="text-xl font-bold text-slate-900">{card.value}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{card.label}</p>
           </div>
         ))}
       </div>
@@ -253,8 +253,8 @@ export default function AdminReportsPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Doughnut */}
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">Kelulusan Keseluruhan</h2>
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Kelulusan Keseluruhan</h2>
           {overview && overview.total_graded > 0 ? (
             <div className="h-64 flex items-center justify-center">
               <Doughnut
@@ -279,8 +279,8 @@ export default function AdminReportsPage() {
         </div>
 
         {/* Bar Chart */}
-        <div className="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">Rata-rata Skor per Ujian</h2>
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Rata-rata Skor per Ujian</h2>
           {sortedExams.length > 0 && sortedExams.some(e => e.avg_score !== null) ? (
             <div className="h-64">
               <Bar
@@ -315,9 +315,9 @@ export default function AdminReportsPage() {
       </div>
 
       {/* Exam Performance Table */}
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
             <ClipboardList className="w-5 h-5 text-purple-400" />
             Performa per Ujian
           </h2>
@@ -325,7 +325,7 @@ export default function AdminReportsPage() {
             <select
               value={examFilter}
               onChange={(e) => setExamFilter(e.target.value as 'all' | 'has_attempts')}
-              className="bg-slate-700 border border-slate-600 text-slate-200 text-sm rounded-lg px-3 py-1.5 focus:ring-purple-500 focus:border-purple-500"
+              className="bg-slate-200 border border-slate-600 text-slate-200 text-sm rounded-lg px-3 py-1.5 focus:ring-purple-500 focus:border-purple-500"
             >
               <option value="all">Semua Ujian</option>
               <option value="has_attempts">Sudah Ada Peserta</option>
@@ -339,15 +339,15 @@ export default function AdminReportsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-sm text-slate-400 border-b border-slate-700">
-                  <th className="pb-3 pr-4 cursor-pointer hover:text-white" onClick={() => handleSort('name')}>
+                <tr className="text-left text-sm text-slate-500 border-b border-slate-200">
+                  <th className="pb-3 pr-4 cursor-pointer hover:text-slate-900" onClick={() => handleSort('name')}>
                     Ujian {sortBy === 'name' && (sortDir === 'asc' ? '↑' : '↓')}
                   </th>
                   <th className="pb-3 pr-4 text-center">Peserta</th>
-                  <th className="pb-3 pr-4 text-center cursor-pointer hover:text-white" onClick={() => handleSort('avg_score')}>
+                  <th className="pb-3 pr-4 text-center cursor-pointer hover:text-slate-900" onClick={() => handleSort('avg_score')}>
                     Rata-rata {sortBy === 'avg_score' && (sortDir === 'asc' ? '↑' : '↓')}
                   </th>
-                  <th className="pb-3 pr-4 text-center cursor-pointer hover:text-white" onClick={() => handleSort('pass_rate')}>
+                  <th className="pb-3 pr-4 text-center cursor-pointer hover:text-slate-900" onClick={() => handleSort('pass_rate')}>
                     Kelulusan {sortBy === 'pass_rate' && (sortDir === 'asc' ? '↑' : '↓')}
                   </th>
                   <th className="pb-3 text-right">Detail</th>
@@ -355,11 +355,11 @@ export default function AdminReportsPage() {
               </thead>
               <tbody>
                 {sortedExams.map((exam) => (
-                  <tr key={exam.id} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                  <tr key={exam.id} className="border-b border-slate-200/50 hover:bg-slate-200/30 transition-colors">
                     <td className="py-3 pr-4">
-                      <span className="text-white font-medium">{exam.title}</span>
+                      <span className="text-slate-900 font-medium">{exam.title}</span>
                     </td>
-                    <td className="py-3 pr-4 text-center text-slate-300">{exam.total_attempts}</td>
+                    <td className="py-3 pr-4 text-center text-slate-600">{exam.total_attempts}</td>
                     <td className="py-3 pr-4 text-center">
                       <span className={`font-medium ${
                         exam.avg_score !== null
@@ -395,8 +395,8 @@ export default function AdminReportsPage() {
       </div>
 
       {/* Top Students Table */}
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-6">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-6">
           <TrendingUp className="w-5 h-5 text-emerald-400" />
           Siswa Terbaik
         </h2>
@@ -407,7 +407,7 @@ export default function AdminReportsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-sm text-slate-400 border-b border-slate-700">
+                <tr className="text-left text-sm text-slate-500 border-b border-slate-200">
                   <th className="pb-3 pr-4">#</th>
                   <th className="pb-3 pr-4">Nama</th>
                   <th className="pb-3 pr-4">Email</th>
@@ -418,20 +418,20 @@ export default function AdminReportsPage() {
               </thead>
               <tbody>
                 {topStudents.map((student, i) => (
-                  <tr key={student.user_id} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                  <tr key={student.user_id} className="border-b border-slate-200/50 hover:bg-slate-200/30 transition-colors">
                     <td className="py-3 pr-4">
                       <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
                         i === 0 ? 'bg-amber-500/20 text-amber-400' :
-                        i === 1 ? 'bg-slate-400/20 text-slate-300' :
+                        i === 1 ? 'bg-slate-400/20 text-slate-600' :
                         i === 2 ? 'bg-orange-500/20 text-orange-400' :
-                        'bg-slate-700 text-slate-400'
+                        'bg-slate-200 text-slate-500'
                       }`}>
                         {i + 1}
                       </span>
                     </td>
-                    <td className="py-3 pr-4 text-white font-medium">{student.name}</td>
-                    <td className="py-3 pr-4 text-slate-400 text-sm">{student.email}</td>
-                    <td className="py-3 pr-4 text-center text-slate-300">{student.exams_taken}</td>
+                    <td className="py-3 pr-4 text-slate-900 font-medium">{student.name}</td>
+                    <td className="py-3 pr-4 text-slate-500 text-sm">{student.email}</td>
+                    <td className="py-3 pr-4 text-center text-slate-600">{student.exams_taken}</td>
                     <td className="py-3 pr-4 text-center">
                       <span className={`font-medium ${student.avg_score >= 60 ? 'text-emerald-400' : 'text-amber-400'}`}>
                         {student.avg_score.toFixed(1)}%

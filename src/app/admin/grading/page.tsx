@@ -73,28 +73,28 @@ export default function GradingIndexPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Grading Center</h1>
-        <p className="text-slate-400">Auto-grade and review exam results</p>
+        <h1 className="text-2xl font-bold text-slate-900">Grading Center</h1>
+        <p className="text-slate-500">Auto-grade and review exam results</p>
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
         <input
           type="text"
           placeholder="Cari ujian..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
       </div>
 
       {/* Exams Grid */}
       {filteredExams.length === 0 ? (
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center">
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <ClipboardList className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">Tidak ada ujian untuk dinilai</h3>
-          <p className="text-slate-400">Question-based exams will appear here</p>
+          <h3 className="text-lg font-medium text-slate-900 mb-2">Tidak ada ujian untuk dinilai</h3>
+          <p className="text-slate-500">Question-based exams will appear here</p>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -102,17 +102,17 @@ export default function GradingIndexPage() {
             <Link
               key={exam.id}
               href={`/admin/exams/${exam.id}/grading`}
-              className="group bg-slate-800 border border-slate-700 rounded-xl p-5 hover:border-purple-500/50 transition-all flex items-center justify-between"
+              className="group bg-white border border-slate-200 rounded-xl p-5 hover:border-purple-500/50 transition-all flex items-center justify-between"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Award className="w-6 h-6 text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white group-hover:text-purple-400 transition-colors">
+                  <h3 className="font-semibold text-slate-900 group-hover:text-purple-400 transition-colors">
                     {exam.title}
                   </h3>
-                  <p className="text-slate-400 text-sm mt-1">
+                  <p className="text-slate-500 text-sm mt-1">
                     {exam.attempt_count} attempt(s) • Created {new Date(exam.created_at).toLocaleDateString('id-ID')}
                   </p>
                 </div>

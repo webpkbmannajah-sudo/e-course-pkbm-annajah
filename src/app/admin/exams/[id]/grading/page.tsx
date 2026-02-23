@@ -164,18 +164,18 @@ export default function GradingPage({ params }: PageProps) {
       <div className="flex items-start gap-4">
         <Link
           href="/admin/exams"
-          className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors mt-1"
+          className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg transition-colors mt-1"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-white">Grading</h1>
-          <p className="text-slate-400 mt-1">{exam?.title}</p>
+          <h1 className="text-2xl font-bold text-slate-900">Grading</h1>
+          <p className="text-slate-500 mt-1">{exam?.title}</p>
         </div>
         <button
           onClick={handleBulkGrade}
           disabled={bulkGrading || attemptCount === 0}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/25"
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-slate-900 font-medium rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/25"
         >
           {bulkGrading ? (
             <>
@@ -193,49 +193,49 @@ export default function GradingPage({ params }: PageProps) {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
+        <div className="bg-white border border-slate-200 rounded-xl p-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
               <Users className="w-5 h-5 text-blue-400" />
             </div>
             <div>
-              <p className="text-sm text-slate-400">Total Attempts</p>
-              <p className="text-2xl font-bold text-white">{attemptCount}</p>
+              <p className="text-sm text-slate-500">Total Attempts</p>
+              <p className="text-2xl font-bold text-slate-900">{attemptCount}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
+        <div className="bg-white border border-slate-200 rounded-xl p-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-purple-400" />
             </div>
             <div>
-              <p className="text-sm text-slate-400">Average Score</p>
-              <p className="text-2xl font-bold text-white">{avgScore}%</p>
+              <p className="text-sm text-slate-500">Average Score</p>
+              <p className="text-2xl font-bold text-slate-900">{avgScore}%</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
+        <div className="bg-white border border-slate-200 rounded-xl p-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
               <CheckCircle className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
-              <p className="text-sm text-slate-400">Passed</p>
+              <p className="text-sm text-slate-500">Passed</p>
               <p className="text-2xl font-bold text-emerald-400">{passedCount}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
+        <div className="bg-white border border-slate-200 rounded-xl p-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
               <XCircle className="w-5 h-5 text-red-400" />
             </div>
             <div>
-              <p className="text-sm text-slate-400">Failed</p>
+              <p className="text-sm text-slate-500">Failed</p>
               <p className="text-2xl font-bold text-red-400">{failedCount}</p>
             </div>
           </div>
@@ -244,15 +244,15 @@ export default function GradingPage({ params }: PageProps) {
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex bg-slate-800 rounded-xl p-1 border border-slate-700">
+        <div className="flex bg-white rounded-xl p-1 border border-slate-200">
           {(['all', 'passed', 'failed'] as const).map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
                 filter === f
-                  ? 'bg-purple-600 text-white'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-purple-600 text-slate-900'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               {f}
@@ -262,7 +262,7 @@ export default function GradingPage({ params }: PageProps) {
         <select
           value={sortBy}
           onChange={e => setSortBy(e.target.value as 'score' | 'name' | 'date')}
-          className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
         >
           <option value="score">Sort by Score</option>
           <option value="name">Sort by Name</option>
@@ -272,40 +272,40 @@ export default function GradingPage({ params }: PageProps) {
 
       {/* Scores Table */}
       {scores.length === 0 ? (
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center">
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <Award className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">No scores yet</h3>
-          <p className="text-slate-400 mb-6">
+          <h3 className="text-lg font-medium text-slate-900 mb-2">No scores yet</h3>
+          <p className="text-slate-500 mb-6">
             {attemptCount > 0
               ? 'Click "Grade All" to auto-grade all student attempts'
               : 'No students have attempted this exam yet'}
           </p>
         </div>
       ) : (
-        <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-700">
-                  <th className="text-left px-5 py-4 text-sm font-semibold text-slate-300">Student</th>
-                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-300">Score</th>
-                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-300">Percentage</th>
-                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-300">Status</th>
-                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-300">Graded</th>
-                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-300">Actions</th>
+                <tr className="border-b border-slate-200">
+                  <th className="text-left px-5 py-4 text-sm font-semibold text-slate-600">Student</th>
+                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Score</th>
+                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Percentage</th>
+                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Status</th>
+                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Graded</th>
+                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredScores.map(score => (
-                  <tr key={score.id} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                  <tr key={score.id} className="border-b border-slate-200/50 hover:bg-slate-200/30 transition-colors">
                     <td className="px-5 py-4">
                       <div>
-                        <p className="text-white font-medium">{score.student_name}</p>
-                        <p className="text-slate-400 text-sm">{score.student_email}</p>
+                        <p className="text-slate-900 font-medium">{score.student_name}</p>
+                        <p className="text-slate-500 text-sm">{score.student_email}</p>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-center">
-                      <span className="text-white font-mono">
+                      <span className="text-slate-900 font-mono">
                         {score.total_score}/{score.max_score}
                       </span>
                     </td>
@@ -330,7 +330,7 @@ export default function GradingPage({ params }: PageProps) {
                         </span>
                       )}
                     </td>
-                    <td className="px-5 py-4 text-center text-sm text-slate-400">
+                    <td className="px-5 py-4 text-center text-sm text-slate-500">
                       {new Date(score.graded_at).toLocaleDateString('id-ID', {
                         day: 'numeric', month: 'short', year: 'numeric'
                       })}

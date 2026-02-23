@@ -111,11 +111,11 @@ export default function StudentProgressPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
           <TrendingUp className="w-7 h-7 text-emerald-400" />
           Progress Saya
         </h1>
-        <p className="text-slate-400 mt-1">Pantau perkembangan belajarmu</p>
+        <p className="text-slate-500 mt-1">Pantau perkembangan belajarmu</p>
       </div>
 
       {/* Performance Cards */}
@@ -143,20 +143,20 @@ export default function StudentProgressPage() {
             color: 'from-emerald-500 to-teal-500',
           },
         ].map((card) => (
-          <div key={card.label} className="bg-slate-800 border border-slate-700 rounded-2xl p-5">
+          <div key={card.label} className="bg-white border border-slate-200 rounded-2xl p-5">
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-3`}>
-              <card.icon className="w-5 h-5 text-white" />
+              <card.icon className="w-5 h-5 text-slate-900" />
             </div>
-            <p className="text-xl font-bold text-white">{card.value}</p>
-            <p className="text-xs text-slate-400 mt-1">{card.label}</p>
+            <p className="text-xl font-bold text-slate-900">{card.value}</p>
+            <p className="text-xs text-slate-500 mt-1">{card.label}</p>
             <p className="text-xs text-slate-500 mt-0.5">{card.sub}</p>
           </div>
         ))}
       </div>
 
       {/* Score Timeline */}
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-emerald-400" />
           Riwayat Skor
         </h2>
@@ -194,8 +194,8 @@ export default function StudentProgressPage() {
       </div>
 
       {/* Exam Results Table */}
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
           <Award className="w-5 h-5 text-emerald-400" />
           Hasil Ujian
         </h2>
@@ -207,7 +207,7 @@ export default function StudentProgressPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-sm text-slate-400 border-b border-slate-700">
+                <tr className="text-left text-sm text-slate-500 border-b border-slate-200">
                   <th className="pb-3 pr-4">Ujian</th>
                   <th className="pb-3 pr-4 text-center">Skor</th>
                   <th className="pb-3 pr-4 text-center">Persentase</th>
@@ -217,14 +217,14 @@ export default function StudentProgressPage() {
               </thead>
               <tbody>
                 {scoreHistory.map((score) => (
-                  <tr key={score.id} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                  <tr key={score.id} className="border-b border-slate-200/50 hover:bg-slate-200/30 transition-colors">
                     <td className="py-3 pr-4">
                       <Link href={`/student/exams/${score.exam_id}/result`}
-                        className="text-white font-medium hover:text-emerald-400 transition-colors">
+                        className="text-slate-900 font-medium hover:text-emerald-400 transition-colors">
                         {score.exam_title}
                       </Link>
                     </td>
-                    <td className="py-3 pr-4 text-center text-slate-300">{Number(score.total_score).toFixed(1)}</td>
+                    <td className="py-3 pr-4 text-center text-slate-600">{Number(score.total_score).toFixed(1)}</td>
                     <td className="py-3 pr-4 text-center">
                       <span className="font-medium text-emerald-400">
                         {Number(score.percentage).toFixed(1)}%
@@ -236,7 +236,7 @@ export default function StudentProgressPage() {
                         Selesai
                       </span>
                     </td>
-                    <td className="py-3 text-right text-slate-400 text-sm">
+                    <td className="py-3 text-right text-slate-500 text-sm">
                       {score.graded_at ? new Date(score.graded_at).toLocaleDateString('id-ID') : '-'}
                     </td>
                   </tr>

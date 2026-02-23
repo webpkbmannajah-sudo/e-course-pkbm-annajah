@@ -11,6 +11,30 @@ interface ExamWithAttempt extends Exam {
   score?: number
 }
 
+const getThemeVars = (level: string | null) => {
+  switch (level) {
+    case 'sd': return {
+      titleHover: 'group-hover:text-orange-600',
+      badge: 'bg-orange-100 text-orange-700 border-orange-200',
+      cardHover: 'hover:border-orange-400',
+      arrowHover: 'text-slate-500 group-hover:text-orange-500 group-hover:translate-x-1',
+    }
+    case 'smp': return {
+      titleHover: 'group-hover:text-blue-600',
+      badge: 'bg-blue-100 text-blue-700 border-blue-200',
+      cardHover: 'hover:border-blue-400',
+      arrowHover: 'text-slate-500 group-hover:text-blue-500 group-hover:translate-x-1',
+    }
+    case 'sma':
+    default: return {
+      titleHover: 'group-hover:text-emerald-600',
+      badge: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+      cardHover: 'hover:border-emerald-400',
+      arrowHover: 'text-slate-500 group-hover:text-emerald-500 group-hover:translate-x-1',
+    }
+  }
+}
+
 export default function StudentExamsPage() {
   const supabase = createClient()
   const [exams, setExams] = useState<ExamWithAttempt[]>([])
@@ -94,46 +118,48 @@ export default function StudentExamsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Latihan Soal</h1>
-        <p className="text-slate-400">
+        <h1 className="text-2xl font-bold text-slate-900">Latihan Soal</h1>
+        <p className="text-slate-500">
             {userLevel ? `Latihan soal untuk ${userLevel === 'sd' ? 'Paket A' : userLevel === 'smp' ? 'Paket B' : userLevel === 'sma' ? 'Paket C' : userLevel.toUpperCase()}` : 'Kerjakan latihan soal dan pantau progress'}
         </p>
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
         <input
           type="text"
           placeholder="Cari latihan soal..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
       </div>
 
       {/* Exams Grid */}
       {filteredExams.length === 0 ? (
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center">
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <ClipboardList className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">Belum ada latihan soal</h3>
-          <p className="text-slate-400">
+          <h3 className="text-lg font-medium text-slate-900 mb-2">Belum ada latihan soal</h3>
+          <p className="text-slate-500">
               {userLevel ? `Belum ada latihan untuk ${userLevel === 'sd' ? 'Paket A' : userLevel === 'smp' ? 'Paket B' : 'Paket C'}.` : 'Silakan cek kembali nanti.'}
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredExams.map((exam) => (
+          {filteredExams.map((exam) => {
+            const themeVars = getThemeVars(userLevel)
+            return (
             <Link
               key={exam.id}
               href={`/student/exams/${exam.id}`}
-              className="group bg-slate-800 border border-slate-700 rounded-xl p-5 hover:border-emerald-500/50 transition-all relative flex flex-col items-start"
+              className={`group bg-white border border-slate-200 rounded-xl p-5 transition-all relative flex flex-col items-start ${themeVars.cardHover}`}
             >
               {exam.hasAttempted && (
                 <div className="absolute top-4 right-4">
-                  <div className="flex items-center gap-1 px-2 py-1 bg-green-500/20 rounded-full">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    <span className="text-xs text-green-400 font-medium">
+                  <div className="flex items-center gap-1 px-2 py-1 bg-green-50 rounded-full border border-green-200">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <span className="text-xs text-green-700 font-medium">
                       {exam.score !== null ? `${exam.score}%` : 'Selesai'}
                     </span>
                   </div>
@@ -142,41 +168,42 @@ export default function StudentExamsPage() {
               
               <div className="flex items-start justify-between w-full mb-4">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform ${
-                    exam.type === 'pdf' ? 'bg-orange-500/20' : 'bg-purple-500/20'
+                    exam.type === 'pdf' ? 'bg-orange-100 text-orange-600' : 'bg-purple-100 text-purple-600'
                   }`}>
                     {exam.type === 'pdf' ? (
-                      <FileText className="w-6 h-6 text-orange-400" />
+                      <FileText className="w-6 h-6" />
                     ) : (
-                      <HelpCircle className="w-6 h-6 text-purple-400" />
+                      <HelpCircle className="w-6 h-6" />
                     )}
                   </div>
                   {exam.subject && (
-                      <span className="px-2 py-1 rounded-lg text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mr-8">
+                      <span className={`px-2 py-1 rounded-lg text-xs font-semibold mr-8 border ${themeVars.badge}`}>
                           {exam.subject.name}
                       </span>
                   )}
               </div>
 
-              <h3 className="font-semibold text-white mb-2 group-hover:text-emerald-400 transition-colors pr-8">
+              <h3 className={`font-semibold text-slate-900 mb-2 transition-colors pr-8 ${themeVars.titleHover}`}>
                 {exam.title}
               </h3>
               
               {exam.description && (
-                <p className="text-slate-400 text-sm line-clamp-2 mb-4 flex-1">{exam.description}</p>
+                <p className="text-slate-500 text-sm line-clamp-2 mb-4 flex-1">{exam.description}</p>
               )}
               
-              <div className="flex items-center justify-between w-full mt-auto pt-4 border-t border-slate-700/50">
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium uppercase ${
+              <div className="flex items-center justify-between w-full mt-auto pt-4 border-t border-slate-200/50">
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium uppercase border ${
                     exam.type === 'pdf' 
-                      ? 'bg-orange-500/10 text-orange-400'
-                      : 'bg-purple-500/10 text-purple-400'
+                      ? 'bg-orange-50 text-orange-600 border-orange-200'
+                      : 'bg-purple-50 text-purple-600 border-purple-200'
                   }`}>
                     {exam.type === 'pdf' ? 'Ujian PDF' : 'Latihan'}
                   </span>
-                <ArrowRight className="w-5 h-5 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
+                <ArrowRight className={`w-5 h-5 transition-all ${themeVars.arrowHover}`} />
               </div>
             </Link>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

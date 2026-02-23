@@ -23,7 +23,7 @@ export default function AdminUsersPage() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('role', 'student')
+        .or('role.eq.student,role.is.null')
         .eq('status', activeTab)
         .order('created_at', { ascending: false })
 
@@ -66,7 +66,7 @@ export default function AdminUsersPage() {
       case 'sd': return 'bg-blue-500/20 text-blue-400'
       case 'smp': return 'bg-orange-500/20 text-orange-400'
       case 'sma': return 'bg-purple-500/20 text-purple-400'
-      default: return 'bg-slate-700 text-slate-400'
+      default: return 'bg-slate-200 text-slate-500'
     }
   }
 
@@ -75,16 +75,16 @@ export default function AdminUsersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Manajemen Pengguna</h1>
-          <p className="text-slate-400">Kelola pendaftaran siswa</p>
+          <h1 className="text-2xl font-bold text-slate-900">Manajemen Pengguna</h1>
+          <p className="text-slate-500">Kelola pendaftaran siswa</p>
         </div>
-        <div className="flex bg-slate-800 p-1 rounded-lg">
+        <div className="flex bg-white p-1 rounded-lg">
           <button
             onClick={() => setActiveTab('pending')}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeTab === 'pending'
-                ? 'bg-purple-500 text-white shadow-lg'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-purple-500 text-slate-900 shadow-lg'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Menunggu Persetujuan
@@ -93,8 +93,8 @@ export default function AdminUsersPage() {
             onClick={() => setActiveTab('active')}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeTab === 'active'
-                ? 'bg-purple-500 text-white shadow-lg'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-purple-500 text-slate-900 shadow-lg'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Siswa Aktif
@@ -104,13 +104,13 @@ export default function AdminUsersPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
         <input
           type="text"
           placeholder="Cari pengguna..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
       </div>
 
@@ -120,40 +120,40 @@ export default function AdminUsersPage() {
           <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : filteredUsers.length === 0 ? (
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center">
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <Users className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">Pengguna tidak ditemukan</h3>
-          <p className="text-slate-400">
+          <h3 className="text-lg font-medium text-slate-900 mb-2">Pengguna tidak ditemukan</h3>
+          <p className="text-slate-500">
             {activeTab === 'pending' ? 'Tidak ada pendaftaran tertunda' : 'Siswa aktif tidak ditemukan'}
           </p>
         </div>
       ) : (
-        <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-700">
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Siswa</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Tingkat Pendidikan</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Bergabung</th>
+                <tr className="border-b border-slate-200">
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Siswa</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Tingkat Pendidikan</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Bergabung</th>
                   {activeTab === 'pending' && (
-                    <th className="text-right px-6 py-4 text-sm font-medium text-slate-400">Aksi</th>
+                    <th className="text-right px-6 py-4 text-sm font-medium text-slate-500">Aksi</th>
                   )}
                 </tr>
               </thead>
               <tbody>
                 {filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-b border-slate-700/50 hover:bg-slate-700/30">
+                  <tr key={user.id} className="border-b border-slate-200/50 hover:bg-slate-200/30">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                          <span className="text-white font-medium">
+                          <span className="text-slate-900 font-medium">
                             {user.name?.charAt(0).toUpperCase() || '?'}
                           </span>
                         </div>
                         <div>
-                          <p className="text-white font-medium">{user.name}</p>
-                          <div className="flex items-center gap-2 text-slate-400 text-xs">
+                          <p className="text-slate-900 font-medium">{user.name}</p>
+                          <div className="flex items-center gap-2 text-slate-500 text-xs">
                             <Mail className="w-3 h-3" />
                             {user.email}
                           </div>
@@ -166,7 +166,7 @@ export default function AdminUsersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-slate-400 text-sm">
+                      <div className="flex items-center gap-2 text-slate-500 text-sm">
                         <Calendar className="w-4 h-4" />
                         {new Date(user.created_at).toLocaleDateString()}
                       </div>

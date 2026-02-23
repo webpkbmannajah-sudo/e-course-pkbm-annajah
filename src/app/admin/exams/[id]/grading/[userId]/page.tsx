@@ -83,8 +83,8 @@ export default function StudentReviewPage({ params }: PageProps) {
     return (
       <div className="text-center py-12">
         <Award className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-white mb-2">No score found</h3>
-        <p className="text-slate-400 mb-4">This student hasn&apos;t been graded yet.</p>
+        <h3 className="text-lg font-medium text-slate-900 mb-2">No score found</h3>
+        <p className="text-slate-500 mb-4">This student hasn&apos;t been graded yet.</p>
         <Link
           href={`/admin/exams/${examId}/grading`}
           className="text-purple-400 hover:text-purple-300"
@@ -104,27 +104,27 @@ export default function StudentReviewPage({ params }: PageProps) {
       <div className="flex items-start gap-4">
         <Link
           href={`/admin/exams/${examId}/grading`}
-          className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors mt-1"
+          className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg transition-colors mt-1"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">Answer Review</h1>
-          <p className="text-slate-400 mt-1">{examTitle}</p>
+          <h1 className="text-2xl font-bold text-slate-900">Answer Review</h1>
+          <p className="text-slate-500 mt-1">{examTitle}</p>
         </div>
       </div>
 
       {/* Student Info & Score Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Student Info */}
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
+        <div className="bg-white border border-slate-200 rounded-xl p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
               <User className="w-5 h-5 text-purple-400" />
             </div>
             <div>
-              <p className="text-white font-medium">{studentName}</p>
-              <p className="text-slate-400 text-sm">
+              <p className="text-slate-900 font-medium">{studentName}</p>
+              <p className="text-slate-500 text-sm">
                 Graded: {new Date(score.graded_at).toLocaleDateString('id-ID')}
               </p>
             </div>
@@ -137,7 +137,7 @@ export default function StudentReviewPage({ params }: PageProps) {
             ? 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30'
             : 'bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/30'
         }`}>
-          <p className="text-sm text-slate-300 mb-1">Score</p>
+          <p className="text-sm text-slate-600 mb-1">Score</p>
           <p className={`text-4xl font-bold ${
             score.is_passed ? 'text-emerald-400' : 'text-red-400'
           }`}>
@@ -151,24 +151,24 @@ export default function StudentReviewPage({ params }: PageProps) {
         </div>
 
         {/* Breakdown Summary */}
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
-          <p className="text-sm text-slate-400 mb-3">Breakdown</p>
+        <div className="bg-white border border-slate-200 rounded-xl p-5">
+          <p className="text-sm text-slate-500 mb-3">Breakdown</p>
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-slate-300">Correct</span>
+              <span className="text-slate-600">Correct</span>
               <span className="text-emerald-400 font-medium">{correctCount}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-300">Incorrect</span>
+              <span className="text-slate-600">Incorrect</span>
               <span className="text-red-400 font-medium">{totalQuestions - correctCount}</span>
             </div>
-            <div className="flex justify-between border-t border-slate-700 pt-2">
-              <span className="text-slate-300">Total</span>
-              <span className="text-white font-medium">{totalQuestions}</span>
+            <div className="flex justify-between border-t border-slate-200 pt-2">
+              <span className="text-slate-600">Total</span>
+              <span className="text-slate-900 font-medium">{totalQuestions}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-300">Weighted Score</span>
-              <span className="text-white font-medium">{score.total_score}/{score.max_score}</span>
+              <span className="text-slate-600">Weighted Score</span>
+              <span className="text-slate-900 font-medium">{score.total_score}/{score.max_score}</span>
             </div>
           </div>
         </div>
@@ -176,12 +176,12 @@ export default function StudentReviewPage({ params }: PageProps) {
 
       {/* Per-Question Review */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-white">Question-by-Question Review</h2>
+        <h2 className="text-lg font-semibold text-slate-900">Question-by-Question Review</h2>
 
         {score.breakdown.map((item, index) => (
           <div
             key={item.question_id}
-            className={`bg-slate-800 border rounded-xl p-5 ${
+            className={`bg-white border rounded-xl p-5 ${
               item.is_correct ? 'border-emerald-500/30' : 'border-red-500/30'
             }`}
           >
@@ -197,7 +197,7 @@ export default function StudentReviewPage({ params }: PageProps) {
                 }
               </span>
               <div className="flex-1">
-                <p className="text-white font-medium">
+                <p className="text-slate-900 font-medium">
                   {index + 1}. {item.question_text}
                 </p>
                 <p className="text-slate-500 text-xs mt-1">
@@ -213,7 +213,7 @@ export default function StudentReviewPage({ params }: PageProps) {
                   ? 'bg-emerald-500/10 border-emerald-500/30'
                   : 'bg-red-500/10 border-red-500/30'
               }`}>
-                <p className="text-xs text-slate-400 mb-1">Student&apos;s Answer</p>
+                <p className="text-xs text-slate-500 mb-1">Student&apos;s Answer</p>
                 <p className={`font-medium ${
                   item.is_correct ? 'text-emerald-400' : 'text-red-400'
                 }`}>
@@ -223,7 +223,7 @@ export default function StudentReviewPage({ params }: PageProps) {
 
               {/* Correct Answer */}
               <div className="px-4 py-3 rounded-lg border bg-emerald-500/10 border-emerald-500/30">
-                <p className="text-xs text-slate-400 mb-1">Correct Answer</p>
+                <p className="text-xs text-slate-500 mb-1">Correct Answer</p>
                 <p className="font-medium text-emerald-400">
                   {item.correct_choice_text}
                 </p>

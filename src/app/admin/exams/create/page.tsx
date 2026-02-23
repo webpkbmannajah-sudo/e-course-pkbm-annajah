@@ -258,10 +258,10 @@ export default function CreateExamPage() {
   if (success) {
     return (
       <div className="max-w-3xl mx-auto">
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center">
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <Check className="w-16 h-16 text-green-400 mx-auto mb-6" />
-          <h2 className="text-xl font-bold text-white mb-2">Ujian Berhasil Dibuat!</h2>
-          <p className="text-slate-400">Mengalihkan ke daftar ujian...</p>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Ujian Berhasil Dibuat!</h2>
+          <p className="text-slate-500">Mengalihkan ke daftar ujian...</p>
         </div>
       </div>
     )
@@ -270,12 +270,12 @@ export default function CreateExamPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/admin/exams" className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg">
+        <Link href="/admin/exams" className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg">
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">Buat Ujian</h1>
-          <p className="text-slate-400">Buat ujian baru untuk siswa</p>
+          <h1 className="text-2xl font-bold text-slate-900">Buat Ujian</h1>
+          <p className="text-slate-500">Buat ujian baru untuk siswa</p>
         </div>
       </div>
 
@@ -283,24 +283,24 @@ export default function CreateExamPage() {
         {error && <div className="bg-red-500/10 text-red-400 px-4 py-3 rounded-lg text-sm">{error}</div>}
 
         {/* Level, Subject, Material Selection */}
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Jenjang (Opsional)</label>
-                <select value={selectedLevelId} onChange={(e) => setSelectedLevelId(e.target.value)} className="w-full px-4 py-3 bg-slate-700/50 rounded-xl text-white">
+                <label className="block text-sm font-medium text-slate-600 mb-2">Jenjang (Opsional)</label>
+                <select value={selectedLevelId} onChange={(e) => setSelectedLevelId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900">
                     <option value="">Pilih Jenjang</option>
                     {levels.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                 </select>
             </div>
             <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Mata Pelajaran (Opsional)</label>
-                <select value={selectedSubjectId} onChange={(e) => setSelectedSubjectId(e.target.value)} className="w-full px-4 py-3 bg-slate-700/50 rounded-xl text-white" disabled={!selectedLevelId}>
+                <label className="block text-sm font-medium text-slate-600 mb-2">Mata Pelajaran (Opsional)</label>
+                <select value={selectedSubjectId} onChange={(e) => setSelectedSubjectId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900" disabled={!selectedLevelId}>
                     <option value="">Pilih Mata Pelajaran</option>
                     {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
             </div>
             <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Materi (Opsional)</label>
-                <select value={selectedMaterialId} onChange={(e) => setSelectedMaterialId(e.target.value)} className="w-full px-4 py-3 bg-slate-700/50 rounded-xl text-white" disabled={!selectedSubjectId}>
+                <label className="block text-sm font-medium text-slate-600 mb-2">Materi (Opsional)</label>
+                <select value={selectedMaterialId} onChange={(e) => setSelectedMaterialId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900" disabled={!selectedSubjectId}>
                     <option value="">Pilih Materi</option>
                     {materials.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
                 </select>
@@ -308,34 +308,34 @@ export default function CreateExamPage() {
         </div>
 
         {/* Exam Type Selection */}
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
-          <label className="block text-sm font-medium text-slate-300 mb-3">Tipe Ujian</label>
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <label className="block text-sm font-medium text-slate-600 mb-3">Tipe Ujian</label>
           <div className="grid grid-cols-2 gap-4">
-            <button type="button" onClick={() => setExamType('questions')} className={`flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all ${examType === 'questions' ? 'border-purple-500 bg-purple-500/10' : 'border-slate-700 hover:border-slate-600'}`}>
-              <HelpCircle className={`w-8 h-8 ${examType === 'questions' ? 'text-purple-400' : 'text-slate-400'}`} />
-              <div className="text-center"><p className={`font-medium ${examType === 'questions' ? 'text-white' : 'text-slate-300'}`}>Pilihan Ganda</p><p className="text-sm text-slate-500 mt-1">Soal pilihan ganda otomatis</p></div>
+            <button type="button" onClick={() => setExamType('questions')} className={`flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all ${examType === 'questions' ? 'border-purple-500 bg-purple-500/10' : 'border-slate-200 hover:border-slate-600'}`}>
+              <HelpCircle className={`w-8 h-8 ${examType === 'questions' ? 'text-purple-400' : 'text-slate-500'}`} />
+              <div className="text-center"><p className={`font-medium ${examType === 'questions' ? 'text-slate-900' : 'text-slate-600'}`}>Pilihan Ganda</p><p className="text-sm text-slate-500 mt-1">Soal pilihan ganda otomatis</p></div>
             </button>
-            <button type="button" onClick={() => setExamType('pdf')} className={`flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all ${examType === 'pdf' ? 'border-orange-500 bg-orange-500/10' : 'border-slate-700 hover:border-slate-600'}`}>
-              <FileUp className={`w-8 h-8 ${examType === 'pdf' ? 'text-orange-400' : 'text-slate-400'}`} />
-              <div className="text-center"><p className={`font-medium ${examType === 'pdf' ? 'text-white' : 'text-slate-300'}`}>Unggah PDF</p><p className="text-sm text-slate-500 mt-1">Unggah ujian sebagai PDF</p></div>
+            <button type="button" onClick={() => setExamType('pdf')} className={`flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all ${examType === 'pdf' ? 'border-orange-500 bg-orange-500/10' : 'border-slate-200 hover:border-slate-600'}`}>
+              <FileUp className={`w-8 h-8 ${examType === 'pdf' ? 'text-orange-400' : 'text-slate-500'}`} />
+              <div className="text-center"><p className={`font-medium ${examType === 'pdf' ? 'text-slate-900' : 'text-slate-600'}`}>Unggah PDF</p><p className="text-sm text-slate-500 mt-1">Unggah ujian sebagai PDF</p></div>
             </button>
           </div>
         </div>
 
         {/* Basic Info */}
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 space-y-4">
-          <div><label className="block text-sm font-medium text-slate-300 mb-2">Judul Ujian</label><input type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white" placeholder="Masukkan judul ujian" /></div>
-          <div><label className="block text-sm font-medium text-slate-300 mb-2">Deskripsi</label><textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={3} className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white" placeholder="Masukkan deskripsi ujian" /></div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
+          <div><label className="block text-sm font-medium text-slate-600 mb-2">Judul Ujian</label><input type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required className="w-full px-4 py-3 bg-slate-100 border border-slate-600 rounded-xl text-slate-900" placeholder="Masukkan judul ujian" /></div>
+          <div><label className="block text-sm font-medium text-slate-600 mb-2">Deskripsi</label><textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={3} className="w-full px-4 py-3 bg-slate-100 border border-slate-600 rounded-xl text-slate-900" placeholder="Masukkan deskripsi ujian" /></div>
         </div>
 
         {/* Unggah PDF */}
         {examType === 'pdf' && (
-          <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
-            <label className="block text-sm font-medium text-slate-300 mb-3">File PDF Ujian (Maks. 5MB)</label>
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <label className="block text-sm font-medium text-slate-600 mb-3">File PDF Ujian (Maks. 5MB)</label>
             <div onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors ${dragActive ? 'border-orange-500 bg-orange-500/10' : file ? 'border-green-500/50 bg-green-500/5' : 'border-slate-600 hover:border-slate-500'}`}>
               <input type="file" accept=".pdf" onChange={handleFileChange} className="hidden" id="exam-pdf-upload" />
               <label htmlFor="exam-pdf-upload" className="cursor-pointer">
-                {file ? <div className="flex items-center justify-center gap-3"><FileText className="w-10 h-10 text-green-400" /><div className="text-left"><p className="text-white font-medium">{file.name}</p><p className="text-slate-400 text-sm">{(file.size / 1024 / 1024).toFixed(2)} MB</p></div><button type="button" onClick={(e) => { e.stopPropagation(); setFile(null) }} className="p-1 text-slate-400 hover:text-red-400"><X className="w-5 h-5" /></button></div> : <><Upload className="w-10 h-10 text-slate-500 mx-auto mb-3" /><p className="text-slate-300">Seret & letakkan file PDF di sini, atau <span className="text-orange-400">pilih file</span></p></>}
+                {file ? <div className="flex items-center justify-center gap-3"><FileText className="w-10 h-10 text-green-400" /><div className="text-left"><p className="text-slate-900 font-medium">{file.name}</p><p className="text-slate-500 text-sm">{(file.size / 1024 / 1024).toFixed(2)} MB</p></div><button type="button" onClick={(e) => { e.stopPropagation(); setFile(null) }} className="p-1 text-slate-500 hover:text-red-400"><X className="w-5 h-5" /></button></div> : <><Upload className="w-10 h-10 text-slate-500 mx-auto mb-3" /><p className="text-slate-600">Seret & letakkan file PDF di sini, atau <span className="text-orange-400">pilih file</span></p></>}
               </label>
             </div>
           </div>
@@ -345,30 +345,30 @@ export default function CreateExamPage() {
         {examType === 'questions' && (
           <div className="space-y-4">
             {questions.map((question, qIndex) => (
-              <div key={qIndex} className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+              <div key={qIndex} className="bg-white border border-slate-200 rounded-2xl p-6">
                 <div className="flex items-start justify-between gap-4 mb-4">
-                  <label className="text-sm font-medium text-slate-300">Soal {qIndex + 1}</label>
-                  {questions.length > 1 && <button type="button" onClick={() => removeQuestion(qIndex)} className="p-1 text-slate-400 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>}
+                  <label className="text-sm font-medium text-slate-600">Soal {qIndex + 1}</label>
+                  {questions.length > 1 && <button type="button" onClick={() => removeQuestion(qIndex)} className="p-1 text-slate-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>}
                 </div>
-                <textarea value={question.question_text} onChange={(e) => updateQuestion(qIndex, e.target.value)} rows={2} className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white mb-4" placeholder="Masukkan pertanyaan" />
+                <textarea value={question.question_text} onChange={(e) => updateQuestion(qIndex, e.target.value)} rows={2} className="w-full px-4 py-3 bg-slate-100 border border-slate-600 rounded-xl text-slate-900 mb-4" placeholder="Masukkan pertanyaan" />
                 <div className="space-y-3">
                   <p className="text-xs text-slate-500">Tandai jawaban yang benar</p>
                   {question.choices.map((choice, cIndex) => (
                     <div key={cIndex} className="flex items-center gap-3">
-                      <button type="button" onClick={() => setCorrectAnswer(qIndex, cIndex)} className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${choice.is_correct ? 'border-green-500 bg-green-500' : 'border-slate-500 hover:border-slate-400'}`}>{choice.is_correct && <Check className="w-3 h-3 text-white" />}</button>
-                      <input type="text" value={choice.choice_text} onChange={(e) => updateChoice(qIndex, cIndex, e.target.value)} className="flex-1 px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white" placeholder={`Pilihan ${String.fromCharCode(65 + cIndex)}`} />
+                      <button type="button" onClick={() => setCorrectAnswer(qIndex, cIndex)} className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${choice.is_correct ? 'border-green-500 bg-green-500' : 'border-slate-500 hover:border-slate-400'}`}>{choice.is_correct && <Check className="w-3 h-3 text-slate-900" />}</button>
+                      <input type="text" value={choice.choice_text} onChange={(e) => updateChoice(qIndex, cIndex, e.target.value)} className="flex-1 px-4 py-2 bg-slate-100 border border-slate-600 rounded-lg text-slate-900" placeholder={`Pilihan ${String.fromCharCode(65 + cIndex)}`} />
                     </div>
                   ))}
                 </div>
               </div>
             ))}
-            <button type="button" onClick={addQuestion} className="w-full py-3 border-2 border-dashed border-slate-700 hover:border-slate-600 rounded-xl text-slate-400 hover:text-white flex items-center justify-center gap-2 transition-colors"><Plus className="w-5 h-5" /> Tambah Soal</button>
+            <button type="button" onClick={addQuestion} className="w-full py-3 border-2 border-dashed border-slate-200 hover:border-slate-600 rounded-xl text-slate-500 hover:text-slate-900 flex items-center justify-center gap-2 transition-colors"><Plus className="w-5 h-5" /> Tambah Soal</button>
           </div>
         )}
 
         <div className="flex gap-3 pt-2">
-          <Link href="/admin/exams" className="flex-1 py-3 px-4 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-xl text-center">Batal</Link>
-          <button type="submit" disabled={submitting} className="flex-1 py-3 px-4 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-xl disabled:opacity-50 flex items-center justify-center gap-2">{submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Buat Ujian'}</button>
+          <Link href="/admin/exams" className="flex-1 py-3 px-4 bg-slate-200 hover:bg-slate-600 text-slate-900 font-medium rounded-xl text-center">Batal</Link>
+          <button type="submit" disabled={submitting} className="flex-1 py-3 px-4 bg-purple-600 hover:bg-purple-500 text-slate-900 font-medium rounded-xl disabled:opacity-50 flex items-center justify-center gap-2">{submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Buat Ujian'}</button>
         </div>
       </form>
     </div>
