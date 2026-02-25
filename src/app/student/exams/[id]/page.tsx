@@ -282,13 +282,13 @@ export default function TakeExamPage({ params }: PageProps) {
           <div className="flex gap-3 justify-center mt-6">
             <Link
               href="/student/exams"
-              className="px-6 py-2 bg-slate-200 hover:bg-slate-600 text-slate-900 rounded-xl transition-colors"
+              className="px-6 py-2 bg-slate-200 hover:bg-slate-600 text-slate-900 hover:text-white rounded-xl transition-colors"
             >
               Kembali ke Ujian
             </Link>
             <button
               onClick={handleRetake}
-              className="flex items-center gap-2 px-6 py-2 bg-purple-600 hover:bg-purple-500 text-slate-900 rounded-xl transition-colors"
+              className="flex items-center gap-2 px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
               Kerjakan Ulang
@@ -425,7 +425,7 @@ export default function TakeExamPage({ params }: PageProps) {
         <button
           onClick={handleSubmit}
           disabled={submitting || Object.keys(answers).length === 0}
-          className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-900 font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           {submitting ? (
             <>

@@ -134,7 +134,7 @@ export default function AdminProfilePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2 bg-purple-600 text-slate-900 rounded-lg hover:bg-purple-700 font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+                className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
               >
                 {saving ? (
                   <>

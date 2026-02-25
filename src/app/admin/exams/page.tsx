@@ -86,7 +86,7 @@ export default function AdminExamsPage() {
         </div>
         <Link
           href="/admin/exams/create"
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-slate-900 rounded-xl transition-colors w-fit"
+          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors w-fit"
         >
           <Plus className="w-4 h-4" />
           Buat Ujian
@@ -113,7 +113,7 @@ export default function AdminExamsPage() {
           <p className="text-slate-500 mb-6">Buat ujian pertama Anda untuk memulai</p>
           <Link
             href="/admin/exams/create"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-slate-900 rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors"
           >
             <Plus className="w-4 h-4" />
             Buat Ujian

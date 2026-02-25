@@ -93,7 +93,7 @@ export default function AdminMaterialsPage() {
         </div>
         <Link
           href="/admin/materials/upload"
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-slate-900 rounded-xl transition-colors w-fit"
+          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors w-fit"
         >
           <Plus className="w-4 h-4" />
           Upload Materi
@@ -120,7 +120,7 @@ export default function AdminMaterialsPage() {
           <p className="text-slate-500 mb-6">Upload materi pertama Anda untuk memulai</p>
           <Link
             href="/admin/materials/upload"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-slate-900 rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors"
           >
             <Plus className="w-4 h-4" />
             Upload Materi

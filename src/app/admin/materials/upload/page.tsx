@@ -175,7 +175,7 @@ export default function UploadMaterialPage() {
             <div className="flex bg-slate-200 p-1 rounded-xl gap-1">
                 {['pdf', 'image'].map((t) => (
                     <button key={t} type="button" onClick={() => setType(t as 'pdf' | 'image')} 
-                        className={`flex-1 py-2 rounded-lg capitalize ${type === t ? 'bg-purple-600 text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}>
+                        className={`flex-1 py-2 rounded-lg capitalize ${type === t ? 'bg-purple-600 text-white' : 'text-slate-500 hover:text-slate-900'}`}>
                         {t}
                     </button>
                 ))}
@@ -202,7 +202,7 @@ export default function UploadMaterialPage() {
             <textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={3} className="w-full px-4 py-3 bg-slate-200 rounded-xl text-slate-900" />
         </div>
 
-        <button type="submit" disabled={uploading} className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-500 text-slate-900 font-medium rounded-xl disabled:opacity-50">
+        <button type="submit" disabled={uploading} className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-xl disabled:opacity-50">
             {uploading ? 'Membuat...' : 'Buat Materi'}
         </button>
       </form>

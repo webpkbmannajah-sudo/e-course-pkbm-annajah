@@ -100,7 +100,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/register"
-              className="text-sm bg-emerald-600 hover:bg-emerald-500 text-slate-900 px-4 py-2 rounded-xl font-medium transition-colors shadow-lg shadow-emerald-500/20"
+              className="text-sm bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-medium transition-colors shadow-lg shadow-emerald-500/20"
             >
               Daftar
             </Link>

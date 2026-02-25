@@ -8,12 +8,9 @@ import {
   LayoutDashboard, 
   FileText, 
   ClipboardList, 
-  Users, 
   LogOut, 
   Menu, 
   X,
-  Settings,
-  UserCircle,
   Award,
   BarChart3,
 } from 'lucide-react'
@@ -25,9 +22,6 @@ const adminNavItems = [
   { href: '/admin/exams', label: 'Ujian', icon: ClipboardList },
   { href: '/admin/grading', label: 'Penilaian', icon: Award },
   { href: '/admin/reports', label: 'Laporan', icon: BarChart3 },
-  { href: '/admin/users', label: 'Pengguna', icon: Users },
-  { href: '/admin/profile', label: 'Profil', icon: UserCircle },
-  { href: '/admin/settings', label: 'Pengaturan', icon: Settings },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

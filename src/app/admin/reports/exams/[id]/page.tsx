@@ -177,11 +177,11 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
         </div>
         <div className="flex gap-2">
           <button onClick={() => handleExport('excel')} disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-900 rounded-xl transition-colors disabled:opacity-50">
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors disabled:opacity-50">
             <FileSpreadsheet className="w-4 h-4" /> Excel
           </button>
           <button onClick={() => handleExport('pdf')} disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-slate-900 rounded-xl transition-colors disabled:opacity-50">
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl transition-colors disabled:opacity-50">
             <Download className="w-4 h-4" /> PDF
           </button>
         </div>

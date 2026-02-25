@@ -129,7 +129,7 @@ export default function AdminSubjectsPage() {
             onClick={() => setSelectedLevelId(level.id)}
             className={`flex-1 min-w-[120px] px-4 py-3 rounded-lg text-sm font-medium transition-all ${
               selectedLevelId === level.id
-                ? 'bg-purple-500 text-slate-900 shadow-lg'
+                ? 'bg-purple-500 text-white shadow-lg'
                 : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
@@ -153,7 +153,7 @@ export default function AdminSubjectsPage() {
           </div>
           <button
             onClick={() => setIsAddingString(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-slate-900 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add Subject

@@ -83,7 +83,7 @@ export default function AdminUsersPage() {
             onClick={() => setActiveTab('pending')}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeTab === 'pending'
-                ? 'bg-purple-500 text-slate-900 shadow-lg'
+                ? 'bg-purple-500 text-white shadow-lg'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -93,7 +93,7 @@ export default function AdminUsersPage() {
             onClick={() => setActiveTab('active')}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeTab === 'active'
-                ? 'bg-purple-500 text-slate-900 shadow-lg'
+                ? 'bg-purple-500 text-white shadow-lg'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >

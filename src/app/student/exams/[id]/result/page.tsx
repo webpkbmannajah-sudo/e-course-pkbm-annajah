@@ -132,7 +132,7 @@ export default function ExamResultPage({ params }: PageProps) {
         <div className="flex gap-3 justify-center mt-6">
           <Link
             href="/student/exams"
-            className="px-6 py-2 bg-slate-200 hover:bg-slate-600 text-slate-900 rounded-xl transition-colors"
+            className="px-6 py-2 bg-slate-200 hover:bg-slate-600 text-slate-900 hover:text-white rounded-xl transition-colors"
           >
             Back to Exams
           </Link>

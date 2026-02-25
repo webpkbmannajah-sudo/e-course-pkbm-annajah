@@ -24,7 +24,6 @@ import {
   Award,
   TrendingUp,
   FileText,
-  Download,
   FileSpreadsheet,
   Percent,
   Target,
@@ -220,7 +219,7 @@ export default function AdminReportsPage() {
           <button
             onClick={() => handleExport()}
             disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-900 rounded-xl transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors disabled:opacity-50"
           >
             <FileSpreadsheet className="w-4 h-4" />
             Unduh Excel
@@ -241,7 +240,7 @@ export default function AdminReportsPage() {
           <div key={card.label} className="bg-white border border-slate-200 rounded-2xl p-4">
             <div className="flex items-center gap-3 mb-2">
               <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center`}>
-                <card.icon className="w-4 h-4 text-slate-900" />
+                <card.icon className="w-4 h-4 text-white" />
               </div>
             </div>
             <p className="text-xl font-bold text-slate-900">{card.value}</p>
@@ -325,7 +324,7 @@ export default function AdminReportsPage() {
             <select
               value={examFilter}
               onChange={(e) => setExamFilter(e.target.value as 'all' | 'has_attempts')}
-              className="bg-slate-200 border border-slate-600 text-slate-200 text-sm rounded-lg px-3 py-1.5 focus:ring-purple-500 focus:border-purple-500"
+              className="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg px-3 py-1.5 focus:ring-purple-500 focus:border-purple-500 outline-none"
             >
               <option value="all">Semua Ujian</option>
               <option value="has_attempts">Sudah Ada Peserta</option>

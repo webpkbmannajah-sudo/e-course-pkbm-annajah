@@ -83,7 +83,7 @@ export default function MaterialDetailPage({ params }: PageProps) {
             href={material.file_url || undefined}
             download={material.file_name}
             target="_blank"
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-900 rounded-xl transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors"
           >
             <Download className="w-4 h-4" />
             Unduh

@@ -251,7 +251,7 @@ export default function GradingPage({ params }: PageProps) {
               onClick={() => setFilter(f)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
                 filter === f
-                  ? 'bg-purple-600 text-slate-900'
+                  ? 'bg-purple-600 text-white'
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >

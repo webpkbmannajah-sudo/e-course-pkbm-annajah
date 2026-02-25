@@ -367,8 +367,8 @@ export default function CreateExamPage() {
         )}
 
         <div className="flex gap-3 pt-2">
-          <Link href="/admin/exams" className="flex-1 py-3 px-4 bg-slate-200 hover:bg-slate-600 text-slate-900 font-medium rounded-xl text-center">Batal</Link>
-          <button type="submit" disabled={submitting} className="flex-1 py-3 px-4 bg-purple-600 hover:bg-purple-500 text-slate-900 font-medium rounded-xl disabled:opacity-50 flex items-center justify-center gap-2">{submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Buat Ujian'}</button>
+          <Link href="/admin/exams" className="flex-1 py-3 px-4 bg-slate-200 hover:bg-slate-600 text-slate-900 hover:text-white font-medium rounded-xl text-center">Batal</Link>
+          <button type="submit" disabled={submitting} className="flex-1 py-3 px-4 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-xl disabled:opacity-50 flex items-center justify-center gap-2">{submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Buat Ujian'}</button>
         </div>
       </form>
     </div>
