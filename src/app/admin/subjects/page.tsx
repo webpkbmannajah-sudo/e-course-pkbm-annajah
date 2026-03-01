@@ -82,14 +82,14 @@ export default function AdminSubjectsPage() {
       setIsAddingString(false)
     } catch (error) {
       console.error('Error adding subject:', error)
-      alert('Failed to add subject')
+      alert('Gagal menambahkan mata pelajaran')
     } finally {
       setProcessingId(null)
     }
   }
 
   const handleDeleteSubject = async (id: string) => {
-    if (!confirm('Are you sure? This will hide materials associated with this subject.')) return
+    if (!confirm('Apakah Anda yakin? Ini akan menyembunyikan materi yang terkait dengan mata pelajaran ini.')) return
     
     setProcessingId(id)
     try {
@@ -116,8 +116,8 @@ export default function AdminSubjectsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Subjects</h1>
-          <p className="text-slate-500">Manage learning subjects per level</p>
+          <h1 className="text-2xl font-bold text-slate-900">Mata Pelajaran</h1>
+          <p className="text-slate-500">Kelola mata pelajaran per tingkat</p>
         </div>
       </div>
 
@@ -156,7 +156,7 @@ export default function AdminSubjectsPage() {
             className="flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Add Subject
+            Tambah Mata Pelajaran
           </button>
         </div>
 
@@ -167,7 +167,7 @@ export default function AdminSubjectsPage() {
             </div>
             <input
               type="text"
-              placeholder="Enter subject name..."
+              placeholder="Masukkan nama mata pelajaran..."
               value={newSubjectName}
               onChange={(e) => setNewSubjectName(e.target.value)}
               autoFocus

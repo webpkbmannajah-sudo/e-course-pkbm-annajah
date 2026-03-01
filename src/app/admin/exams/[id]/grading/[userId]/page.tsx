@@ -83,13 +83,13 @@ export default function StudentReviewPage({ params }: PageProps) {
     return (
       <div className="text-center py-12">
         <Award className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-slate-900 mb-2">No score found</h3>
-        <p className="text-slate-500 mb-4">This student hasn&apos;t been graded yet.</p>
+        <h3 className="text-lg font-medium text-slate-900 mb-2">Nilai tidak ditemukan</h3>
+        <p className="text-slate-500 mb-4">Siswa ini belum dinilai.</p>
         <Link
           href={`/admin/exams/${examId}/grading`}
           className="text-purple-400 hover:text-purple-300"
         >
-          ← Back to grading
+          ← Kembali ke penilaian
         </Link>
       </div>
     )
@@ -109,7 +109,7 @@ export default function StudentReviewPage({ params }: PageProps) {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Answer Review</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Tinjauan Jawaban</h1>
           <p className="text-slate-500 mt-1">{examTitle}</p>
         </div>
       </div>
@@ -125,7 +125,7 @@ export default function StudentReviewPage({ params }: PageProps) {
             <div>
               <p className="text-slate-900 font-medium">{studentName}</p>
               <p className="text-slate-500 text-sm">
-                Graded: {new Date(score.graded_at).toLocaleDateString('id-ID')}
+                Dinilai: {new Date(score.graded_at).toLocaleDateString('id-ID')}
               </p>
             </div>
           </div>
@@ -137,7 +137,7 @@ export default function StudentReviewPage({ params }: PageProps) {
             ? 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30'
             : 'bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/30'
         }`}>
-          <p className="text-sm text-slate-600 mb-1">Score</p>
+          <p className="text-sm text-slate-600 mb-1">Nilai</p>
           <p className={`text-4xl font-bold ${
             score.is_passed ? 'text-emerald-400' : 'text-red-400'
           }`}>
@@ -146,20 +146,20 @@ export default function StudentReviewPage({ params }: PageProps) {
           <p className={`text-sm mt-1 ${
             score.is_passed ? 'text-emerald-400' : 'text-red-400'
           }`}>
-            {score.is_passed ? 'PASSED' : 'FAILED'}
+            {score.is_passed ? 'LULUS' : 'TIDAK LULUS'}
           </p>
         </div>
 
         {/* Breakdown Summary */}
         <div className="bg-white border border-slate-200 rounded-xl p-5">
-          <p className="text-sm text-slate-500 mb-3">Breakdown</p>
+          <p className="text-sm text-slate-500 mb-3">Rincian</p>
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-slate-600">Correct</span>
+              <span className="text-slate-600">Benar</span>
               <span className="text-emerald-400 font-medium">{correctCount}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-600">Incorrect</span>
+              <span className="text-slate-600">Salah</span>
               <span className="text-red-400 font-medium">{totalQuestions - correctCount}</span>
             </div>
             <div className="flex justify-between border-t border-slate-200 pt-2">
@@ -167,7 +167,7 @@ export default function StudentReviewPage({ params }: PageProps) {
               <span className="text-slate-900 font-medium">{totalQuestions}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-600">Weighted Score</span>
+              <span className="text-slate-600">Nilai Berbobot</span>
               <span className="text-slate-900 font-medium">{score.total_score}/{score.max_score}</span>
             </div>
           </div>
@@ -176,7 +176,7 @@ export default function StudentReviewPage({ params }: PageProps) {
 
       {/* Per-Question Review */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-slate-900">Question-by-Question Review</h2>
+        <h2 className="text-lg font-semibold text-slate-900">Tinjauan Per Soal</h2>
 
         {score.breakdown.map((item, index) => (
           <div
@@ -201,7 +201,7 @@ export default function StudentReviewPage({ params }: PageProps) {
                   {index + 1}. {item.question_text}
                 </p>
                 <p className="text-slate-500 text-xs mt-1">
-                  Weight: {item.weight}
+                  Bobot: {item.weight}
                 </p>
               </div>
             </div>
@@ -213,17 +213,17 @@ export default function StudentReviewPage({ params }: PageProps) {
                   ? 'bg-emerald-500/10 border-emerald-500/30'
                   : 'bg-red-500/10 border-red-500/30'
               }`}>
-                <p className="text-xs text-slate-500 mb-1">Student&apos;s Answer</p>
+                <p className="text-xs text-slate-500 mb-1">Jawaban Siswa</p>
                 <p className={`font-medium ${
                   item.is_correct ? 'text-emerald-400' : 'text-red-400'
                 }`}>
-                  {item.selected_choice_text || '(No answer)'}
+                  {item.selected_choice_text || '(Tidak dijawab)'}
                 </p>
               </div>
 
               {/* Correct Answer */}
               <div className="px-4 py-3 rounded-lg border bg-emerald-500/10 border-emerald-500/30">
-                <p className="text-xs text-slate-500 mb-1">Correct Answer</p>
+                <p className="text-xs text-slate-500 mb-1">Jawaban Benar</p>
                 <p className="font-medium text-emerald-400">
                   {item.correct_choice_text}
                 </p>

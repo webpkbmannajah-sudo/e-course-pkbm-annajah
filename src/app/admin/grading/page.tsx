@@ -73,8 +73,8 @@ export default function GradingIndexPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Grading Center</h1>
-        <p className="text-slate-500">Auto-grade and review exam results</p>
+        <h1 className="text-2xl font-bold text-slate-900">Pusat Penilaian</h1>
+        <p className="text-slate-500">Nilai otomatis dan tinjau hasil ujian</p>
       </div>
 
       {/* Search */}
@@ -94,7 +94,7 @@ export default function GradingIndexPage() {
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <ClipboardList className="w-16 h-16 text-slate-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">Tidak ada ujian untuk dinilai</h3>
-          <p className="text-slate-500">Question-based exams will appear here</p>
+          <p className="text-slate-500">Ujian berbasis pertanyaan akan muncul di sini</p>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -113,7 +113,7 @@ export default function GradingIndexPage() {
                     {exam.title}
                   </h3>
                   <p className="text-slate-500 text-sm mt-1">
-                    {exam.attempt_count} attempt(s) • Created {new Date(exam.created_at).toLocaleDateString('id-ID')}
+                    {exam.attempt_count} percobaan • Dibuat {new Date(exam.created_at).toLocaleDateString('id-ID')}
                   </p>
                 </div>
               </div>

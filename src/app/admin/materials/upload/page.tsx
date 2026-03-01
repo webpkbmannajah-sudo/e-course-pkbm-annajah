@@ -93,8 +93,8 @@ export default function UploadMaterialPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedSubjectId) return setError('Please select a subject')
-    if (!file) return setError('Please select a file')
+    if (!selectedSubjectId) return setError('Silakan pilih mata pelajaran')
+    if (!file) return setError('Silakan pilih file')
 
     setError(null)
     setUploading(true)
@@ -134,8 +134,8 @@ export default function UploadMaterialPage() {
       <div className="max-w-2xl mx-auto">
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <Check className="w-16 h-16 text-green-400 mx-auto mb-6" />
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Material Created!</h2>
-          <p className="text-slate-500">Redirecting to materials list...</p>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Materi Berhasil Dibuat!</h2>
+          <p className="text-slate-500">Mengalihkan ke daftar materi...</p>
         </div>
       </div>
     )
@@ -147,7 +147,7 @@ export default function UploadMaterialPage() {
         <Link href="/admin/materials" className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg">
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <h1 className="text-2xl font-bold text-slate-900">Add Material</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Tambah Materi</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6">
@@ -155,28 +155,28 @@ export default function UploadMaterialPage() {
 
         <div className="grid grid-cols-2 gap-4">
             <div>
-                <label className="block text-sm font-medium text-slate-600 mb-2">Level</label>
+                <label className="block text-sm font-medium text-slate-600 mb-2">Tingkat</label>
                 <select value={selectedLevelId} onChange={(e) => setSelectedLevelId(e.target.value)} className="w-full px-4 py-3 bg-slate-200 rounded-xl text-slate-900" required>
-                    <option value="">Select Level</option>
+                    <option value="">Pilih Tingkat</option>
                     {levels.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                 </select>
             </div>
             <div>
-                <label className="block text-sm font-medium text-slate-600 mb-2">Subject</label>
+                <label className="block text-sm font-medium text-slate-600 mb-2">Mata Pelajaran</label>
                 <select value={selectedSubjectId} onChange={(e) => setSelectedSubjectId(e.target.value)} className="w-full px-4 py-3 bg-slate-200 rounded-xl text-slate-900" required disabled={!selectedLevelId}>
-                    <option value="">Select Subject</option>
+                    <option value="">Pilih Mata Pelajaran</option>
                     {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
             </div>
         </div>
 
         <div>
-            <label className="block text-sm font-medium text-slate-600 mb-2">Type</label>
+            <label className="block text-sm font-medium text-slate-600 mb-2">Tipe</label>
             <div className="flex bg-slate-200 p-1 rounded-xl gap-1">
-                {['pdf', 'image'].map((t) => (
+                {(['pdf', 'image'] as const).map((t) => (
                     <button key={t} type="button" onClick={() => setType(t as 'pdf' | 'image')} 
-                        className={`flex-1 py-2 rounded-lg capitalize ${type === t ? 'bg-purple-600 text-white' : 'text-slate-500 hover:text-slate-900'}`}>
-                        {t}
+                        className={`flex-1 py-2 rounded-lg ${type === t ? 'bg-purple-600 text-white' : 'text-slate-500 hover:text-slate-900'}`}>
+                        {t === 'pdf' ? 'Pdf' : 'Gambar'}
                     </button>
                 ))}
             </div>
@@ -188,17 +188,17 @@ export default function UploadMaterialPage() {
         >
             <input type="file" accept={type === 'pdf' ? '.pdf' : 'image/*'} onChange={handleFileChange} className="hidden" id="file-upload" />
             <label htmlFor="file-upload" className="cursor-pointer">
-                {file ? <div className="text-slate-900">{file.name}</div> : <div className="text-slate-500">Click or Drag {type.toUpperCase()} here</div>}
+                {file ? <div className="text-slate-900">{file.name}</div> : <div className="text-slate-500">Klik atau Seret {type.toUpperCase()} ke sini</div>}
             </label>
         </div>
 
         <div>
-            <label className="block text-sm font-medium text-slate-600 mb-2">Title</label>
+            <label className="block text-sm font-medium text-slate-600 mb-2">Judul</label>
             <input type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required className="w-full px-4 py-3 bg-slate-200 rounded-xl text-slate-900" />
         </div>
 
         <div>
-            <label className="block text-sm font-medium text-slate-600 mb-2">Description</label>
+            <label className="block text-sm font-medium text-slate-600 mb-2">Deskripsi</label>
             <textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={3} className="w-full px-4 py-3 bg-slate-200 rounded-xl text-slate-900" />
         </div>
 

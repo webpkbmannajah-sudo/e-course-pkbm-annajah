@@ -82,7 +82,7 @@ export default function GradingPage({ params }: PageProps) {
   }
 
   const handleBulkGrade = async () => {
-    if (!confirm('Grade all student attempts for this exam?')) return
+    if (!confirm('Nilai semua percobaan siswa untuk ujian ini?')) return
 
     setBulkGrading(true)
     try {
@@ -95,14 +95,14 @@ export default function GradingPage({ params }: PageProps) {
       const data = await response.json()
 
       if (response.ok) {
-        alert(`Grading complete!\n• Graded: ${data.summary.graded}\n• Failed: ${data.summary.failed}`)
+        alert(`Penilaian selesai!\n• Dinilai: ${data.summary.graded}\n• Gagal: ${data.summary.failed}`)
         await fetchData() // Refresh scores
       } else {
-        alert(data.error || 'Failed to grade')
+        alert(data.error || 'Gagal menilai')
       }
     } catch (error) {
       console.error('Bulk grade error:', error)
-      alert('Failed to grade exams')
+      alert('Gagal menilai ujian')
     } finally {
       setBulkGrading(false)
     }
@@ -121,7 +121,7 @@ export default function GradingPage({ params }: PageProps) {
         await fetchData()
       } else {
         const data = await response.json()
-        alert(data.error || 'Failed to grade')
+        alert(data.error || 'Gagal menilai')
       }
     } catch (error) {
       console.error('Single grade error:', error)
@@ -169,7 +169,7 @@ export default function GradingPage({ params }: PageProps) {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-slate-900">Grading</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Penilaian</h1>
           <p className="text-slate-500 mt-1">{exam?.title}</p>
         </div>
         <button
@@ -180,18 +180,18 @@ export default function GradingPage({ params }: PageProps) {
           {bulkGrading ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
-              Grading...
+              Menilai...
             </>
           ) : (
             <>
               <Zap className="w-5 h-5" />
-              Grade All ({attemptCount})
+               Nilai Semua ({attemptCount})
             </>
           )}
         </button>
       </div>
 
-      {/* Stats Cards */}
+      {/* Kartu Statistik */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-white border border-slate-200 rounded-xl p-5">
           <div className="flex items-center gap-3">
@@ -199,7 +199,7 @@ export default function GradingPage({ params }: PageProps) {
               <Users className="w-5 h-5 text-blue-400" />
             </div>
             <div>
-              <p className="text-sm text-slate-500">Total Attempts</p>
+              <p className="text-sm text-slate-500">Total Percobaan</p>
               <p className="text-2xl font-bold text-slate-900">{attemptCount}</p>
             </div>
           </div>
@@ -211,7 +211,7 @@ export default function GradingPage({ params }: PageProps) {
               <TrendingUp className="w-5 h-5 text-purple-400" />
             </div>
             <div>
-              <p className="text-sm text-slate-500">Average Score</p>
+              <p className="text-sm text-slate-500">Rata-rata Nilai</p>
               <p className="text-2xl font-bold text-slate-900">{avgScore}%</p>
             </div>
           </div>
@@ -223,7 +223,7 @@ export default function GradingPage({ params }: PageProps) {
               <CheckCircle className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
-              <p className="text-sm text-slate-500">Passed</p>
+              <p className="text-sm text-slate-500">Lulus</p>
               <p className="text-2xl font-bold text-emerald-400">{passedCount}</p>
             </div>
           </div>
@@ -235,27 +235,27 @@ export default function GradingPage({ params }: PageProps) {
               <XCircle className="w-5 h-5 text-red-400" />
             </div>
             <div>
-              <p className="text-sm text-slate-500">Failed</p>
+              <p className="text-sm text-slate-500">Tidak Lulus</p>
               <p className="text-2xl font-bold text-red-400">{failedCount}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filter */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex bg-white rounded-xl p-1 border border-slate-200">
-          {(['all', 'passed', 'failed'] as const).map(f => (
+          {([{key: 'all', label: 'Semua'}, {key: 'passed', label: 'Lulus'}, {key: 'failed', label: 'Tidak Lulus'}] as const).map(f => (
             <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
-                filter === f
+              key={f.key}
+              onClick={() => setFilter(f.key as 'all' | 'passed' | 'failed')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filter === f.key
                   ? 'bg-purple-600 text-white'
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              {f}
+              {f.label}
             </button>
           ))}
         </div>
@@ -264,21 +264,21 @@ export default function GradingPage({ params }: PageProps) {
           onChange={e => setSortBy(e.target.value as 'score' | 'name' | 'date')}
           className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
         >
-          <option value="score">Sort by Score</option>
-          <option value="name">Sort by Name</option>
-          <option value="date">Sort by Date</option>
+          <option value="score">Urutkan berdasarkan Nilai</option>
+          <option value="name">Urutkan berdasarkan Nama</option>
+          <option value="date">Urutkan berdasarkan Tanggal</option>
         </select>
       </div>
 
-      {/* Scores Table */}
+      {/* Tabel Nilai */}
       {scores.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <Award className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-slate-900 mb-2">No scores yet</h3>
+          <h3 className="text-lg font-medium text-slate-900 mb-2">Belum ada nilai</h3>
           <p className="text-slate-500 mb-6">
             {attemptCount > 0
-              ? 'Click "Grade All" to auto-grade all student attempts'
-              : 'No students have attempted this exam yet'}
+              ? 'Klik "Nilai Semua" untuk menilai otomatis semua percobaan siswa'
+              : 'Belum ada siswa yang mengerjakan ujian ini'}
           </p>
         </div>
       ) : (
@@ -287,12 +287,12 @@ export default function GradingPage({ params }: PageProps) {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-200">
-                  <th className="text-left px-5 py-4 text-sm font-semibold text-slate-600">Student</th>
-                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Score</th>
-                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Percentage</th>
+                  <th className="text-left px-5 py-4 text-sm font-semibold text-slate-600">Siswa</th>
+                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Nilai</th>
+                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Persentase</th>
                   <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Status</th>
-                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Graded</th>
-                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Actions</th>
+                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Dinilai</th>
+                  <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -321,12 +321,12 @@ export default function GradingPage({ params }: PageProps) {
                       {score.is_passed ? (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-medium">
                           <CheckCircle className="w-3 h-3" />
-                          Passed
+                          Lulus
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-medium">
                           <XCircle className="w-3 h-3" />
-                          Failed
+                          Tidak Lulus
                         </span>
                       )}
                     </td>
@@ -341,14 +341,14 @@ export default function GradingPage({ params }: PageProps) {
                           href={`/admin/exams/${examId}/grading/${score.user_id}`}
                           className="px-3 py-1.5 text-sm bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-lg transition-colors"
                         >
-                          Review
+                          Tinjau
                         </Link>
                         <button
                           onClick={() => handleSingleGrade(score.attempt_id)}
                           disabled={grading}
                           className="px-3 py-1.5 text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded-lg transition-colors disabled:opacity-50"
                         >
-                          Re-grade
+                           Nilai Ulang
                         </button>
                       </div>
                     </td>
@@ -365,8 +365,8 @@ export default function GradingPage({ params }: PageProps) {
         <div className="flex items-center gap-3 px-5 py-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
           <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
           <p className="text-amber-300 text-sm">
-            <strong>{attemptCount - scores.length}</strong> attempt(s) haven&apos;t been graded yet.
-            Click &quot;Grade All&quot; to grade them.
+            <strong>{attemptCount - scores.length}</strong> percobaan belum dinilai.
+            Klik &quot;Nilai Semua&quot; untuk menilainya.
           </p>
         </div>
       )}
