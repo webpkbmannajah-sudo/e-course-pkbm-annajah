@@ -4,24 +4,47 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { FileText, Plus, Trash2, Eye, Search, Calendar, Image as ImageIcon } from 'lucide-react'
-import { Material } from '@/types'
+import { Material, Level } from '@/types'
 
 export default function AdminMaterialsPage() {
   const supabase = createClient()
   const [materials, setMaterials] = useState<Material[]>([])
+  const [levels, setLevels] = useState<Level[]>([])
+  const [selectedLevelId, setSelectedLevelId] = useState<string>('all')
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string; title: string; fileUrl: string | null }>({
+    isOpen: false,
+    id: '',
+    title: '',
+    fileUrl: null
+  })
 
   useEffect(() => {
+    fetchLevels()
     fetchMaterials()
   }, [])
+
+  const fetchLevels = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('levels')
+        .select('*')
+        .order('name')
+      
+      if (error) throw error
+      setLevels(data || [])
+    } catch (error) {
+      console.error('Error fetching levels:', error)
+    }
+  }
 
   const fetchMaterials = async () => {
     try {
       const { data, error } = await supabase
         .from('materials')
-        .select('*, subjects(name)')
+        .select('*, subject:subjects(name, level_id)')
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -33,8 +56,9 @@ export default function AdminMaterialsPage() {
     }
   }
 
-  const handleDelete = async (id: string, fileUrl: string | null) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus materi ini?')) return
+  const handleDelete = async () => {
+    const { id, fileUrl } = deleteModal
+    if (!id) return
 
     setDeleting(id)
     try {
@@ -55,6 +79,7 @@ export default function AdminMaterialsPage() {
       if (error) throw error
 
       setMaterials(prev => prev.filter(m => m.id !== id))
+      setDeleteModal({ isOpen: false, id: '', title: '', fileUrl: null })
     } catch (error) {
       console.error('Error deleting material:', error)
       alert('Failed to delete material')
@@ -63,10 +88,14 @@ export default function AdminMaterialsPage() {
     }
   }
 
-  const filteredMaterials = materials.filter(m =>
-    m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    m.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredMaterials = materials.filter(m => {
+    const matchesSearch = m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    const matchesLevel = selectedLevelId === 'all' || m.subject?.level_id === selectedLevelId
+    
+    return matchesSearch && matchesLevel
+  })
 
   const getTypeIcon = (type: string) => {
       switch (type) {
@@ -100,16 +129,44 @@ export default function AdminMaterialsPage() {
         </Link>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-        <input
-          type="text"
-          placeholder="Cari materi..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
+      {/* Filters */}
+      <div className="flex flex-col gap-4">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+          <input
+            type="text"
+            placeholder="Cari materi..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+        </div>
+
+        <div className="flex bg-white p-1 rounded-xl border border-slate-200 overflow-x-auto">
+          <button
+            onClick={() => setSelectedLevelId('all')}
+            className={`flex-1 min-w-[100px] px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              selectedLevelId === 'all'
+                ? 'bg-purple-500 text-white shadow-md'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            Semua Paket
+          </button>
+          {levels.map(level => (
+            <button
+              key={level.id}
+              onClick={() => setSelectedLevelId(level.id)}
+              className={`flex-1 min-w-[100px] px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                selectedLevelId === level.id
+                  ? 'bg-purple-500 text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+              }`}
+            >
+              {level.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Materials List */}
@@ -171,21 +228,56 @@ export default function AdminMaterialsPage() {
                   )}
                   
                   <button
-                    onClick={() => handleDelete(material.id, material.file_url)}
+                    onClick={() => setDeleteModal({ isOpen: true, id: material.id, title: material.title, fileUrl: material.file_url })}
                     disabled={deleting === material.id}
                     className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
                     title="Delete"
                   >
-                    {deleting === material.id ? (
-                      <div className="w-5 h-5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Trash2 className="w-5 h-5" />
-                    )}
+                    <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {/* Delete Confirmation Modal */}
+      {deleteModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center mb-4">
+                <Trash2 className="w-6 h-6 text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Hapus Materi?</h3>
+              <p className="text-slate-500 leading-relaxed">
+                Apakah Anda yakin ingin menghapus materi <span className="font-semibold text-slate-900">"{deleteModal.title}"</span>? 
+                <br /><br />
+                Tindakan ini tidak dapat dibatalkan.
+              </p>
+            </div>
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setDeleteModal({ isOpen: false, id: '', title: '', fileUrl: null })}
+                disabled={deleting !== null}
+                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting !== null}
+                className="flex items-center gap-2 px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-500/20 transition-all disabled:opacity-50"
+              >
+                {deleting === deleteModal.id ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                Hapus Sekarang
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

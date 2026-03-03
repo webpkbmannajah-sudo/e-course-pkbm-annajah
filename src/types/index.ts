@@ -52,6 +52,8 @@ export interface Subject {
     icon_url?: string | null
     created_at: string
     level?: Level
+    materials?: { count: number }[]
+    exams?: { count: number }[]
 }
 
 export interface Material {
