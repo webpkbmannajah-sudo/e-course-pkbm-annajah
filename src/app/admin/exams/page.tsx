@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { ClipboardList, Plus, Trash2, Eye, Search, Calendar, FileText, HelpCircle, Award } from 'lucide-react'
+import { ClipboardList, Plus, Trash2, Edit, Search, Calendar, FileText, HelpCircle, Award } from 'lucide-react'
 import ConfirmModal from '@/components/ConfirmModal'
 import { showToast } from '@/components/Toast'
 import { Exam, Level } from '@/types'
@@ -220,11 +220,11 @@ export default function AdminExamsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Link
-                    href={`/admin/exams/${exam.id}`}
+                    href={`/admin/exams/${exam.id}/edit`}
                     className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
-                    title="Lihat Ujian"
+                    title="Edit Ujian"
                   >
-                    <Eye className="w-5 h-5" />
+                    <Edit className="w-5 h-5" />
                   </Link>
                   {exam.type === 'questions' && (
                     <Link
