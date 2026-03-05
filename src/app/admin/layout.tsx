@@ -13,6 +13,8 @@ import {
   X,
   Award,
   BarChart3,
+  Users,
+  ShieldCheck,
 } from 'lucide-react'
 
 const adminNavItems = [
@@ -21,6 +23,7 @@ const adminNavItems = [
   { href: '/admin/materials', label: 'Materi', icon: FileText },
   { href: '/admin/exams', label: 'Ujian', icon: ClipboardList },
   { href: '/admin/grading', label: 'Penilaian', icon: Award },
+  { href: '/admin/users', label: 'Siswa', icon: Users },
   { href: '/admin/reports', label: 'Laporan', icon: BarChart3 },
 ]
 
@@ -29,7 +32,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter()
   const supabase = createClient()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [user, setUser] = useState<{name: string; email: string} | null>(null)
+  const [user, setUser] = useState<{name: string; email: string; role: string} | null>(null)
 
   useEffect(() => {
     const getUser = async () => {
@@ -37,7 +40,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       if (user) {
         setUser({
           name: user.user_metadata?.name || 'Admin',
-          email: user.email || ''
+          email: user.email || '',
+          role: user.user_metadata?.role || 'admin'
         })
       }
     }
@@ -49,6 +53,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push('/login')
     router.refresh()
   }
+
+  // Build nav items: add "Manajemen Admin" only for superadmin
+  const navItems = user?.role === 'superadmin'
+    ? [...adminNavItems, { href: '/admin/manage-admins', label: 'Manajemen Admin', icon: ShieldCheck }]
+    : adminNavItems
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -82,7 +91,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-2">
-            {adminNavItems.map((item) => {
+            {navItems.map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link

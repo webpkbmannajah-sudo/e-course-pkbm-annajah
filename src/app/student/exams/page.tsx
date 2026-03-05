@@ -93,7 +93,7 @@ export default function StudentExamsPage() {
         }
       })
 
-      setExams(examsWithAttempts as any)
+      setExams(examsWithAttempts as unknown as ExamWithAttempt[])
     } catch (error) {
       console.error('Error fetching exams:', error)
     } finally {

@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { BookOpen, Search, Plus, Trash2, Edit2, Check, X, Folder } from 'lucide-react'
+import { BookOpen, Plus, Trash2, Edit, Search, Users, CheckCircle, GraduationCap } from 'lucide-react'
+import ConfirmModal from '@/components/ConfirmModal'
+import { showToast } from '@/components/Toast'
 import { Level, Subject } from '@/types'
 
 export default function AdminSubjectsPage() {
@@ -23,17 +25,7 @@ export default function AdminSubjectsPage() {
     name: ''
   })
 
-  useEffect(() => {
-    fetchLevels()
-  }, [])
-
-  useEffect(() => {
-    if (selectedLevelId) {
-      fetchSubjects(selectedLevelId)
-    }
-  }, [selectedLevelId])
-
-  const fetchLevels = async () => {
+  const fetchLevels = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('levels')
@@ -42,31 +34,56 @@ export default function AdminSubjectsPage() {
       
       if (error) throw error
       setLevels(data || [])
-      if (data && data.length > 0) {
-        setSelectedLevelId(data[0].id)
-      }
+      // The original code had a side effect here: if (data && data.length > 0) { setSelectedLevelId(data[0].id) }.
+      // This side effect is now handled in the useEffect that calls fetchLevels.
     } catch (error) {
       console.error('Error fetching levels:', error)
+      showToast('Gagal memuat tingkat', 'error')
     }
-  }
+  }, [supabase])
 
-  const fetchSubjects = async (levelId: string) => {
+  const fetchSubjects = useCallback(async (levelId: string) => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('subjects')
-        .select('*, materials:materials(count), exams:exams(count)')
-        .eq('level_id', levelId)
+        .select(`
+          *,
+          level:levels(name),
+          materials(count),
+          exams(count)
+        `)
         .order('name')
 
+      if (levelId !== 'all') {
+        query = query.eq('level_id', levelId)
+      }
+
+      const { data, error } = await query
       if (error) throw error
       setSubjects(data || [])
     } catch (error) {
       console.error('Error fetching subjects:', error)
+      showToast('Gagal memuat mata pelajaran', 'error')
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchLevels().then(() => {
+      // After fetching levels, if there are levels, set the first one as selected
+      if (levels.length > 0 && !selectedLevelId) {
+        setSelectedLevelId(levels[0].id);
+      }
+    });
+  }, [fetchLevels, levels.length, selectedLevelId, levels]); // Added levels.length and selectedLevelId to dependencies
+
+  useEffect(() => {
+    if (selectedLevelId) {
+      fetchSubjects(selectedLevelId)
+    }
+  }, [selectedLevelId, fetchSubjects])
 
   const handleAddSubject = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,22 +91,24 @@ export default function AdminSubjectsPage() {
 
     setProcessingId('new')
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('subjects')
         .insert([{
           name: newSubjectName.trim(),
-          level_id: selectedLevelId
+          level_id: selectedLevelId !== 'all' ? selectedLevelId : levels[0]?.id
         }])
         .select()
         .single()
 
       if (error) throw error
-      setSubjects([...subjects, data])
+
+      await fetchSubjects(selectedLevelId) // Re-fetch subjects to include the new one
       setNewSubjectName('')
       setIsAddingString(false)
+      showToast('Berhasil menambahkan mata pelajaran', 'success')
     } catch (error) {
       console.error('Error adding subject:', error)
-      alert('Gagal menambahkan mata pelajaran')
+      showToast('Gagal menambahkan mata pelajaran', 'error')
     } finally {
       setProcessingId(null)
     }
@@ -113,16 +132,17 @@ export default function AdminSubjectsPage() {
       ))
       setEditingId(null)
       setEditingName('')
+      showToast('Mata pelajaran berhasil diperbarui', 'success')
     } catch (error) {
       console.error('Error updating subject:', error)
-      alert('Gagal memperbarui mata pelajaran')
+      showToast('Gagal memperbarui mata pelajaran', 'error')
     } finally {
       setProcessingId(null)
     }
   }
 
   const handleDeleteSubject = async () => {
-    const { id, name } = deleteModal
+    const { id } = deleteModal
     if (!id) return
     
     setProcessingId(id)
@@ -146,11 +166,12 @@ export default function AdminSubjectsPage() {
         .eq('id', id)
 
       if (error) throw error
-      setSubjects(subjects.filter(s => s.id !== id))
+      await fetchSubjects(selectedLevelId) // Re-fetch subjects after deletion
+      showToast('Mata pelajaran berhasil dihapus', 'success')
       setDeleteModal({ isOpen: false, id: '', name: '' })
     } catch (error) {
       console.error('Error deleting subject:', error)
-      alert('Gagal menghapus mata pelajaran')
+      showToast('Gagal menghapus mata pelajaran', 'error')
     } finally {
       setProcessingId(null)
     }
@@ -211,7 +232,7 @@ export default function AdminSubjectsPage() {
         {isAddingString && (
           <form onSubmit={handleAddSubject} className="mb-6 p-4 bg-slate-50/50 rounded-xl border border-purple-500/30 flex items-center gap-4">
             <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-              <Folder className="w-5 h-5 text-purple-400" />
+              <GraduationCap className="w-5 h-5 text-purple-400" />
             </div>
             <input
               type="text"
@@ -227,7 +248,7 @@ export default function AdminSubjectsPage() {
                 disabled={!newSubjectName.trim() || processingId === 'new'}
                 className="p-2 text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors disabled:opacity-50"
               >
-                <Check className="w-5 h-5" />
+                <CheckCircle className="w-5 h-5" />
               </button>
               <button
                 type="button"
@@ -235,7 +256,7 @@ export default function AdminSubjectsPage() {
                 className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                 title="Batal"
               >
-                <X className="w-5 h-5" />
+                <Users className="w-5 h-5" />
               </button>
             </div>
           </form>
@@ -268,7 +289,7 @@ export default function AdminSubjectsPage() {
                                 disabled={!editingName.trim() || processingId === subject.id}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 disabled:opacity-50"
                               >
-                                <Check className="w-4 h-4" />
+                                <CheckCircle className="w-4 h-4" />
                                 Simpan
                               </button>
                               <button
@@ -279,7 +300,7 @@ export default function AdminSubjectsPage() {
                                 }}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-300"
                               >
-                                <X className="w-4 h-4" />
+                                <Users className="w-4 h-4" />
                                 Batal
                               </button>
                             </div>
@@ -303,7 +324,7 @@ export default function AdminSubjectsPage() {
                                         className="p-2 text-slate-500 hover:text-blue-500 hover:bg-blue-50 rounded-lg md:opacity-0 group-hover:opacity-100 transition-all"
                                         title="Edit"
                                     >
-                                        <Edit2 className="w-4 h-4" />
+                                        <Edit className="w-4 h-4" />
                                     </button>
                                     <button
                                         onClick={() => setDeleteModal({ isOpen: true, id: subject.id, name: subject.name })}
@@ -321,7 +342,7 @@ export default function AdminSubjectsPage() {
                                   {subject.materials?.[0]?.count || 0} Materi
                                 </div>
                                 <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded-md border border-slate-100">
-                                  <Check className="w-3.5 h-3.5" />
+                                  <CheckCircle className="w-3.5 h-3.5" />
                                   {subject.exams?.[0]?.count || 0} Ujian
                                 </div>
                             </div>
@@ -334,44 +355,22 @@ export default function AdminSubjectsPage() {
       </div>
 
       {/* Delete Confirmation Modal */}
-      {deleteModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6">
-              <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center mb-4">
-                <Trash2 className="w-6 h-6 text-red-500" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Hapus Mata Pelajaran?</h3>
-              <p className="text-slate-500 leading-relaxed">
-                Apakah Anda yakin ingin menghapus mata pelajaran <span className="font-semibold text-slate-900">"{deleteModal.name}"</span>? 
-                <br /><br />
-                Tindakan ini akan <span className="text-red-500 font-medium">menghapus seluruh materi dan ujian</span> yang terkait dengan mata pelajaran ini secara permanen.
-              </p>
-            </div>
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setDeleteModal({ isOpen: false, id: '', name: '' })}
-                disabled={processingId !== null}
-                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors disabled:opacity-50"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleDeleteSubject}
-                disabled={processingId !== null}
-                className="flex items-center gap-2 px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-500/20 transition-all disabled:opacity-50"
-              >
-                {processingId === deleteModal.id ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Trash2 className="w-4 h-4" />
-                )}
-                Hapus Sekarang
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: '', name: '' })}
+        onConfirm={handleDeleteSubject}
+        title="Hapus Mata Pelajaran?"
+        message={
+          <span>
+            Apakah Anda yakin ingin menghapus mata pelajaran <strong className="font-semibold text-slate-900">&quot;{deleteModal.name}&quot;</strong>? 
+            <br /><br />
+            Tindakan ini akan <span className="text-red-500 font-medium">menghapus seluruh materi dan ujian</span> yang terkait dengan mata pelajaran ini secara permanen.
+          </span>
+        }
+        confirmText="Hapus Sekarang"
+        variant="danger"
+        loading={processingId === deleteModal.id}
+      />
     </div>
   )
 }

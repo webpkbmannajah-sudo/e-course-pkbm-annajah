@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { isAdminRole } from '@/lib/roles'
 
 export async function GET(
     request: NextRequest,
@@ -22,7 +23,7 @@ export async function GET(
             .eq('id', user.id)
             .single()
 
-        const isAdmin = profile?.role === 'admin'
+        const isAdmin = isAdminRole(profile?.role)
 
         // Optional userId filter
         const { searchParams } = new URL(request.url)

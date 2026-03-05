@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateExcel, examReportColumns, studentReportColumns, overviewReportColumns } from '@/lib/export'
+import { isAdminRole } from '@/lib/roles'
 
 export async function POST(request: NextRequest) {
     try {
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
             .eq('id', user.id)
             .single()
 
-        if (profile?.role !== 'admin') {
+        if (!isAdminRole(profile?.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 

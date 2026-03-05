@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { isAdminRole } from '@/lib/roles';
 
 export async function GET(request: Request) {
     const supabase = await createClient();
@@ -12,7 +13,7 @@ export async function GET(request: Request) {
         .eq('id', user?.id)
         .single();
 
-    if (profile?.role !== 'admin') {
+    if (!isAdminRole(profile?.role)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
@@ -57,7 +58,7 @@ export async function PATCH(request: Request) {
         .eq('id', user?.id)
         .single();
 
-    if (requesterProfile?.role !== 'admin') {
+    if (!isAdminRole(requesterProfile?.role)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

@@ -1,6 +1,6 @@
 // Database types for the Course Management System
 
-export type UserRole = 'student' | 'admin'
+export type UserRole = 'student' | 'admin' | 'superadmin'
 
 export interface User {
     id: string

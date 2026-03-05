@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isAdminRole } from '@/lib/roles'
 
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({
@@ -54,7 +55,7 @@ export async function updateSession(request: NextRequest) {
         // Get user role from user metadata
         const role = user.user_metadata?.role || 'student'
         const url = request.nextUrl.clone()
-        url.pathname = role === 'admin' ? '/admin/dashboard' : '/student/dashboard'
+        url.pathname = isAdminRole(role) ? '/admin/dashboard' : '/student/dashboard'
         return NextResponse.redirect(url)
     }
 
@@ -64,7 +65,7 @@ export async function updateSession(request: NextRequest) {
 
 
         // Student trying to access admin routes
-        if (isAdminRoute && role !== 'admin') {
+        if (isAdminRoute && !isAdminRole(role)) {
             const url = request.nextUrl.clone()
             url.pathname = '/student/dashboard'
             return NextResponse.redirect(url)

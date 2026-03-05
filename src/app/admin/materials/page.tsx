@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { FileText, Plus, Trash2, Eye, Search, Calendar, Image as ImageIcon } from 'lucide-react'
+import ConfirmModal from '@/components/ConfirmModal'
+import { showToast } from '@/components/Toast'
 import { Material, Level } from '@/types'
 
 export default function AdminMaterialsPage() {
@@ -21,12 +23,7 @@ export default function AdminMaterialsPage() {
     fileUrl: null
   })
 
-  useEffect(() => {
-    fetchLevels()
-    fetchMaterials()
-  }, [])
-
-  const fetchLevels = async () => {
+  const fetchLevels = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('levels')
@@ -37,24 +34,33 @@ export default function AdminMaterialsPage() {
       setLevels(data || [])
     } catch (error) {
       console.error('Error fetching levels:', error)
+      showToast('Gagal memuat daftar paket', 'error')
     }
-  }
+  }, [supabase])
 
-  const fetchMaterials = async () => {
+  const fetchMaterials = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('materials')
-        .select('*, subject:subjects(name, level_id)')
+        .select(`
+          *,
+          subject:subjects(name, level_id)
+        `)
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setMaterials(data as any || [])
+      setMaterials(data as unknown as Material[] || [])
     } catch (error) {
       console.error('Error fetching materials:', error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchLevels()
+    fetchMaterials()
+  }, [fetchLevels, fetchMaterials])
 
   const handleDelete = async () => {
     const { id, fileUrl } = deleteModal
@@ -80,9 +86,10 @@ export default function AdminMaterialsPage() {
 
       setMaterials(prev => prev.filter(m => m.id !== id))
       setDeleteModal({ isOpen: false, id: '', title: '', fileUrl: null })
+      showToast('Materi berhasil dihapus', 'success')
     } catch (error) {
       console.error('Error deleting material:', error)
-      alert('Failed to delete material')
+      showToast('Gagal menghapus materi', 'error')
     } finally {
       setDeleting(null)
     }
@@ -242,44 +249,22 @@ export default function AdminMaterialsPage() {
         </div>
       )}
       {/* Delete Confirmation Modal */}
-      {deleteModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6">
-              <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center mb-4">
-                <Trash2 className="w-6 h-6 text-red-500" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Hapus Materi?</h3>
-              <p className="text-slate-500 leading-relaxed">
-                Apakah Anda yakin ingin menghapus materi <span className="font-semibold text-slate-900">"{deleteModal.title}"</span>? 
-                <br /><br />
-                Tindakan ini tidak dapat dibatalkan.
-              </p>
-            </div>
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setDeleteModal({ isOpen: false, id: '', title: '', fileUrl: null })}
-                disabled={deleting !== null}
-                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors disabled:opacity-50"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting !== null}
-                className="flex items-center gap-2 px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-500/20 transition-all disabled:opacity-50"
-              >
-                {deleting === deleteModal.id ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Trash2 className="w-4 h-4" />
-                )}
-                Hapus Sekarang
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: '', title: '', fileUrl: null })}
+        onConfirm={handleDelete}
+        title="Hapus Materi?"
+        message={
+          <span>
+            Apakah Anda yakin ingin menghapus materi <strong className="font-semibold text-slate-900">&quot;{deleteModal.title}&quot;</strong>? 
+            <br /><br />
+            File materi yang diunggah (jika ada) juga akan dihapus. Tindakan ini tidak dapat dibatalkan.
+          </span>
+        }
+        confirmText="Hapus Sekarang"
+        variant="danger"
+        loading={deleting === deleteModal.id}
+      />
     </div>
   )
 }

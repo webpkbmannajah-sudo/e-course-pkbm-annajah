@@ -8,6 +8,8 @@ import {
   ArrowLeft, FileText, ClipboardList, CheckCircle, 
   Loader2, AlertCircle, Trophy, RefreshCw
 } from 'lucide-react'
+import ConfirmModal from '@/components/ConfirmModal'
+import { showToast } from '@/components/Toast'
 import { Exam, Question, Choice } from '@/types'
 
 interface PageProps {
@@ -36,6 +38,11 @@ export default function TakeExamPage({ params }: PageProps) {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState<number | null>(null)
+  
+  // Modals state
+  const [showSubmitModal, setShowSubmitModal] = useState(false)
+  const [showRetakeModal, setShowRetakeModal] = useState(false)
+  const [unansweredCount, setUnansweredCount] = useState(0)
 
   useEffect(() => {
     const fetchExam = async () => {
@@ -112,16 +119,22 @@ export default function TakeExamPage({ params }: PageProps) {
     }))
   }
 
-  const handleSubmit = async () => {
+  const attemptSubmit = () => {
     if (!exam) return
 
     const unanswered = exam.questions?.filter(q => !answers[q.id])
     if (unanswered && unanswered.length > 0) {
-      if (!confirm(`Anda memiliki ${unanswered.length} soal yang belum dijawab. Kirim sekarang?`)) {
-        return
-      }
+      setUnansweredCount(unanswered.length)
+      setShowSubmitModal(true)
+      return
     }
 
+    executeSubmit()
+  }
+
+  const executeSubmit = async () => {
+    if (!exam) return
+    setShowSubmitModal(false)
     setSubmitting(true)
 
     try {
@@ -156,15 +169,15 @@ export default function TakeExamPage({ params }: PageProps) {
       router.push(`/student/exams/${id}/result`)
     } catch (err) {
       console.error('Error submitting exam:', err)
-      alert('Gagal mengirim ujian')
+      showToast('Gagal mengirim ujian', 'error')
       setSubmitting(false)
     }
   }
 
   const handleRetake = async () => {
     if (!existingAttempt) return
-    if (!confirm('Apakah Anda yakin ingin mengulang ujian ini? Nilai sebelumnya akan diganti.')) return
-
+    
+    setShowRetakeModal(false)
     try {
       const { error } = await supabase
         .from('exam_attempts')
@@ -282,13 +295,13 @@ export default function TakeExamPage({ params }: PageProps) {
           <div className="flex gap-3 justify-center mt-6">
             <Link
               href="/student/exams"
-              className="px-6 py-2 bg-slate-200 hover:bg-slate-600 text-slate-900 hover:text-white rounded-xl transition-colors"
+              className="px-6 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 hover:text-slate-900 font-medium rounded-xl transition-colors"
             >
               Kembali ke Ujian
             </Link>
             <button
-              onClick={handleRetake}
-              className="flex items-center gap-2 px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors"
+              onClick={() => setShowRetakeModal(true)}
+              className="flex items-center gap-2 px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-xl transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
               Kerjakan Ulang
@@ -342,6 +355,17 @@ export default function TakeExamPage({ params }: PageProps) {
             )
           })}
         </div>
+
+        {/* Retake Confirmation Modal */}
+        <ConfirmModal
+          isOpen={showRetakeModal}
+          onClose={() => setShowRetakeModal(false)}
+          onConfirm={handleRetake}
+          title="Kerjakan Ulang Ujian?"
+          message="Apakah Anda yakin ingin mengulang ujian ini? Nilai dan percobaan Anda sebelumnya akan diganti secara permanen."
+          confirmText="Kerjakan Ulang"
+          variant="danger"
+        />
       </div>
     )
   }
@@ -423,7 +447,7 @@ export default function TakeExamPage({ params }: PageProps) {
           {Object.keys(answers).length} dari {exam.questions?.length || 0} soal dijawab
         </p>
         <button
-          onClick={handleSubmit}
+          onClick={attemptSubmit}
           disabled={submitting || Object.keys(answers).length === 0}
           className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
@@ -440,6 +464,23 @@ export default function TakeExamPage({ params }: PageProps) {
           )}
         </button>
       </div>
+
+      {/* Submit Confirmation Modal (Warning for unanswered) */}
+      <ConfirmModal
+        isOpen={showSubmitModal}
+        onClose={() => setShowSubmitModal(false)}
+        onConfirm={executeSubmit}
+        title="Ada Soal Kosong"
+        message={
+          <span>
+            Anda masih memiliki <strong className="font-semibold text-slate-900">{unansweredCount}</strong> soal yang belum dijawab. 
+            Yakin ingin mengirim jawaban sekarang?
+          </span>
+        }
+        confirmText="Kirim Sekarang"
+        variant="warning"
+        loading={submitting}
+      />
     </div>
   )
 }

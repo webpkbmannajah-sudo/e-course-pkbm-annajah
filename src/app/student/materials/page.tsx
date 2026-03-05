@@ -43,7 +43,7 @@ export default function StudentMaterialsPage() {
       const { data, error } = await query
 
       if (error) throw error
-      setMaterials(data as any || [])
+      setMaterials(data as unknown as Material[] || [])
     } catch (error) {
       console.error('Error fetching materials:', error)
     } finally {
@@ -92,7 +92,7 @@ export default function StudentMaterialsPage() {
     }
   }
 
-  const getTypeIcon = (type: string, theme: any) => {
+  const getTypeIcon = (type: string, theme: Record<string, string>) => {
     switch (type) {
       case 'image': return <ImageIcon className={`w-6 h-6 ${theme.iconBase}`} />
       default: return <FileText className={`w-6 h-6 ${theme.iconBase}`} />

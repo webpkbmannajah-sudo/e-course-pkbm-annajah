@@ -89,7 +89,7 @@ export default function RegisterPage() {
           </div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Pendaftaran Berhasil!</h2>
           <p className="text-slate-500 mb-4">
-            Silakan cek email Anda untuk verifikasi akun.
+            Akun Anda telah berhasil dibuat. Anda akan dialihkan ke halaman login.
           </p>
           <p className="text-slate-500 text-sm">Mengalihkan ke halaman login...</p>
         </div>

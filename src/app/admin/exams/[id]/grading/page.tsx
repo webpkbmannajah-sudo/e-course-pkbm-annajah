@@ -3,10 +3,12 @@
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import {
-  ArrowLeft, Award, CheckCircle, XCircle, Loader2,
+import { 
+  ArrowLeft, Award, CheckCircle, XCircle, Loader2, 
   Users, TrendingUp, AlertCircle, Zap
 } from 'lucide-react'
+import ConfirmModal from '@/components/ConfirmModal'
+import { showToast } from '@/components/Toast'
 
 interface ScoreWithProfile {
   id: string
@@ -42,6 +44,7 @@ export default function GradingPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true)
   const [grading, setGrading] = useState(false)
   const [bulkGrading, setBulkGrading] = useState(false)
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false)
   const [filter, setFilter] = useState<'all' | 'passed' | 'failed'>('all')
   const [sortBy, setSortBy] = useState<'score' | 'name' | 'date'>('score')
 
@@ -82,8 +85,7 @@ export default function GradingPage({ params }: PageProps) {
   }
 
   const handleBulkGrade = async () => {
-    if (!confirm('Nilai semua percobaan siswa untuk ujian ini?')) return
-
+    setShowBulkConfirm(false)
     setBulkGrading(true)
     try {
       const response = await fetch('/api/grading/bulk', {
@@ -95,14 +97,14 @@ export default function GradingPage({ params }: PageProps) {
       const data = await response.json()
 
       if (response.ok) {
-        alert(`Penilaian selesai!\n• Dinilai: ${data.summary.graded}\n• Gagal: ${data.summary.failed}`)
+        showToast(`Penilaian selesai! Dinilai: ${data.summary.graded}, Gagal: ${data.summary.failed}`, 'success')
         await fetchData() // Refresh scores
       } else {
-        alert(data.error || 'Gagal menilai')
+        showToast(data.error || 'Gagal menilai')
       }
     } catch (error) {
       console.error('Bulk grade error:', error)
-      alert('Gagal menilai ujian')
+      showToast('Gagal menilai ujian')
     } finally {
       setBulkGrading(false)
     }
@@ -119,12 +121,14 @@ export default function GradingPage({ params }: PageProps) {
 
       if (response.ok) {
         await fetchData()
+        showToast('Berhasil menilai ulang', 'success')
       } else {
         const data = await response.json()
-        alert(data.error || 'Gagal menilai')
+        showToast(data.error || 'Gagal menilai')
       }
     } catch (error) {
       console.error('Single grade error:', error)
+      showToast('Gagal menilai ujian')
     } finally {
       setGrading(false)
     }
@@ -173,9 +177,9 @@ export default function GradingPage({ params }: PageProps) {
           <p className="text-slate-500 mt-1">{exam?.title}</p>
         </div>
         <button
-          onClick={handleBulkGrade}
-          disabled={bulkGrading || attemptCount === 0}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-slate-900 font-medium rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/25"
+          onClick={() => setShowBulkConfirm(true)}
+          disabled={bulkGrading || attemptCount === 0 || attemptCount === scores.length}
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/25"
         >
           {bulkGrading ? (
             <>
@@ -364,12 +368,24 @@ export default function GradingPage({ params }: PageProps) {
       {attemptCount > scores.length && (
         <div className="flex items-center gap-3 px-5 py-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
           <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
-          <p className="text-amber-300 text-sm">
-            <strong>{attemptCount - scores.length}</strong> percobaan belum dinilai.
+          <p className="text-amber-500 text-sm">
+            <strong className="font-semibold">{attemptCount - scores.length}</strong> percobaan belum dinilai.
             Klik &quot;Nilai Semua&quot; untuk menilainya.
           </p>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showBulkConfirm}
+        onClose={() => setShowBulkConfirm(false)}
+        onConfirm={handleBulkGrade}
+        title="Mulai Penilaian Otomatis?"
+        message={`Anda akan otomatis menilai ${attemptCount - scores.length} percobaan yang belum dinilai. Proses ini mungkin memakan waktu beberapa saat.`}
+        confirmText="Nilai Semua"
+        variant="info"
+        loading={bulkGrading}
+      />
     </div>
   )
 }

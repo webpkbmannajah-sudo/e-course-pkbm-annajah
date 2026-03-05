@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { ClipboardList, Plus, Trash2, Eye, Search, Calendar, FileText, HelpCircle, Award } from 'lucide-react'
+import ConfirmModal from '@/components/ConfirmModal'
+import { showToast } from '@/components/Toast'
 import { Exam, Level } from '@/types'
 
 export default function AdminExamsPage() {
@@ -21,12 +23,7 @@ export default function AdminExamsPage() {
     pdfUrl: null
   })
 
-  useEffect(() => {
-    fetchLevels()
-    fetchExams()
-  }, [])
-
-  const fetchLevels = async () => {
+  const fetchLevels = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('levels')
@@ -37,10 +34,11 @@ export default function AdminExamsPage() {
       setLevels(data || [])
     } catch (error) {
       console.error('Error fetching levels:', error)
+      showToast('Gagal memuat paket', 'error')
     }
-  }
+  }, [supabase])
 
-  const fetchExams = async () => {
+  const fetchExams = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('exams')
@@ -48,13 +46,18 @@ export default function AdminExamsPage() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setExams(data as any || [])
+      setExams(data as unknown as Exam[] || [])
     } catch (error) {
       console.error('Error fetching exams:', error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchLevels()
+    fetchExams()
+  }, [fetchLevels, fetchExams])
 
   const handleDelete = async () => {
     const { id, pdfUrl } = deleteModal
@@ -80,9 +83,10 @@ export default function AdminExamsPage() {
 
       setExams(prev => prev.filter(e => e.id !== id))
       setDeleteModal({ isOpen: false, id: '', title: '', pdfUrl: null })
+      showToast('Ujian berhasil dihapus', 'success')
     } catch (error) {
       console.error('Error deleting exam:', error)
-      alert('Gagal menghapus ujian')
+      showToast('Gagal menghapus ujian', 'error')
     } finally {
       setDeleting(null)
     }
@@ -246,44 +250,22 @@ export default function AdminExamsPage() {
         </div>
       )}
       {/* Delete Confirmation Modal */}
-      {deleteModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6">
-              <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center mb-4">
-                <Trash2 className="w-6 h-6 text-red-500" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Hapus Ujian?</h3>
-              <p className="text-slate-500 leading-relaxed">
-                Apakah Anda yakin ingin menghapus ujian <span className="font-semibold text-slate-900">"{deleteModal.title}"</span>? 
-                <br /><br />
-                Tindakan ini tidak dapat dibatalkan.
-              </p>
-            </div>
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setDeleteModal({ isOpen: false, id: '', title: '', pdfUrl: null })}
-                disabled={deleting !== null}
-                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors disabled:opacity-50"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting !== null}
-                className="flex items-center gap-2 px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-500/20 transition-all disabled:opacity-50"
-              >
-                {deleting === deleteModal.id ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Trash2 className="w-4 h-4" />
-                )}
-                Hapus Sekarang
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: '', title: '', pdfUrl: null })}
+        onConfirm={handleDelete}
+        title="Hapus Ujian?"
+        message={
+          <span>
+            Apakah Anda yakin ingin menghapus ujian <strong className="font-semibold text-slate-900">&quot;{deleteModal.title}&quot;</strong>? 
+            <br /><br />
+            Tindakan ini tidak dapat dibatalkan. Hasil pengerjaan siswa untuk ujian ini juga akan terhapus.
+          </span>
+        }
+        confirmText="Hapus Sekarang"
+        variant="danger"
+        loading={deleting !== null}
+      />
     </div>
   )
 }

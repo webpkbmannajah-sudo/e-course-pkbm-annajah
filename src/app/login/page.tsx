@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { isAdminRole } from '@/lib/roles'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -50,7 +51,7 @@ export default function LoginPage() {
 
       // Redirect based on user role
       const role = data.user?.user_metadata?.role || 'student'
-      router.push(role === 'admin' ? '/admin/dashboard' : '/student/dashboard')
+      router.push(isAdminRole(role) ? '/admin/dashboard' : '/student/dashboard')
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Gagal masuk')
@@ -120,15 +121,6 @@ export default function LoginPage() {
                 </button>
               </div>
 
-            </div>
-
-            <div className="flex justify-end">
-              <Link
-                href="/forgot-password"
-                className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
-              >
-                Lupa Password?
-              </Link>
             </div>
 
             <button
