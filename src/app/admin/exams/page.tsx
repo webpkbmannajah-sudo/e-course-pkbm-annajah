@@ -12,7 +12,9 @@ export default function AdminExamsPage() {
   const supabase = createClient()
   const [exams, setExams] = useState<Exam[]>([])
   const [levels, setLevels] = useState<Level[]>([])
+  const [subjects, setSubjects] = useState<any[]>([])
   const [selectedLevelId, setSelectedLevelId] = useState<string>('all')
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('all')
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
@@ -54,10 +56,29 @@ export default function AdminExamsPage() {
     }
   }, [supabase])
 
+  const fetchSubjects = useCallback(async (levelId: string) => {
+    try {
+      let query = supabase.from('subjects').select('id, name').order('name')
+      if (levelId !== 'all') {
+        query = query.eq('level_id', levelId)
+      }
+      const { data, error } = await query
+      if (error) throw error
+      setSubjects(data || [])
+    } catch (error) {
+      console.error('Error fetching subjects:', error)
+    }
+  }, [supabase])
+
   useEffect(() => {
     fetchLevels()
     fetchExams()
   }, [fetchLevels, fetchExams])
+
+  useEffect(() => {
+    fetchSubjects(selectedLevelId)
+    setSelectedSubjectId('all')
+  }, [selectedLevelId, fetchSubjects])
 
   const handleDelete = async () => {
     const { id, pdfUrl } = deleteModal
@@ -97,8 +118,9 @@ export default function AdminExamsPage() {
       e.description?.toLowerCase().includes(searchQuery.toLowerCase())
     
     const matchesLevel = selectedLevelId === 'all' || e.subject?.level_id === selectedLevelId
+    const matchesSubject = selectedSubjectId === 'all' || e.subject_id === selectedSubjectId
     
-    return matchesSearch && matchesLevel
+    return matchesSearch && matchesLevel && matchesSubject
   })
 
   if (loading) {
@@ -139,30 +161,45 @@ export default function AdminExamsPage() {
           />
         </div>
 
-        <div className="flex bg-white p-1 rounded-xl border border-slate-200 overflow-x-auto">
-          <button
-            onClick={() => setSelectedLevelId('all')}
-            className={`flex-1 min-w-[100px] px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              selectedLevelId === 'all'
-                ? 'bg-purple-500 text-white shadow-md'
-                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-            }`}
-          >
-            Semua Paket
-          </button>
-          {levels.map(level => (
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex bg-white p-1 rounded-xl border border-slate-200 overflow-x-auto flex-1">
             <button
-              key={level.id}
-              onClick={() => setSelectedLevelId(level.id)}
+              onClick={() => setSelectedLevelId('all')}
               className={`flex-1 min-w-[100px] px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                selectedLevelId === level.id
+                selectedLevelId === 'all'
                   ? 'bg-purple-500 text-white shadow-md'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
-              {level.name}
+              Semua Paket
             </button>
-          ))}
+            {levels.map(level => (
+              <button
+                key={level.id}
+                onClick={() => setSelectedLevelId(level.id)}
+                className={`flex-1 min-w-[100px] px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  selectedLevelId === level.id
+                    ? 'bg-purple-500 text-white shadow-md'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                {level.name}
+              </button>
+            ))}
+          </div>
+
+          <select
+            value={selectedSubjectId}
+            onChange={(e) => setSelectedSubjectId(e.target.value)}
+            className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[200px]"
+          >
+            <option value="all">Semua Mata Pelajaran</option>
+            {subjects.map(subject => (
+              <option key={subject.id} value={subject.id}>
+                {subject.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
