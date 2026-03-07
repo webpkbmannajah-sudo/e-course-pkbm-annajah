@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { ClipboardList, Plus, Trash2, Edit, Search, Calendar, FileText, HelpCircle, Award, ChevronDown, Check } from 'lucide-react'
+import { getLevelBadgeClass } from '@/lib/levelColors'
 import ConfirmModal from '@/components/ConfirmModal'
 import { showToast } from '@/components/Toast'
 import { Exam, Level } from '@/types'
@@ -305,16 +306,7 @@ export default function AdminExamsPage() {
       ) : (
         <div className="grid gap-4">
           {filteredExams.map((exam) => {
-            // Tentukan warna badge berdasarkan nama paket
-            let levelColorClass = "bg-slate-100 text-slate-600 border-slate-200"
-            const levelNameTemp = exam.subject?.level?.name?.toLowerCase() || ""
-            if (levelNameTemp.includes('paket a')) {
-              levelColorClass = "bg-red-50 text-red-600 border-red-200"
-            } else if (levelNameTemp.includes('paket b')) {
-              levelColorClass = "bg-emerald-50 text-emerald-600 border-emerald-200"
-            } else if (levelNameTemp.includes('paket c')) {
-              levelColorClass = "bg-yellow-50 text-yellow-600 border-yellow-200"
-            }
+            const levelColorClass = getLevelBadgeClass(exam.subject?.level?.name)
 
             return (
             <div

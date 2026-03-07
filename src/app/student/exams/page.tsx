@@ -5,35 +5,14 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { ClipboardList, Search, Calendar, ArrowRight, FileText, CheckCircle, ChevronDown, Check, PenTool } from 'lucide-react'
 import { Exam } from '@/types'
+import { getStudentThemeVars } from '@/lib/levelColors'
 
 interface ExamWithAttempt extends Exam {
   hasAttempted?: boolean
   score?: number
 }
 
-const getThemeVars = (level: string | null) => {
-  switch (level) {
-    case 'sd': return {
-      titleHover: 'group-hover:text-orange-600',
-      badge: 'bg-orange-100 text-orange-700 border-orange-200',
-      cardHover: 'hover:border-orange-400',
-      arrowHover: 'text-slate-500 group-hover:text-orange-500 group-hover:translate-x-1',
-    }
-    case 'smp': return {
-      titleHover: 'group-hover:text-blue-600',
-      badge: 'bg-blue-100 text-blue-700 border-blue-200',
-      cardHover: 'hover:border-blue-400',
-      arrowHover: 'text-slate-500 group-hover:text-blue-500 group-hover:translate-x-1',
-    }
-    case 'sma':
-    default: return {
-      titleHover: 'group-hover:text-emerald-600',
-      badge: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-      cardHover: 'hover:border-emerald-400',
-      arrowHover: 'text-slate-500 group-hover:text-emerald-500 group-hover:translate-x-1',
-    }
-  }
-}
+
 
 export default function StudentExamsPage() {
   const supabase = createClient()
@@ -262,7 +241,7 @@ export default function StudentExamsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredExams.map((exam) => {
-            const themeVars = getThemeVars(userLevel)
+            const themeVars = getStudentThemeVars(userLevel)
             return (
             <Link
               key={exam.id}

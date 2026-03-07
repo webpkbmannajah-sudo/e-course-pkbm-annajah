@@ -52,11 +52,11 @@ export default function StudentProfilePage() {
     }
   }
 
-  if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin w-8 h-8 text-blue-600" /></div>
+  if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin w-8 h-8 text-emerald-600" /></div>
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">My Profile</h1>
+      <h1 className="text-2xl font-bold text-slate-800 mb-6">Profil Saya</h1>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-6 md:p-8">
@@ -82,8 +82,8 @@ export default function StudentProfilePage() {
                     <Camera className="w-8 h-8 text-slate-900" />
                   </div>
                 </div>
-                <button type="button" className="text-sm text-blue-600 font-medium hover:text-blue-700">
-                  Change Photo
+                <button type="button" className="text-sm text-emerald-600 font-medium hover:text-emerald-700">
+                  Ubah Foto
                 </button>
               </div>
 
@@ -91,12 +91,12 @@ export default function StudentProfilePage() {
               <div className="flex-1 space-y-6 w-full">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Nama Lengkap</label>
                     <input
                       type="text"
                       value={profile?.name || ''}
                       onChange={e => setProfile({ ...profile!, name: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
                     />
                   </div>
                   <div>
@@ -111,12 +111,12 @@ export default function StudentProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Phone Number</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Nomor Telepon</label>
                   <input
                     type="tel"
                     value={profile?.phone || ''}
                     onChange={e => setProfile({ ...profile!, phone: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
                     placeholder="+62..."
                   />
                 </div>
@@ -127,7 +127,7 @@ export default function StudentProfilePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2 disabled:opacity-50 w-full md:w-auto justify-center"
+                className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium transition-colors flex items-center gap-2 disabled:opacity-50 w-full md:w-auto justify-center"
               >
                 {saving ? (
                   <>

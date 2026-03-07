@@ -68,13 +68,13 @@ export default function ExamResultPage({ params }: PageProps) {
     return (
       <div className="text-center py-12">
         <Award className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-slate-900 mb-2">Results not available yet</h3>
-        <p className="text-slate-500 mb-4">Your exam hasn&apos;t been graded yet. Please check back later.</p>
+        <h3 className="text-lg font-medium text-slate-900 mb-2">Hasil belum tersedia</h3>
+        <p className="text-slate-500 mb-4">Ujian Anda belum dinilai. Silakan cek kembali nanti.</p>
         <Link
           href="/student/exams"
           className="text-emerald-400 hover:text-emerald-300"
         >
-          ← Back to exams
+          ← Kembali ke daftar ujian
         </Link>
       </div>
     )
@@ -123,7 +123,7 @@ export default function ExamResultPage({ params }: PageProps) {
               </span>
             )}
           </div>
-          <p className="text-slate-500 mt-1">Exam Results</p>
+          <p className="text-slate-500 mt-1">Hasil Ujian</p>
         </div>
       </div>
 
@@ -136,7 +136,7 @@ export default function ExamResultPage({ params }: PageProps) {
         <Trophy className={`w-16 h-16 mx-auto mb-4 ${
           score.is_passed ? 'text-emerald-400' : 'text-orange-400'
         }`} />
-        <h2 className="text-lg text-slate-600 mb-2">Your Score</h2>
+        <h2 className="text-lg text-slate-600 mb-2">Nilai Anda</h2>
         <p className={`text-5xl font-bold ${
           score.is_passed ? 'text-emerald-400' : 'text-orange-400'
         }`}>
@@ -145,11 +145,11 @@ export default function ExamResultPage({ params }: PageProps) {
         <p className={`text-sm mt-2 font-medium ${
           score.is_passed ? 'text-emerald-400' : 'text-orange-400'
         }`}>
-          {score.is_passed ? '✓ PASSED' : '✗ FAILED'}
+          {score.is_passed ? '✓ LULUS' : '✗ TIDAK LULUS'}
         </p>
         <div className="flex items-center justify-center gap-6 mt-4 text-slate-600 text-sm">
-          <span>Correct: <strong className="text-emerald-400">{correctCount}</strong></span>
-          <span>Incorrect: <strong className="text-red-400">{totalQuestions - correctCount}</strong></span>
+          <span>Benar: <strong className="text-emerald-400">{correctCount}</strong></span>
+          <span>Salah: <strong className="text-red-400">{totalQuestions - correctCount}</strong></span>
           <span>Total: <strong className="text-slate-900">{totalQuestions}</strong></span>
         </div>
         <p className="text-slate-500 text-xs mt-3">
@@ -162,14 +162,14 @@ export default function ExamResultPage({ params }: PageProps) {
             href="/student/exams"
             className="px-6 py-2 bg-slate-200 hover:bg-slate-600 text-slate-900 hover:text-white rounded-xl transition-colors"
           >
-            Back to Exams
+            Kembali ke Ujian
           </Link>
         </div>
       </div>
 
       {/* Answer Breakdown */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-slate-900">Answer Review</h3>
+        <h3 className="text-lg font-semibold text-slate-900">Tinjau Jawaban</h3>
 
         {score.breakdown.map((item, index) => (
           <div
@@ -205,12 +205,12 @@ export default function ExamResultPage({ params }: PageProps) {
                 }`}>
                   {item.selected_choice_text}
                   <span className="ml-2 text-xs">
-                    {item.is_correct ? '(Your answer ✓)' : '(Your answer)'}
+                    {item.is_correct ? '(Jawaban Anda ✓)' : '(Jawaban Anda)'}
                   </span>
                 </div>
               ) : (
                 <div className="px-4 py-2 rounded-lg border border-slate-200 text-slate-500">
-                  No answer selected
+                  Tidak ada jawaban yang dipilih
                 </div>
               )}
 
@@ -218,7 +218,7 @@ export default function ExamResultPage({ params }: PageProps) {
               {!item.is_correct && (
                 <div className="px-4 py-2 rounded-lg border bg-green-500/10 border-green-500/50 text-green-400">
                   {item.correct_choice_text}
-                  <span className="ml-2 text-xs">(Correct answer)</span>
+                  <span className="ml-2 text-xs">(Jawaban benar)</span>
                 </div>
               )}
             </div>

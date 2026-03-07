@@ -7,6 +7,7 @@ import { FileText, Plus, Trash2, Eye, Search, Calendar, Image as ImageIcon } fro
 import ConfirmModal from '@/components/ConfirmModal'
 import { showToast } from '@/components/Toast'
 import { Material, Level } from '@/types'
+import { getLevelBadgeClass } from '@/lib/levelColors'
 
 export default function AdminMaterialsPage() {
   const supabase = createClient()
@@ -44,7 +45,7 @@ export default function AdminMaterialsPage() {
         .from('materials')
         .select(`
           *,
-          subject:subjects(name, level_id)
+          subject:subjects(name, level_id, level:levels(name))
         `)
         .order('created_at', { ascending: false })
 
@@ -204,9 +205,14 @@ export default function AdminMaterialsPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-slate-900">{material.title}</h3>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                        {(material as any).subject?.level?.name && (
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${getLevelBadgeClass((material as any).subject.level.name)}`}>
+                                {(material as any).subject.level.name}
+                            </span>
+                        )}
                         {material.subject && (
-                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-purple-500/20 text-purple-300">
+                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-purple-50 text-purple-600 border border-purple-200">
                                 {material.subject.name}
                             </span>
                         )}

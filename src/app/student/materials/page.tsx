@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { FileText, Search, Calendar, ArrowRight, Image as ImageIcon, X } from 'lucide-react'
 import { Material } from '@/types'
+import { getStudentThemeVars, getLevelLabel } from '@/lib/levelColors'
 
 export default function StudentMaterialsPage() {
   const supabase = createClient()
@@ -56,41 +57,9 @@ export default function StudentMaterialsPage() {
     m.description?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const getLevelLabel = (level: string | null) => {
-    switch (level) {
-      case 'sd': return 'Paket A'
-      case 'smp': return 'Paket B'
-      case 'sma': return 'Paket C'
-      default: return level?.toUpperCase() || ''
-    }
-  }
 
-  const getThemeVars = (level: string | null) => {
-    switch (level) {
-      case 'sd': return {
-        titleHover: 'group-hover:text-orange-600',
-        badge: 'bg-orange-100 text-orange-700 border-orange-200',
-        iconBase: 'text-orange-500',
-        linkHover: 'text-orange-600 hover:text-orange-700',
-        cardHover: 'hover:border-orange-400',
-      }
-      case 'smp': return {
-        titleHover: 'group-hover:text-blue-600',
-        badge: 'bg-blue-100 text-blue-700 border-blue-200',
-        iconBase: 'text-blue-500',
-        linkHover: 'text-blue-600 hover:text-blue-700',
-        cardHover: 'hover:border-blue-400',
-      }
-      case 'sma':
-      default: return {
-        titleHover: 'group-hover:text-emerald-600',
-        badge: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-        iconBase: 'text-emerald-500',
-        linkHover: 'text-emerald-600 hover:text-emerald-700',
-        cardHover: 'hover:border-emerald-400',
-      }
-    }
-  }
+
+
 
   const getTypeIcon = (type: string, theme: Record<string, string>) => {
     switch (type) {
@@ -99,7 +68,7 @@ export default function StudentMaterialsPage() {
     }
   }
 
-  const themeVars = getThemeVars(userLevel)
+  const themeVars = getStudentThemeVars(userLevel)
 
   if (loading) {
     return (

@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { FileText, ClipboardList, Users, Plus, TrendingUp, Target, Percent } from 'lucide-react'
+import { FileText, ClipboardList, Users, Plus, TrendingUp, Target, Percent, ShieldCheck } from 'lucide-react'
+import { isSuperAdmin } from '@/lib/roles'
 
 interface DashboardStats {
   totalMaterials: number
@@ -11,16 +12,19 @@ interface DashboardStats {
   totalStudents: number
   avgScore: number | null
   passRate: number | null
+  totalAdmins: number
 }
 
 export default function AdminDashboard() {
   const supabase = createClient()
+  const [userRole, setUserRole] = useState<{role: string, email: string} | null>(null)
   const [stats, setStats] = useState<DashboardStats>({
     totalMaterials: 0,
     totalExams: 0,
     totalStudents: 0,
     avgScore: null,
     passRate: null,
+    totalAdmins: 0,
   })
   const [recentMaterials, setRecentMaterials] = useState<{id: string; title: string; created_at: string}[]>([])
   const [loading, setLoading] = useState(true)
@@ -65,12 +69,25 @@ export default function AdminDashboard() {
           passRate = Math.round((passCount / scores.length) * 100 * 10) / 10
         }
 
+        // Fetch user context
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          setUserRole({ role: user.user_metadata?.role || 'admin', email: user.email || '' })
+        }
+        
+        // Fetch admins count
+        const { count: adminsCount } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .in('role', ['admin', 'superadmin'])
+
         setStats({
           totalMaterials: materialsCount || 0,
           totalExams: examsCount || 0,
           totalStudents: studentsCount || 0,
           avgScore,
           passRate,
+          totalAdmins: adminsCount || 0
         })
         setRecentMaterials(materials || [])
       } catch (error) {
@@ -82,6 +99,8 @@ export default function AdminDashboard() {
 
     fetchStats()
   }, [supabase])
+
+  const isSuper = isSuperAdmin(userRole?.role, userRole?.email)
 
   const statCards = [
     {
@@ -105,6 +124,13 @@ export default function AdminDashboard() {
       color: 'from-emerald-500 to-teal-500',
       href: '/admin/students',
     },
+    ...(isSuper ? [{
+      title: 'Admin & Operator',
+      value: stats.totalAdmins,
+      icon: ShieldCheck,
+      color: 'from-amber-500 to-orange-500',
+      href: '/admin/manage-admins',
+    }] : []),
     {
       title: 'Rata-rata Nilai',
       value: stats.avgScore !== null ? `${stats.avgScore}%` : '-',

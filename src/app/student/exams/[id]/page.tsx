@@ -266,6 +266,13 @@ export default function TakeExamPage({ params }: PageProps) {
     
     setShowRetakeModal(false)
     try {
+      // Delete associated score first
+      await supabase
+        .from('scores')
+        .delete()
+        .eq('attempt_id', existingAttempt.id)
+
+      // Then delete the attempt
       const { error } = await supabase
         .from('exam_attempts')
         .delete()
