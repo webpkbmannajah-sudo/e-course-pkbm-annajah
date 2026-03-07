@@ -26,7 +26,6 @@ export default function GradingIndexPage() {
         const { data: examsData, error } = await supabase
           .from('exams')
           .select('id, title, type, created_at')
-          .eq('type', 'questions')
           .order('created_at', { ascending: false })
 
         if (error) throw error
@@ -94,7 +93,7 @@ export default function GradingIndexPage() {
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <ClipboardList className="w-16 h-16 text-slate-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">Tidak ada ujian untuk dinilai</h3>
-          <p className="text-slate-500">Ujian berbasis pertanyaan akan muncul di sini</p>
+          <p className="text-slate-500">Ujian berbasis pertanyaan dan PDF akan muncul di sini</p>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -109,9 +108,18 @@ export default function GradingIndexPage() {
                   <Award className="w-6 h-6 text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900 group-hover:text-purple-400 transition-colors">
-                    {exam.title}
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-slate-900 group-hover:text-purple-400 transition-colors">
+                      {exam.title}
+                    </h3>
+                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                      exam.type === 'pdf' 
+                        ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                        : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                    }`}>
+                      {exam.type === 'pdf' ? 'PDF' : 'Pilihan Ganda'}
+                    </span>
+                  </div>
                   <p className="text-slate-500 text-sm mt-1">
                     {exam.attempt_count} percobaan • Dibuat {new Date(exam.created_at).toLocaleDateString('id-ID')}
                   </p>

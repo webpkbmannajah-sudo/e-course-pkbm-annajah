@@ -42,7 +42,7 @@ export default function AdminExamsPage() {
     try {
       const { data, error } = await supabase
         .from('exams')
-        .select('*, subject:subjects(name, level_id)')
+        .select('*, subject:subjects(name, level_id, level:levels(name)), material:materials(title)')
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -203,18 +203,37 @@ export default function AdminExamsPage() {
                     {exam.description && (
                       <p className="text-slate-500 text-sm mt-1 line-clamp-2">{exam.description}</p>
                     )}
-                    <div className="flex items-center gap-4 mt-3 text-sm text-slate-500">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        exam.type === 'pdf' 
-                          ? 'bg-orange-500/20 text-orange-400'
-                          : 'bg-purple-500/20 text-purple-400'
-                      }`}>
-                        {exam.type === 'pdf' ? 'Ujian PDF' : 'Pilihan Ganda'}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {new Date(exam.created_at).toLocaleDateString()}
-                      </span>
+                    <div className="flex flex-col gap-2 mt-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {exam.subject?.level?.name && (
+                          <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                            {exam.subject.level.name}
+                          </span>
+                        )}
+                        {exam.subject?.name && (
+                          <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                            {exam.subject.name}
+                          </span>
+                        )}
+                        {exam.material?.title && (
+                          <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                            Materi: {exam.material.title}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-slate-500">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          exam.type === 'pdf' 
+                            ? 'bg-orange-500/20 text-orange-400'
+                            : 'bg-purple-500/20 text-purple-400'
+                        }`}>
+                          {exam.type === 'pdf' ? 'Ujian PDF' : 'Pilihan Ganda'}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {new Date(exam.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -23,6 +23,7 @@ interface ScoreWithProfile {
   graded_at: string
   student_name: string
   student_email: string
+  is_graded?: boolean
 }
 
 interface ExamInfo {
@@ -142,17 +143,22 @@ export default function GradingPage({ params }: PageProps) {
       return true
     })
     .sort((a, b) => {
+      // Sort ungraded first
+      if (a.is_graded === false && b.is_graded !== false) return -1
+      if (a.is_graded !== false && b.is_graded === false) return 1
+      
       if (sortBy === 'score') return b.percentage - a.percentage
       if (sortBy === 'name') return a.student_name.localeCompare(b.student_name)
       return new Date(b.graded_at).getTime() - new Date(a.graded_at).getTime()
     })
 
-  // Stats
-  const avgScore = scores.length > 0
-    ? Math.round(scores.reduce((sum, s) => sum + s.percentage, 0) / scores.length)
+  // Stats (only for graded attempts)
+  const gradedScores = scores.filter(s => s.is_graded !== false)
+  const avgScore = gradedScores.length > 0
+    ? Math.round(gradedScores.reduce((sum, s) => sum + s.percentage, 0) / gradedScores.length)
     : 0
-  const passedCount = scores.filter(s => s.is_passed).length
-  const failedCount = scores.filter(s => !s.is_passed).length
+  const passedCount = gradedScores.filter(s => s.is_passed).length
+  const failedCount = gradedScores.filter(s => !s.is_passed).length
 
   if (loading) {
     return (
@@ -176,23 +182,25 @@ export default function GradingPage({ params }: PageProps) {
           <h1 className="text-2xl font-bold text-slate-900">Penilaian</h1>
           <p className="text-slate-500 mt-1">{exam?.title}</p>
         </div>
-        <button
-          onClick={() => setShowBulkConfirm(true)}
-          disabled={bulkGrading || attemptCount === 0 || attemptCount === scores.length}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/25"
-        >
-          {bulkGrading ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Menilai...
-            </>
-          ) : (
-            <>
-              <Zap className="w-5 h-5" />
-               Nilai Semua ({attemptCount})
-            </>
-          )}
-        </button>
+        {exam?.type !== 'pdf' && (
+          <button
+            onClick={() => setShowBulkConfirm(true)}
+            disabled={bulkGrading || attemptCount === 0 || attemptCount === gradedScores.length}
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/25"
+          >
+            {bulkGrading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Menilai...
+              </>
+            ) : (
+              <>
+                <Zap className="w-5 h-5" />
+                 Nilai Semua ({attemptCount - gradedScores.length})
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       {/* Kartu Statistik */}
@@ -309,20 +317,32 @@ export default function GradingPage({ params }: PageProps) {
                       </div>
                     </td>
                     <td className="px-5 py-4 text-center">
-                      <span className="text-slate-900 font-mono">
-                        {score.total_score}/{score.max_score}
-                      </span>
+                      {score.is_graded === false ? (
+                        <span className="text-slate-400 font-medium">-</span>
+                      ) : (
+                        <span className="text-slate-900 font-mono">
+                          {score.total_score}/{score.max_score}
+                        </span>
+                      )}
                     </td>
                     <td className="px-5 py-4 text-center">
-                      <span className={`text-lg font-bold ${
-                        score.percentage >= 80 ? 'text-emerald-400' :
-                        score.percentage >= 60 ? 'text-yellow-400' : 'text-red-400'
-                      }`}>
-                        {score.percentage}%
-                      </span>
+                      {score.is_graded === false ? (
+                        <span className="text-slate-400 font-medium">-</span>
+                      ) : (
+                        <span className={`text-lg font-bold ${
+                          score.percentage >= 80 ? 'text-emerald-400' :
+                          score.percentage >= 60 ? 'text-yellow-400' : 'text-red-400'
+                        }`}>
+                          {score.percentage}%
+                        </span>
+                      )}
                     </td>
                     <td className="px-5 py-4 text-center">
-                      {score.is_passed ? (
+                      {score.is_graded === false ? (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500/20 text-amber-500 rounded-full text-xs font-medium">
+                          Belum Dinilai
+                        </span>
+                      ) : score.is_passed ? (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-medium">
                           <CheckCircle className="w-3 h-3" />
                           Lulus
@@ -343,17 +363,23 @@ export default function GradingPage({ params }: PageProps) {
                       <div className="flex items-center justify-center gap-2">
                         <Link
                           href={`/admin/exams/${examId}/grading/${score.user_id}`}
-                          className="px-3 py-1.5 text-sm bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-lg transition-colors"
+                          className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                            score.is_graded === false
+                              ? 'bg-amber-500/20 text-amber-600 hover:bg-amber-500/30'
+                              : 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'
+                          }`}
                         >
-                          Tinjau
+                          {score.is_graded === false ? 'Beri Nilai' : 'Tinjau'}
                         </Link>
-                        <button
-                          onClick={() => handleSingleGrade(score.attempt_id)}
-                          disabled={grading}
-                          className="px-3 py-1.5 text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded-lg transition-colors disabled:opacity-50"
-                        >
-                           Nilai Ulang
-                        </button>
+                        {exam?.type !== 'pdf' && score.is_graded !== false && (
+                          <button
+                            onClick={() => handleSingleGrade(score.attempt_id)}
+                            disabled={grading}
+                            className="px-3 py-1.5 text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded-lg transition-colors disabled:opacity-50"
+                          >
+                             Nilai Ulang
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -365,12 +391,22 @@ export default function GradingPage({ params }: PageProps) {
       )}
 
       {/* Ungraded attempts notice */}
-      {attemptCount > scores.length && (
+      {attemptCount > gradedScores.length && exam?.type !== 'pdf' && (
         <div className="flex items-center gap-3 px-5 py-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
           <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
           <p className="text-amber-500 text-sm">
-            <strong className="font-semibold">{attemptCount - scores.length}</strong> percobaan belum dinilai.
+            <strong className="font-semibold">{attemptCount - gradedScores.length}</strong> percobaan belum dinilai.
             Klik &quot;Nilai Semua&quot; untuk menilainya.
+          </p>
+        </div>
+      )}
+      
+      {attemptCount > gradedScores.length && exam?.type === 'pdf' && (
+        <div className="flex items-center gap-3 px-5 py-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+          <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
+          <p className="text-amber-500 text-sm">
+            <strong className="font-semibold">{attemptCount - gradedScores.length}</strong> ujian PDF menunggu dinilai.
+            Pilih &quot;Beri Nilai&quot; pada tabel di atas untuk memeriksa file PDF siswa.
           </p>
         </div>
       )}
@@ -381,7 +417,7 @@ export default function GradingPage({ params }: PageProps) {
         onClose={() => setShowBulkConfirm(false)}
         onConfirm={handleBulkGrade}
         title="Mulai Penilaian Otomatis?"
-        message={`Anda akan otomatis menilai ${attemptCount - scores.length} percobaan yang belum dinilai. Proses ini mungkin memakan waktu beberapa saat.`}
+        message={`Anda akan otomatis menilai ${attemptCount - gradedScores.length} percobaan yang belum dinilai. Proses ini mungkin memakan waktu beberapa saat.`}
         confirmText="Nilai Semua"
         variant="info"
         loading={bulkGrading}

@@ -20,7 +20,7 @@ export async function POST(request: Request) {
             .eq('id', user.id)
             .single()
 
-        if (!isAdminRole(profile?.role)) {
+        if (!isAdminRole(profile?.role, user.email)) {
             return NextResponse.json({ error: 'Forbidden. Admin access required.' }, { status: 403 })
         }
 
@@ -44,6 +44,14 @@ export async function POST(request: Request) {
 
         if (updateError) {
             console.error('Error updating user password:', updateError)
+
+            // Handle specific Supabase Auth error for users created manually via SQL
+            if (updateError.message.includes('Database error loading user')) {
+                return NextResponse.json({
+                    error: 'Gagal mereset password. Akun ini kemungkinan dibuat secara manual via SQL sehingga data otentikasinya di Supabase tidak lengkap. Silakan hapus dan buat ulang akun ini.'
+                }, { status: 500 })
+            }
+
             return NextResponse.json({ error: updateError.message }, { status: 500 })
         }
 

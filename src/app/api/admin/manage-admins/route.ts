@@ -19,7 +19,7 @@ export async function GET() {
             .eq('id', user.id)
             .single()
 
-        if (!isSuperAdmin(profile?.role)) {
+        if (!isSuperAdmin(profile?.role, user.email)) {
             return NextResponse.json({ error: 'Forbidden. Super Admin access required.' }, { status: 403 })
         }
 
@@ -34,7 +34,14 @@ export async function GET() {
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
 
-        return NextResponse.json({ admins: admins || [] })
+        const adminsWithRoles = (admins || []).map(admin => {
+            if (isSuperAdmin(admin.role, admin.email)) {
+                return { ...admin, role: 'superadmin' }
+            }
+            return admin
+        })
+
+        return NextResponse.json({ admins: adminsWithRoles })
     } catch (error) {
         console.error('Error fetching admins:', error)
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -57,7 +64,7 @@ export async function POST(request: Request) {
             .eq('id', user.id)
             .single()
 
-        if (!isSuperAdmin(profile?.role)) {
+        if (!isSuperAdmin(profile?.role, user.email)) {
             return NextResponse.json({ error: 'Forbidden. Super Admin access required.' }, { status: 403 })
         }
 
@@ -129,7 +136,7 @@ export async function DELETE(request: Request) {
             .eq('id', user.id)
             .single()
 
-        if (!isSuperAdmin(profile?.role)) {
+        if (!isSuperAdmin(profile?.role, user.email)) {
             return NextResponse.json({ error: 'Forbidden. Super Admin access required.' }, { status: 403 })
         }
 
@@ -148,6 +155,14 @@ export async function DELETE(request: Request) {
         const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
         if (deleteError) {
             console.error('Error deleting admin auth:', deleteError)
+
+            // Handle specific Supabase Auth error for users created manually via SQL
+            if (deleteError.message.includes('Database error loading user')) {
+                return NextResponse.json({
+                    error: 'Gagal menghapus lewat sistem. Akun ini kemungkinan dibuat secara manual via SQL sehingga tidak terdaftar dengan benar di Supabase Auth. Silakan hapus langsung dari menu Authentication di Supabase Dashboard.'
+                }, { status: 500 })
+            }
+
             return NextResponse.json({ error: `Gagal menghapus admin: ${deleteError.message}` }, { status: 500 })
         }
 

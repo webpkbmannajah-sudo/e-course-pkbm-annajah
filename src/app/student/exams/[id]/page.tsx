@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { 
   ArrowLeft, FileText, ClipboardList, CheckCircle, 
-  Loader2, AlertCircle, Trophy, RefreshCw
+  Loader2, AlertCircle, Trophy, RefreshCw, Upload, X
 } from 'lucide-react'
 import ConfirmModal from '@/components/ConfirmModal'
 import { showToast } from '@/components/Toast'
@@ -38,6 +38,10 @@ export default function TakeExamPage({ params }: PageProps) {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState<number | null>(null)
+  
+  const [answerFile, setAnswerFile] = useState<File | null>(null)
+  const [uploadingAnswer, setUploadingAnswer] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
   
   // Modals state
   const [showSubmitModal, setShowSubmitModal] = useState(false)
@@ -111,6 +115,85 @@ export default function TakeExamPage({ params }: PageProps) {
       localStorage.setItem(`exam_answers_${id}`, JSON.stringify(answers))
     }
   }, [answers, id])
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true)
+    } else if (e.type === 'dragleave') {
+      setDragActive(false)
+    }
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const droppedFile = e.dataTransfer.files[0]
+      if (droppedFile.size > 5 * 1024 * 1024) {
+        showToast('Ukuran file maksimal 5MB', 'error')
+        return
+      }
+      setAnswerFile(droppedFile)
+    }
+  }, [])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0]
+      if (selectedFile.size > 5 * 1024 * 1024) {
+        showToast('Ukuran file maksimal 5MB', 'error')
+        return
+      }
+      setAnswerFile(selectedFile)
+    }
+  }
+
+  const submitPdfExam = async () => {
+    if (!exam || !answerFile) return
+    setUploadingAnswer(true)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const formData = new FormData()
+      formData.append('file', answerFile)
+      
+      const uploadRes = await fetch(`/api/exams/${exam.id}/upload-answer`, {
+        method: 'POST',
+        body: formData
+      })
+      
+      const uploadData = await uploadRes.json()
+      if (!uploadRes.ok) throw new Error(uploadData.error || 'Gagal mengunggah file')
+
+      const { data: attempt, error } = await supabase
+        .from('exam_attempts')
+        .insert({
+          user_id: user.id,
+          exam_id: exam.id,
+          answers: { file_url: uploadData.url, file_name: answerFile.name },
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      setExistingAttempt(attempt as ExistingAttempt)
+      setSubmitted(true)
+      showToast('Jawaban berhasil dikirim', 'success')
+      
+    } catch (err) {
+      console.error('Error submitting exam:', err)
+      showToast(err instanceof Error ? err.message : 'Gagal mengirim ujian', 'error')
+    } finally {
+      setUploadingAnswer(false)
+    }
+  }
 
   const handleAnswerChange = (questionId: string, choiceId: string) => {
     setAnswers(prev => ({
@@ -219,7 +302,7 @@ export default function TakeExamPage({ params }: PageProps) {
   // PDF Exam
   if (exam.type === 'pdf') {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-start gap-4">
           <Link
@@ -233,6 +316,7 @@ export default function TakeExamPage({ params }: PageProps) {
             {exam.description && (
               <p className="text-slate-500 mt-1">{exam.description}</p>
             )}
+            {submitted && <span className="inline-block mt-2 px-3 py-1 bg-emerald-100 text-emerald-700 text-sm font-medium rounded-full">Terkirim</span>}
           </div>
         </div>
 
@@ -240,7 +324,7 @@ export default function TakeExamPage({ params }: PageProps) {
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
           <div className="bg-slate-100 px-4 py-3 border-b border-slate-600 flex items-center gap-2 text-slate-500">
             <FileText className="w-5 h-5" />
-            <span className="text-sm">File PDF Ujian</span>
+            <span className="text-sm">File Soal Ujian</span>
           </div>
           <div className="aspect-[4/3] bg-slate-50">
             <iframe
@@ -249,6 +333,85 @@ export default function TakeExamPage({ params }: PageProps) {
               title={exam.title}
             />
           </div>
+        </div>
+
+        {/* Answer Upload Section */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Jawaban Ujian</h2>
+          {submitted ? (
+            <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-100 rounded-xl">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-emerald-500" />
+                <div>
+                  <p className="text-emerald-900 font-medium">Jawaban telah dikirim</p>
+                  <p className="text-emerald-700 text-sm">
+                    {existingAttempt?.answers?.file_name || 'File jawaban tersimpan'}
+                  </p>
+                </div>
+              </div>
+              {existingAttempt?.answers?.file_url && (
+                <a 
+                  href={existingAttempt.answers.file_url} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="px-4 py-2 bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Lihat Jawaban
+                </a>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div 
+                onDragEnter={handleDrag} 
+                onDragLeave={handleDrag} 
+                onDragOver={handleDrag} 
+                onDrop={handleDrop} 
+                className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors ${dragActive ? 'border-emerald-500 bg-emerald-500/10' : answerFile ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-slate-300 hover:border-slate-400'}`}
+              >
+                <input type="file" accept=".pdf,image/*" onChange={handleFileChange} className="hidden" id="answer-file-upload" />
+                <label htmlFor="answer-file-upload" className="cursor-pointer block">
+                  {answerFile ? (
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="text-left py-2">
+                        <p className="text-slate-900 font-medium truncate max-w-xs">{answerFile.name}</p>
+                        <p className="text-slate-500 text-sm">{(answerFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
+                      <button type="button" onClick={(e) => { e.preventDefault(); setAnswerFile(null) }} className="p-2 ml-4 bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-red-500 hover:bg-red-50 transition-colors">
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+                      <p className="text-slate-600">Seret & letakkan file jawaban (PDF/Gambar) di sini, atau <span className="text-emerald-500">pilih file</span></p>
+                      <p className="text-slate-400 text-sm mt-1">Maksimal 5MB</p>
+                    </>
+                  )}
+                </label>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={submitPdfExam}
+                  disabled={!answerFile || uploadingAnswer}
+                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {uploadingAnswer ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Mengunggah...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      Kirim Jawaban
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )
