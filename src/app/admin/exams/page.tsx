@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { ClipboardList, Plus, Trash2, Edit, Search, Calendar, FileText, HelpCircle, Award } from 'lucide-react'
+import { ClipboardList, Plus, Trash2, Edit, Search, Calendar, FileText, HelpCircle, Award, ChevronDown, Check } from 'lucide-react'
 import ConfirmModal from '@/components/ConfirmModal'
 import { showToast } from '@/components/Toast'
 import { Exam, Level } from '@/types'
@@ -14,7 +14,9 @@ export default function AdminExamsPage() {
   const [levels, setLevels] = useState<Level[]>([])
   const [subjects, setSubjects] = useState<any[]>([])
   const [selectedLevelId, setSelectedLevelId] = useState<string>('all')
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('all')
+  const [selectedSubjectName, setSelectedSubjectName] = useState<string>('all')
+  const [isSubjectDropdownOpen, setIsSubjectDropdownOpen] = useState(false)
+  const [subjectSearchQuery, setSubjectSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
@@ -64,7 +66,21 @@ export default function AdminExamsPage() {
       }
       const { data, error } = await query
       if (error) throw error
-      setSubjects(data || [])
+      
+      const uniqueSubjects: any[] = []
+      const seenNames = new Set()
+      
+      if (data) {
+        data.forEach(subject => {
+          const lowerName = subject.name.toLowerCase()
+          if (!seenNames.has(lowerName)) {
+            seenNames.add(lowerName)
+            uniqueSubjects.push(subject)
+          }
+        })
+      }
+      
+      setSubjects(uniqueSubjects)
     } catch (error) {
       console.error('Error fetching subjects:', error)
     }
@@ -77,7 +93,7 @@ export default function AdminExamsPage() {
 
   useEffect(() => {
     fetchSubjects(selectedLevelId)
-    setSelectedSubjectId('all')
+    setSelectedSubjectName('all')
   }, [selectedLevelId, fetchSubjects])
 
   const handleDelete = async () => {
@@ -118,10 +134,14 @@ export default function AdminExamsPage() {
       e.description?.toLowerCase().includes(searchQuery.toLowerCase())
     
     const matchesLevel = selectedLevelId === 'all' || e.subject?.level_id === selectedLevelId
-    const matchesSubject = selectedSubjectId === 'all' || e.subject_id === selectedSubjectId
+    const matchesSubject = selectedSubjectName === 'all' || e.subject?.name === selectedSubjectName
     
     return matchesSearch && matchesLevel && matchesSubject
   })
+
+  const filteredSubjectsList = subjects.filter(s => 
+    s.name.toLowerCase().includes(subjectSearchQuery.toLowerCase())
+  )
 
   if (loading) {
     return (
@@ -188,18 +208,83 @@ export default function AdminExamsPage() {
             ))}
           </div>
 
-          <select
-            value={selectedSubjectId}
-            onChange={(e) => setSelectedSubjectId(e.target.value)}
-            className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[200px]"
-          >
-            <option value="all">Semua Mata Pelajaran</option>
-            {subjects.map(subject => (
-              <option key={subject.id} value={subject.id}>
-                {subject.name}
-              </option>
-            ))}
-          </select>
+          <div className="relative min-w-[200px] md:min-w-[250px] z-20">
+            <button
+              onClick={() => setIsSubjectDropdownOpen(!isSubjectDropdownOpen)}
+              className="w-full flex items-center justify-between px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+            >
+              <span className="truncate pr-4">
+                {selectedSubjectName === 'all' 
+                  ? 'Semua Mata Pelajaran' 
+                  : selectedSubjectName}
+              </span>
+              <ChevronDown className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${isSubjectDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isSubjectDropdownOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setIsSubjectDropdownOpen(false)}
+                />
+                <div className="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+                  <div className="p-2 border-b border-slate-100">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Cari mata pelajaran..."
+                        value={subjectSearchQuery}
+                        onChange={(e) => setSubjectSearchQuery(e.target.value)}
+                        className="w-full pl-8 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  </div>
+                  <div className="max-h-[200px] overflow-y-auto p-1">
+                    <button
+                      onClick={() => {
+                        setSelectedSubjectName('all')
+                        setIsSubjectDropdownOpen(false)
+                        setSubjectSearchQuery('')
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
+                        selectedSubjectName === 'all'
+                          ? 'bg-purple-50 text-purple-700 font-medium'
+                          : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      Semua Mata Pelajaran
+                      {selectedSubjectName === 'all' && <Check className="w-4 h-4" />}
+                    </button>
+                    {filteredSubjectsList.map(subject => (
+                      <button
+                        key={subject.id}
+                        onClick={() => {
+                          setSelectedSubjectName(subject.name)
+                          setIsSubjectDropdownOpen(false)
+                          setSubjectSearchQuery('')
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors mt-1 ${
+                          selectedSubjectName === subject.name
+                            ? 'bg-purple-50 text-purple-700 font-medium'
+                            : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span className="truncate">{subject.name}</span>
+                        {selectedSubjectName === subject.name && <Check className="w-4 h-4 shrink-0" />}
+                      </button>
+                    ))}
+                    {filteredSubjectsList.length === 0 && (
+                      <div className="px-3 py-4 text-sm text-slate-500 text-center">
+                        Mata pelajaran tidak ditemukan
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
