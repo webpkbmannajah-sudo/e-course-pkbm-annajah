@@ -246,6 +246,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
     setError(null)
 
     // Validation
+    if (!formData.category) return setError('Silakan pilih kategori')
+    if (!selectedLevelId) return setError('Silakan pilih jenjang')
     if (examType === 'pdf' && !file && !existingPdfUrl) return setError('Silakan unggah file PDF')
 
     if (examType === 'questions') {
@@ -416,8 +418,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         {/* Level, Subject, Material Selection */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-                <label className="block text-sm font-medium text-slate-600 mb-2">Kategori (Opsional)</label>
-                <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900 border border-slate-200">
+                <label className="block text-sm font-medium text-slate-600 mb-2">Kategori <span className="text-red-500">*</span></label>
+                <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900 border border-slate-200" required>
                     <option value="">Pilih Kategori</option>
                     <option value="UAS">UAS</option>
                     <option value="UTS">UTS</option>
@@ -426,8 +428,8 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
                 </select>
             </div>
              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-2">Jenjang (Opsional)</label>
-                <select value={selectedLevelId} onChange={(e) => setSelectedLevelId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900 border border-slate-200">
+                <label className="block text-sm font-medium text-slate-600 mb-2">Jenjang <span className="text-red-500">*</span></label>
+                <select value={selectedLevelId} onChange={(e) => setSelectedLevelId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900 border border-slate-200" required>
                     <option value="">Pilih Jenjang</option>
                     {levels.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                 </select>
