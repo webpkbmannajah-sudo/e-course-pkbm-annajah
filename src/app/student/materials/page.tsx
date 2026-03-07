@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { FileText, Search, Calendar, ArrowRight, Image as ImageIcon, X } from 'lucide-react'
+import { FileText, Search, Calendar, ArrowRight, Image as ImageIcon, X, ChevronDown, Check } from 'lucide-react'
 import { Material } from '@/types'
 import { getStudentThemeVars, getLevelLabel } from '@/lib/levelColors'
 
@@ -13,6 +13,20 @@ export default function StudentMaterialsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [userLevel, setUserLevel] = useState<string | null>(null)
   const [selectedImage, setSelectedImage] = useState<Material | null>(null)
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('all')
+  const [isSubjectDropdownOpen, setIsSubjectDropdownOpen] = useState(false)
+  const [subjectSearchQuery, setSubjectSearchQuery] = useState('')
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsSubjectDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   useEffect(() => {
     fetchData()
@@ -52,10 +66,26 @@ export default function StudentMaterialsPage() {
     }
   }
 
-  const filteredMaterials = materials.filter(m =>
-    m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    m.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  const uniqueSubjects = Array.from(new Map(
+    materials
+      .filter(m => m.subject)
+      .map(m => [(m as any).subject.id, m.subject])
+  ).values())
+
+  const filteredSubjectsForDropdown = uniqueSubjects.filter((subject: any) => 
+    subject.name.toLowerCase().includes(subjectSearchQuery.toLowerCase())
   )
+
+  const selectedSubject = uniqueSubjects.find((s: any) => s.id === selectedSubjectId)
+
+  const filteredMaterials = materials.filter(m => {
+    const matchesSearch = m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.description?.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesSubject = selectedSubjectId === 'all' || m.subject?.id === selectedSubjectId
+
+    return matchesSearch && matchesSubject
+  })
 
 
 
@@ -88,16 +118,86 @@ export default function StudentMaterialsPage() {
         </p>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-        <input
-          type="text"
-          placeholder="Cari materi..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        />
+      {/* Search and Filter */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+          <input
+            type="text"
+            placeholder="Cari materi..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
+        </div>
+
+        {/* Custom Subject Dropdown */}
+        <div className="relative min-w-[250px]" ref={dropdownRef}>
+          <button
+            onClick={() => setIsSubjectDropdownOpen(!isSubjectDropdownOpen)}
+            className="w-full h-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 flex items-center justify-between hover:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors"
+          >
+            <span className="truncate">
+              {selectedSubjectId === 'all' ? 'Semua Mata Pelajaran' : (selectedSubject as any)?.name}
+            </span>
+            <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${isSubjectDropdownOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {isSubjectDropdownOpen && (
+            <div className="absolute z-10 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+              <div className="p-2 border-b border-slate-100">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Cari mata pelajaran..."
+                    value={subjectSearchQuery}
+                    onChange={(e) => setSubjectSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-transparent rounded-lg text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
+                  />
+                </div>
+              </div>
+              <div className="max-h-60 overflow-y-auto custom-scrollbar p-1">
+                <button
+                  onClick={() => {
+                    setSelectedSubjectId('all')
+                    setIsSubjectDropdownOpen(false)
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between transition-colors ${
+                    selectedSubjectId === 'all'
+                      ? 'bg-emerald-50 text-emerald-700 font-medium'
+                      : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  Semua Mata Pelajaran
+                  {selectedSubjectId === 'all' && <Check className="w-4 h-4 text-emerald-600" />}
+                </button>
+                {filteredSubjectsForDropdown.map((subject: any) => (
+                  <button
+                    key={subject.id}
+                    onClick={() => {
+                      setSelectedSubjectId(subject.id)
+                      setIsSubjectDropdownOpen(false)
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between transition-colors ${
+                      selectedSubjectId === subject.id
+                        ? 'bg-emerald-50 text-emerald-700 font-medium'
+                        : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className="truncate">{subject.name}</span>
+                    {selectedSubjectId === subject.id && <Check className="w-4 h-4 text-emerald-600" />}
+                  </button>
+                ))}
+                {filteredSubjectsForDropdown.length === 0 && (
+                  <div className="px-3 py-8 text-center text-sm text-slate-500">
+                    Mata pelajaran tidak ditemukan
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Materials Grid */}

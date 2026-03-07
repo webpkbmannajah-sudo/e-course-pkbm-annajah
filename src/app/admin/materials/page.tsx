@@ -14,6 +14,7 @@ export default function AdminMaterialsPage() {
   const [materials, setMaterials] = useState<Material[]>([])
   const [levels, setLevels] = useState<Level[]>([])
   const [selectedLevelId, setSelectedLevelId] = useState<string>('all')
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('all')
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
@@ -102,8 +103,22 @@ export default function AdminMaterialsPage() {
     
     const matchesLevel = selectedLevelId === 'all' || m.subject?.level_id === selectedLevelId
     
-    return matchesSearch && matchesLevel
+    const matchesSubject = selectedSubjectId === 'all' || m.subject?.id === selectedSubjectId
+    
+    return matchesSearch && matchesLevel && matchesSubject
   })
+
+  // Get unique subjects for dropdown
+  const uniqueSubjects = Array.from(new Map(
+    materials
+      .filter(m => m.subject)
+      .map(m => [(m as any).subject.id, m.subject])
+  ).values())
+
+  // Filter available subjects based on selected level
+  const availableSubjects = uniqueSubjects.filter((subject: any) => 
+    selectedLevelId === 'all' || subject.level_id === selectedLevelId
+  )
 
   const getTypeIcon = (type: string) => {
       switch (type) {
@@ -139,15 +154,30 @@ export default function AdminMaterialsPage() {
 
       {/* Filters */}
       <div className="flex flex-col gap-4">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-          <input
-            type="text"
-            placeholder="Cari materi..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Cari materi..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <select
+            value={selectedSubjectId}
+            onChange={(e) => setSelectedSubjectId(e.target.value)}
+            className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[200px]"
+          >
+            <option value="all">Semua Mata Pelajaran</option>
+            {availableSubjects.map((subject: any) => (
+              <option key={subject.id} value={subject.id}>
+                {subject.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex bg-white p-1 rounded-xl border border-slate-200 overflow-x-auto">
