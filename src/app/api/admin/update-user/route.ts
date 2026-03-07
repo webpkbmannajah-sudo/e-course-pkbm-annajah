@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { isAdminRole } from '@/lib/roles'
+import { isAdminRole, isSuperAdmin } from '@/lib/roles'
 
 export async function POST(request: Request) {
     try {
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
             .eq('id', user.id)
             .single()
 
-        if (!isAdminRole(profile?.role)) {
+        if (!isAdminRole(profile?.role, user.email)) {
             return NextResponse.json({ error: 'Forbidden. Admin access required.' }, { status: 403 })
         }
 
@@ -30,6 +30,19 @@ export async function POST(request: Request) {
 
         if (!userId || !email || !name) {
             return NextResponse.json({ error: 'Missing required fields: userId, name, and email' }, { status: 400 })
+        }
+
+        // Fetch target user's profile to prevent modifying a superadmin if caller is not one
+        const { data: targetProfile } = await supabaseSession
+            .from('profiles')
+            .select('role, email')
+            .eq('id', userId)
+            .single()
+
+        if (targetProfile && isSuperAdmin(targetProfile.role, targetProfile.email)) {
+            if (!isSuperAdmin(profile?.role, user.email)) {
+                return NextResponse.json({ error: 'Forbidden. Super Admin access required to modify a Super Admin account.' }, { status: 403 })
+            }
         }
 
         // 3. Update the user's email in Auth (requires admin privileges)

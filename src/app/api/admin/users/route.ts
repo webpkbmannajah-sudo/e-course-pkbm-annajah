@@ -6,14 +6,18 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // Check if user is admin
     const { data: profile } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', user?.id)
+        .eq('id', user.id)
         .single();
 
-    if (!isAdminRole(profile?.role)) {
+    if (!isAdminRole(profile?.role, user.email)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
@@ -51,14 +55,18 @@ export async function PATCH(request: Request) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // Check if user is admin
     const { data: requesterProfile } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', user?.id)
+        .eq('id', user.id)
         .single();
 
-    if (!isAdminRole(requesterProfile?.role)) {
+    if (!isAdminRole(requesterProfile?.role, user.email)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

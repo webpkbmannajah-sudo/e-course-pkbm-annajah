@@ -23,7 +23,7 @@ export async function GET(
             .eq('id', user.id)
             .single()
 
-        const isAdmin = isAdminRole(profile?.role)
+        const isAdmin = isAdminRole(profile?.role, user.email)
 
         // Optional userId filter
         const { searchParams } = new URL(request.url)

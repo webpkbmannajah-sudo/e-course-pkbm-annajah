@@ -22,6 +22,17 @@ export async function POST(
             return NextResponse.json({ error: 'No file provided' }, { status: 400 })
         }
 
+        // Validate file type (server-side enforcement)
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/gif']
+        if (!allowedTypes.includes(file.type)) {
+            return NextResponse.json({ error: 'Tipe file tidak didukung. Hanya PDF dan gambar (JPEG, PNG, WebP) yang diizinkan.' }, { status: 400 })
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            return NextResponse.json({ error: 'Ukuran file maksimal 5MB' }, { status: 400 })
+        }
+
         // Verify exam exists and is of type pdf
         const { data: exam, error: examError } = await supabase
             .from('exams')

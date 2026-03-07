@@ -22,7 +22,7 @@ export async function GET(
             .eq('id', user.id)
             .single()
 
-        if (!isAdminRole(profile?.role)) {
+        if (!isAdminRole(profile?.role, user.email)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 

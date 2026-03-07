@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { isAdminRole } from '@/lib/roles'
+import { isAdminRole, isSuperAdmin } from '@/lib/roles'
 
 export async function POST(request: Request) {
     try {
@@ -34,6 +34,19 @@ export async function POST(request: Request) {
 
         if (newPassword.length < 6) {
             return NextResponse.json({ error: 'Password must be at least 6 characters long' }, { status: 400 })
+        }
+
+        // Fetch target user's profile to prevent modifying a superadmin if caller is not one
+        const { data: targetProfile } = await supabaseSession
+            .from('profiles')
+            .select('role, email')
+            .eq('id', userId)
+            .single()
+
+        if (targetProfile && isSuperAdmin(targetProfile.role, targetProfile.email)) {
+            if (!isSuperAdmin(profile?.role, user.email)) {
+                return NextResponse.json({ error: 'Forbidden. Super Admin access required to modify a Super Admin account.' }, { status: 403 })
+            }
         }
 
         // 3. Update the user's password using the admin client

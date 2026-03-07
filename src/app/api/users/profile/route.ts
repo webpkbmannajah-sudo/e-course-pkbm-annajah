@@ -30,7 +30,20 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const updates = await request.json();
+    const body = await request.json();
+
+    // Only allow updating safe fields — prevent role escalation
+    const allowedFields = ['name', 'phone', 'address', 'education_level', 'enrollment_year'];
+    const updates: Record<string, unknown> = {};
+    for (const key of allowedFields) {
+        if (key in body) {
+            updates[key] = body[key];
+        }
+    }
+
+    if (Object.keys(updates).length === 0) {
+        return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+    }
 
     const { data: profile, error } = await supabase
         .from('profiles')
