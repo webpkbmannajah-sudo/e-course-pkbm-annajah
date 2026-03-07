@@ -304,7 +304,19 @@ export default function AdminExamsPage() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {filteredExams.map((exam) => (
+          {filteredExams.map((exam) => {
+            // Tentukan warna badge berdasarkan nama paket
+            let levelColorClass = "bg-slate-100 text-slate-600 border-slate-200"
+            const levelNameTemp = exam.subject?.level?.name?.toLowerCase() || ""
+            if (levelNameTemp.includes('paket a')) {
+              levelColorClass = "bg-red-50 text-red-600 border-red-200"
+            } else if (levelNameTemp.includes('paket b')) {
+              levelColorClass = "bg-emerald-50 text-emerald-600 border-emerald-200"
+            } else if (levelNameTemp.includes('paket c')) {
+              levelColorClass = "bg-yellow-50 text-yellow-600 border-yellow-200"
+            }
+
+            return (
             <div
               key={exam.id}
               className="bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-600 transition-all"
@@ -327,8 +339,13 @@ export default function AdminExamsPage() {
                     )}
                     <div className="flex flex-col gap-2 mt-3">
                       <div className="flex flex-wrap items-center gap-2">
+                        {exam.category && (
+                          <span className="px-2 py-1 rounded-md bg-blue-50 text-blue-600 text-xs font-medium border border-blue-200">
+                            {exam.category}
+                          </span>
+                        )}
                         {exam.subject?.level?.name && (
-                          <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                          <span className={`px-2 py-1 rounded-md text-xs font-medium border ${levelColorClass}`}>
                             {exam.subject.level.name}
                           </span>
                         )}
@@ -387,7 +404,7 @@ export default function AdminExamsPage() {
                 </div>
               </div>
             </div>
-          ))}
+          )})}
         </div>
       )}
       {/* Delete Confirmation Modal */}

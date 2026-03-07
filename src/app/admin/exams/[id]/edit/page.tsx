@@ -20,6 +20,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    category: '',
   })
   
   // Selection State
@@ -34,12 +35,16 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
   const [file, setFile] = useState<File | null>(null)
   const [existingPdfUrl, setExistingPdfUrl] = useState<string | null>(null)
   const [questions, setQuestions] = useState<QuestionFormData[]>([
-    { question_text: '', choices: [
-      { choice_text: '', is_correct: true },
-      { choice_text: '', is_correct: false },
-      { choice_text: '', is_correct: false },
-      { choice_text: '', is_correct: false },
-    ]}
+    { 
+      id: crypto.randomUUID(),
+      question_text: '', 
+      choices: [
+        { id: crypto.randomUUID(), choice_text: '', is_correct: true },
+        { id: crypto.randomUUID(), choice_text: '', is_correct: false },
+        { id: crypto.randomUUID(), choice_text: '', is_correct: false },
+        { id: crypto.randomUUID(), choice_text: '', is_correct: false },
+      ]
+    }
   ])
   const [dragActive, setDragActive] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -68,7 +73,11 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         if (examError) throw examError
 
         setExamType(exam.type as ExamType)
-        setFormData({ title: exam.title, description: exam.description || '' })
+        setFormData({ 
+            title: exam.title, 
+            description: exam.description || '',
+            category: exam.category || ''
+        })
         
         if (exam.subject_id) {
           setSelectedSubjectId(exam.subject_id)
@@ -90,9 +99,11 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
             
           if (qError) throw qError
           if (qData && qData.length > 0) {
-             setQuestions(qData.map((q: { question_text: string; choices: { choice_text: string; is_correct: boolean }[] }) => ({
+             setQuestions(qData.map((q: any) => ({
+               id: q.id,
                question_text: q.question_text,
-               choices: q.choices.map((c: { choice_text: string; is_correct: boolean }) => ({
+               choices: q.choices.map((c: any) => ({
+                  id: c.id,
                   choice_text: c.choice_text,
                   is_correct: c.is_correct
                }))
@@ -187,12 +198,13 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
   const addQuestion = () => {
     setQuestions(prev => [...prev, {
+      id: crypto.randomUUID(),
       question_text: '',
       choices: [
-        { choice_text: '', is_correct: true },
-        { choice_text: '', is_correct: false },
-        { choice_text: '', is_correct: false },
-        { choice_text: '', is_correct: false },
+        { id: crypto.randomUUID(), choice_text: '', is_correct: true },
+        { id: crypto.randomUUID(), choice_text: '', is_correct: false },
+        { id: crypto.randomUUID(), choice_text: '', is_correct: false },
+        { id: crypto.randomUUID(), choice_text: '', is_correct: false },
       ]
     }])
   }
@@ -269,6 +281,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
           title: formData.title,
           description: formData.description || null,
           type: examType,
+          category: formData.category || null,
           pdf_url: pdfUrl,
           subject_id: selectedSubjectId || null,
           material_id: selectedMaterialId || null
@@ -278,31 +291,76 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
       if (examError) throw examError
 
       if (examType === 'questions') {
-        const { error: deleteError } = await supabase.from('questions').delete().eq('exam_id', id)
-        if (deleteError) throw deleteError
+        // Fetch existing question IDs from DB to figure out which ones to delete
+        const { data: existingDbQuestions } = await supabase
+          .from('questions')
+          .select('id')
+          .eq('exam_id', id)
+          
+        const existingDbQuestionIds = existingDbQuestions?.map(q => q.id) || []
+        const currentQuestionIds = questions.map(q => q.id).filter(Boolean)
+        const questionsToDelete = existingDbQuestionIds.filter(dbId => !currentQuestionIds.includes(dbId))
+
+        // Delete removed questions
+        if (questionsToDelete.length > 0) {
+          await supabase.from('questions').delete().in('id', questionsToDelete)
+        }
 
         for (let i = 0; i < questions.length; i++) {
           const q = questions[i]
+          
+          // Upsert the question
           const { data: question, error: qError } = await supabase
             .from('questions')
-            .insert({
+            .upsert({
+              id: q.id,
               exam_id: id,
               question_text: q.question_text,
               order_number: i + 1,
-            })
-            .select().single()
+            }, { onConflict: 'id' })
+            .select()
+            .single()
 
           if (qError) throw qError
 
-          const choicesData = q.choices.map(c => ({
-            question_id: question.id,
-            choice_text: c.choice_text,
-            is_correct: c.is_correct,
-          }))
+          // Fetch existing choices for this question to figure out which ones to delete
+          const { data: existingDbChoices } = await supabase
+            .from('choices')
+            .select('id')
+            .eq('question_id', question.id)
+            
+          const existingDbChoiceIds = existingDbChoices?.map(c => c.id) || []
+          const currentChoiceIds = q.choices.map(c => c.id).filter(Boolean)
+          const choicesToDelete = existingDbChoiceIds.filter(dbId => !currentChoiceIds.includes(dbId))
 
-          const { error: cError } = await supabase.from('choices').insert(choicesData)
-          if (cError) throw cError
+          if (choicesToDelete.length > 0) {
+              await supabase.from('choices').delete().in('id', choicesToDelete)
+          }
+
+          // Upsert the choices
+          for (const c of q.choices) {
+              const { error: cError } = await supabase.from('choices').upsert({
+                  id: c.id,
+                  question_id: question.id,
+                  choice_text: c.choice_text,
+                  is_correct: c.is_correct,
+              }, { onConflict: 'id' })
+              if (cError) throw cError
+          }
         }
+        
+        // Trigger bulk score recalculation via API
+        try {
+            await fetch('/api/grading/bulk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ examId: id })
+            })
+        } catch (gradingErr) {
+            console.error('Failed to trigger bulk grading:', gradingErr)
+            // We don't throw here to not break the save success, but ideally we show a warning
+        }
+
       } else {
         // If type changed from questions to pdf
         await supabase.from('questions').delete().eq('exam_id', id)
@@ -330,7 +388,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
 
   if (success) {
     return (
-      <div className="max-w-3xl mx-auto">
+      <div className="space-y-6">
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <Check className="w-16 h-16 text-green-400 mx-auto mb-6" />
           <h2 className="text-xl font-bold text-slate-900 mb-2">Perubahan Ujian Berhasil Disimpan!</h2>
@@ -341,7 +399,7 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/admin/exams" className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg">
           <ArrowLeft className="w-5 h-5" />
@@ -356,24 +414,34 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
         {error && <div className="bg-red-500/10 text-red-400 px-4 py-3 rounded-lg text-sm">{error}</div>}
 
         {/* Level, Subject, Material Selection */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+                <label className="block text-sm font-medium text-slate-600 mb-2">Kategori (Opsional)</label>
+                <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900 border border-slate-200">
+                    <option value="">Pilih Kategori</option>
+                    <option value="UAS">UAS</option>
+                    <option value="UTS">UTS</option>
+                    <option value="Remedial">Remedial</option>
+                    <option value="Latihan Soal">Latihan Soal</option>
+                </select>
+            </div>
              <div>
                 <label className="block text-sm font-medium text-slate-600 mb-2">Jenjang (Opsional)</label>
-                <select value={selectedLevelId} onChange={(e) => setSelectedLevelId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900">
+                <select value={selectedLevelId} onChange={(e) => setSelectedLevelId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900 border border-slate-200">
                     <option value="">Pilih Jenjang</option>
                     {levels.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                 </select>
             </div>
             <div>
                 <label className="block text-sm font-medium text-slate-600 mb-2">Mata Pelajaran (Opsional)</label>
-                <select value={selectedSubjectId} onChange={(e) => setSelectedSubjectId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900" disabled={!selectedLevelId}>
+                <select value={selectedSubjectId} onChange={(e) => setSelectedSubjectId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900 border border-slate-200" disabled={!selectedLevelId}>
                     <option value="">Pilih Mata Pelajaran</option>
                     {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
             </div>
             <div>
                 <label className="block text-sm font-medium text-slate-600 mb-2">Materi (Opsional)</label>
-                <select value={selectedMaterialId} onChange={(e) => setSelectedMaterialId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900" disabled={!selectedSubjectId}>
+                <select value={selectedMaterialId} onChange={(e) => setSelectedMaterialId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900 border border-slate-200" disabled={!selectedSubjectId}>
                     <option value="">Pilih Materi</option>
                     {materials.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
                 </select>

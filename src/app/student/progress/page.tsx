@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import {
   Chart as ChartJS,
@@ -21,6 +21,7 @@ import {
   Target,
   BookOpen,
   CheckCircle,
+  ChevronDown,
 } from 'lucide-react'
 import { formatPercentage } from '@/lib/analytics'
 
@@ -51,6 +52,53 @@ export default function StudentProgressPage() {
   const [loading, setLoading] = useState(true)
   const [performance, setPerformance] = useState<PerformanceData | null>(null)
   const [scoreHistory, setScoreHistory] = useState<ScoreEntry[]>([])
+  const [expandedExams, setExpandedExams] = useState<Record<string, boolean>>({})
+
+  const groupedScoreHistory = useMemo(() => {
+    const groups: Record<string, {
+      exam_id: string
+      exam_title: string
+      highest_percentage: number
+      highest_score: number
+      attempts: ScoreEntry[]
+    }> = {}
+    
+    scoreHistory.forEach(score => {
+      if (!groups[score.exam_id]) {
+        groups[score.exam_id] = {
+          exam_id: score.exam_id,
+          exam_title: score.exam_title,
+          highest_percentage: Number(score.percentage),
+          highest_score: Number(score.total_score),
+          attempts: [score]
+        }
+      } else {
+        groups[score.exam_id].attempts.push(score)
+        if (Number(score.percentage) > groups[score.exam_id].highest_percentage) {
+          groups[score.exam_id].highest_percentage = Number(score.percentage)
+          groups[score.exam_id].highest_score = Number(score.total_score)
+        }
+      }
+    })
+
+    // Sort attempts from newest to oldest within each group
+    Object.values(groups).forEach(group => {
+      group.attempts.sort((a, b) => new Date(b.graded_at).getTime() - new Date(a.graded_at).getTime())
+    })
+
+    // Sort groups themselves by the latest attempt
+    const sortedGroups = Object.values(groups).sort((a, b) => {
+      const latestA = a.attempts[0]?.graded_at ? new Date(a.attempts[0].graded_at).getTime() : 0
+      const latestB = b.attempts[0]?.graded_at ? new Date(b.attempts[0].graded_at).getTime() : 0
+      return latestB - latestA
+    })
+
+    return sortedGroups
+  }, [scoreHistory])
+
+  const toggleExpand = (examId: string) => {
+    setExpandedExams(prev => ({ ...prev, [examId]: !prev[examId] }))
+  }
 
   const fetchData = useCallback(async () => {
     try {
@@ -216,30 +264,48 @@ export default function StudentProgressPage() {
                 </tr>
               </thead>
               <tbody>
-                {scoreHistory.map((score) => (
-                  <tr key={score.id} className="border-b border-slate-200/50 hover:bg-slate-200/30 transition-colors">
-                    <td className="py-3 pr-4">
-                      <Link href={`/student/exams/${score.exam_id}/result`}
-                        className="text-slate-900 font-medium hover:text-emerald-400 transition-colors">
-                        {score.exam_title}
-                      </Link>
-                    </td>
-                    <td className="py-3 pr-4 text-center text-slate-600">{Number(score.total_score).toFixed(1)}</td>
-                    <td className="py-3 pr-4 text-center">
-                      <span className="font-medium text-emerald-400">
-                        {Number(score.percentage).toFixed(1)}%
-                      </span>
-                    </td>
-                    <td className="py-3 pr-4 text-center">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">
-                        <CheckCircle className="w-3 h-3" />
-                        Selesai
-                      </span>
-                    </td>
-                    <td className="py-3 text-right text-slate-500 text-sm">
-                      {score.graded_at ? new Date(score.graded_at).toLocaleDateString('id-ID') : '-'}
-                    </td>
-                  </tr>
+                {groupedScoreHistory.map((group) => (
+                  <React.Fragment key={group.exam_id}>
+                    <tr 
+                      className="border-b border-slate-200/50 hover:bg-slate-50 transition-colors cursor-pointer"
+                      onClick={() => toggleExpand(group.exam_id)}
+                    >
+                      <td className="py-3 pr-4 flex items-center gap-2">
+                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${expandedExams[group.exam_id] ? 'rotate-180' : ''}`} />
+                        <span className="text-slate-900 font-medium">{group.exam_title}</span>
+                      </td>
+                      <td className="py-3 pr-4 text-center text-slate-600">{Number(group.highest_score).toFixed(1)}</td>
+                      <td className="py-3 pr-4 text-center">
+                        <span className="font-medium text-emerald-500">
+                          {Number(group.highest_percentage).toFixed(1)}%
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4 text-center">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                          <CheckCircle className="w-3 h-3 text-emerald-600" />
+                          {group.attempts.length} Percobaan
+                        </span>
+                      </td>
+                      <td className="py-3 text-right text-slate-500 text-sm">
+                        {group.attempts[0]?.graded_at ? new Date(group.attempts[0].graded_at).toLocaleDateString('id-ID') : '-'}
+                      </td>
+                    </tr>
+                    {expandedExams[group.exam_id] && group.attempts.map((score, index) => (
+                      <tr key={score.id} className="bg-slate-50/80 border-b border-slate-100 last:border-slate-200/50">
+                        <td className="py-2 pr-4 pl-10">
+                          <Link href={`/student/exams/${score.exam_id}/result`} className="text-sm font-medium text-emerald-600 hover:text-emerald-500 transition-colors">
+                            Percobaan {group.attempts.length - index}
+                          </Link>
+                        </td>
+                        <td className="py-2 pr-4 text-center text-sm text-slate-500">{Number(score.total_score).toFixed(1)}</td>
+                        <td className="py-2 pr-4 text-center text-sm text-slate-500">{Number(score.percentage).toFixed(1)}%</td>
+                        <td className="py-2 pr-4 text-center text-xs text-slate-400"></td>
+                        <td className="py-2 text-right text-slate-400 text-xs">
+                          {score.graded_at ? new Date(score.graded_at).toLocaleDateString('id-ID') : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

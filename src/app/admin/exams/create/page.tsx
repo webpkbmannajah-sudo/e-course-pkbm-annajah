@@ -18,6 +18,7 @@ export default function CreateExamPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    category: '',
   })
   
   // Selection State
@@ -209,6 +210,7 @@ export default function CreateExamPage() {
           title: formData.title,
           description: formData.description || null,
           type: examType,
+          category: formData.category || null,
           pdf_url: pdfUrl,
           created_by: user.id,
           subject_id: selectedSubjectId || null,
@@ -257,7 +259,7 @@ export default function CreateExamPage() {
 
   if (success) {
     return (
-      <div className="max-w-3xl mx-auto">
+      <div className="space-y-6">
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <Check className="w-16 h-16 text-green-400 mx-auto mb-6" />
           <h2 className="text-xl font-bold text-slate-900 mb-2">Ujian Berhasil Dibuat!</h2>
@@ -268,7 +270,7 @@ export default function CreateExamPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/admin/exams" className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg">
           <ArrowLeft className="w-5 h-5" />
@@ -283,24 +285,34 @@ export default function CreateExamPage() {
         {error && <div className="bg-red-500/10 text-red-400 px-4 py-3 rounded-lg text-sm">{error}</div>}
 
         {/* Level, Subject, Material Selection */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+             <div>
+                <label className="block text-sm font-medium text-slate-600 mb-2">Kategori (Opsional)</label>
+                <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900 border border-slate-200">
+                    <option value="">Pilih Kategori</option>
+                    <option value="UAS">UAS</option>
+                    <option value="UTS">UTS</option>
+                    <option value="Remedial">Remedial</option>
+                    <option value="Latihan Soal">Latihan Soal</option>
+                </select>
+            </div>
              <div>
                 <label className="block text-sm font-medium text-slate-600 mb-2">Jenjang (Opsional)</label>
-                <select value={selectedLevelId} onChange={(e) => setSelectedLevelId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900">
+                <select value={selectedLevelId} onChange={(e) => setSelectedLevelId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900 border border-slate-200">
                     <option value="">Pilih Jenjang</option>
                     {levels.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                 </select>
             </div>
             <div>
                 <label className="block text-sm font-medium text-slate-600 mb-2">Mata Pelajaran (Opsional)</label>
-                <select value={selectedSubjectId} onChange={(e) => setSelectedSubjectId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900" disabled={!selectedLevelId}>
+                <select value={selectedSubjectId} onChange={(e) => setSelectedSubjectId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900 border border-slate-200" disabled={!selectedLevelId}>
                     <option value="">Pilih Mata Pelajaran</option>
                     {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
             </div>
             <div>
                 <label className="block text-sm font-medium text-slate-600 mb-2">Materi (Opsional)</label>
-                <select value={selectedMaterialId} onChange={(e) => setSelectedMaterialId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900" disabled={!selectedSubjectId}>
+                <select value={selectedMaterialId} onChange={(e) => setSelectedMaterialId(e.target.value)} className="w-full px-4 py-3 bg-slate-100 rounded-xl text-slate-900 border border-slate-200" disabled={!selectedSubjectId}>
                     <option value="">Pilih Materi</option>
                     {materials.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
                 </select>

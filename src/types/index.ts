@@ -70,12 +70,14 @@ export interface Material {
 }
 
 export type ExamType = 'pdf' | 'questions'
+export type ExamCategory = 'UAS' | 'UTS' | 'Remedial' | 'Latihan Soal' | string
 
 export interface Exam {
     id: string
     title: string
     description: string | null
     type: ExamType
+    category?: ExamCategory | null
     pdf_url: string | null
     created_by: string
     created_at: string
@@ -150,16 +152,19 @@ export interface ExamFormData {
     title: string
     description: string
     type: ExamType
+    category?: ExamCategory | null
     file?: File | null
     questions?: QuestionFormData[]
 }
 
 export interface QuestionFormData {
+    id?: string
     question_text: string
     choices: ChoiceFormData[]
 }
 
 export interface ChoiceFormData {
+    id?: string
     choice_text: string
     is_correct: boolean
 }

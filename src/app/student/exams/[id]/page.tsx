@@ -18,6 +18,8 @@ interface PageProps {
 
 interface ExamWithQuestions extends Exam {
   questions: (Question & { choices: Choice[] })[]
+  subject?: any
+  material?: any
 }
 
 interface ExistingAttempt {
@@ -59,6 +61,8 @@ export default function TakeExamPage({ params }: PageProps) {
           .from('exams')
           .select(`
             *,
+            subject:subjects(name, level_id, level:levels(name)),
+            material:materials(title),
             questions (
               *,
               choices (*)
@@ -299,24 +303,54 @@ export default function TakeExamPage({ params }: PageProps) {
     )
   }
 
+  // Determine level color class based on package name
+  let levelColorClass = "bg-slate-100 text-slate-600 border-slate-200"
+  const levelNameTemp = exam.subject?.level?.name?.toLowerCase() || ""
+  if (levelNameTemp.includes('paket a')) {
+    levelColorClass = "bg-red-50 text-red-600 border-red-200"
+  } else if (levelNameTemp.includes('paket b')) {
+    levelColorClass = "bg-emerald-50 text-emerald-600 border-emerald-200"
+  } else if (levelNameTemp.includes('paket c')) {
+    levelColorClass = "bg-yellow-50 text-yellow-600 border-yellow-200"
+  }
+
   // PDF Exam
   if (exam.type === 'pdf') {
     return (
-      <div className="space-y-6 max-w-4xl mx-auto">
+      <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-start gap-4">
-          <Link
-            href="/student/exams"
-            className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg transition-colors mt-1"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">{exam.title}</h1>
-            {exam.description && (
-              <p className="text-slate-500 mt-1">{exam.description}</p>
-            )}
-            {submitted && <span className="inline-block mt-2 px-3 py-1 bg-emerald-100 text-emerald-700 text-sm font-medium rounded-full">Terkirim</span>}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <div className="flex items-start gap-4">
+            <Link
+              href="/student/exams"
+              className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors mt-1 shrink-0"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">{exam.title}</h1>
+              <div className="flex flex-wrap items-center gap-2 mt-3 mb-2">
+                {exam.subject?.level?.name && (
+                  <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${levelColorClass}`}>
+                    {exam.subject.level.name}
+                  </span>
+                )}
+                {exam.subject?.name && (
+                  <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                    {exam.subject.name}
+                  </span>
+                )}
+                {exam.material?.title && (
+                  <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                    Materi: {exam.material.title}
+                  </span>
+                )}
+              </div>
+              {exam.description && (
+                <p className="text-slate-500 mt-1">{exam.description}</p>
+              )}
+              {submitted && <span className="inline-block mt-2 px-3 py-1 bg-emerald-100 text-emerald-700 text-sm font-medium rounded-full">Terkirim</span>}
+            </div>
           </div>
         </div>
 
@@ -420,18 +454,37 @@ export default function TakeExamPage({ params }: PageProps) {
   // Question-based Exam - Results
   if (submitted && exam.type === 'questions') {
     return (
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-start gap-4">
-          <Link
-            href="/student/exams"
-            className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg transition-colors mt-1"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">{exam.title}</h1>
-            <p className="text-slate-500 mt-1">Ujian selesai</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <div className="flex items-start gap-4">
+            <Link
+              href="/student/exams"
+              className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors mt-1 shrink-0"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">{exam.title}</h1>
+              <div className="flex flex-wrap items-center gap-2 mt-3 mb-2">
+                {exam.subject?.level?.name && (
+                  <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${levelColorClass}`}>
+                    {exam.subject.level.name}
+                  </span>
+                )}
+                {exam.subject?.name && (
+                  <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                    {exam.subject.name}
+                  </span>
+                )}
+                {exam.material?.title && (
+                  <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                    Materi: {exam.material.title}
+                  </span>
+                )}
+              </div>
+              <p className="text-slate-500 mt-1">Ujian selesai</p>
+            </div>
           </div>
         </div>
 
@@ -535,25 +588,44 @@ export default function TakeExamPage({ params }: PageProps) {
 
   // Question-based Exam - Taking
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <Link
-            href="/student/exams"
-            className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg transition-colors mt-1"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">{exam.title}</h1>
-            {exam.description && (
-              <p className="text-slate-500 mt-1">{exam.description}</p>
-            )}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <Link
+              href="/student/exams"
+              className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors mt-1 shrink-0"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">{exam.title}</h1>
+              <div className="flex flex-wrap items-center gap-2 mt-3 mb-2">
+                {exam.subject?.level?.name && (
+                  <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${levelColorClass}`}>
+                    {exam.subject.level.name}
+                  </span>
+                )}
+                {exam.subject?.name && (
+                  <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                    {exam.subject.name}
+                  </span>
+                )}
+                {exam.material?.title && (
+                  <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                    Materi: {exam.material.title}
+                  </span>
+                )}
+              </div>
+              {exam.description && (
+                <p className="text-slate-500 mt-1">{exam.description}</p>
+              )}
+            </div>
           </div>
-        </div>
-        <div className="bg-white px-4 py-2 rounded-xl text-slate-600">
-          {Object.keys(answers).length} / {exam.questions?.length || 0} dijawab
+          <div className="bg-slate-100 px-4 py-2 rounded-xl text-slate-700 font-medium shrink-0">
+            {Object.keys(answers).length} / {exam.questions?.length || 0} dijawab
+          </div>
         </div>
       </div>
 

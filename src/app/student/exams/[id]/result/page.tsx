@@ -25,19 +25,19 @@ interface PageProps {
 export default function ExamResultPage({ params }: PageProps) {
   const { id: examId } = use(params)
   const supabase = createClient()
-  const [examTitle, setExamTitle] = useState('')
+  const [examDetail, setExamDetail] = useState<any>(null)
   const [score, setScore] = useState<ScoreData | null>(null)
   const [loading, setLoading] = useState(true)
 
   const fetchResult = useCallback(async () => {
     try {
-      const { data: exam } = await supabase
+      const { data: examData } = await supabase
         .from('exams')
-        .select('title')
+        .select('title, subject:subjects(name, level_id, level:levels(name)), material:materials(title)')
         .eq('id', examId)
         .single()
 
-      if (exam) setExamTitle(exam.title)
+      if (examData) setExamDetail(examData)
 
       const response = await fetch(`/api/scores/${examId}`)
       const data = await response.json()
@@ -83,6 +83,17 @@ export default function ExamResultPage({ params }: PageProps) {
   const correctCount = score.breakdown.filter(b => b.is_correct).length
   const totalQuestions = score.breakdown.length
 
+  // Determine level color class based on package name
+  let levelColorClass = "bg-slate-100 text-slate-600 border-slate-200"
+  const levelNameTemp = examDetail?.subject?.level?.name?.toLowerCase() || ""
+  if (levelNameTemp.includes('paket a')) {
+    levelColorClass = "bg-red-50 text-red-600 border-red-200"
+  } else if (levelNameTemp.includes('paket b')) {
+    levelColorClass = "bg-emerald-50 text-emerald-600 border-emerald-200"
+  } else if (levelNameTemp.includes('paket c')) {
+    levelColorClass = "bg-yellow-50 text-yellow-600 border-yellow-200"
+  }
+
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
@@ -94,7 +105,24 @@ export default function ExamResultPage({ params }: PageProps) {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{examTitle}</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{examDetail?.title || ''}</h1>
+          <div className="flex flex-wrap items-center gap-2 mt-2 mb-1">
+            {examDetail?.subject?.level?.name && (
+              <span className={`px-2 py-1 rounded-md text-xs font-medium border ${levelColorClass}`}>
+                {examDetail.subject.level.name}
+              </span>
+            )}
+            {examDetail?.subject?.name && (
+              <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                {examDetail.subject.name}
+              </span>
+            )}
+            {examDetail?.material?.title && (
+              <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                Materi: {examDetail.material.title}
+              </span>
+            )}
+          </div>
           <p className="text-slate-500 mt-1">Exam Results</p>
         </div>
       </div>
