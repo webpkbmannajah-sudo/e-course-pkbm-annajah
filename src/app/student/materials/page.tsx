@@ -13,7 +13,8 @@ export default function StudentMaterialsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [userLevel, setUserLevel] = useState<string | null>(null)
   const [selectedImage, setSelectedImage] = useState<Material | null>(null)
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('all')
+  const [subjects, setSubjects] = useState<string[]>([])
+  const [selectedSubjectName, setSelectedSubjectName] = useState<string>('all')
   const [isSubjectDropdownOpen, setIsSubjectDropdownOpen] = useState(false)
   const [subjectSearchQuery, setSubjectSearchQuery] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -53,6 +54,25 @@ export default function StudentMaterialsPage() {
 
       if (level) {
           query = query.eq('subjects.levels.slug', level)
+
+          // Fetch subjects for this level
+          const { data: subjectData, error: subjectError } = await supabase
+            .from('subjects')
+            .select('name, levels!inner(slug)')
+            .eq('levels.slug', level)
+            .order('name')
+
+          if (!subjectError && subjectData) {
+             const uniqueNames = Array.from(new Set(subjectData.map(s => s.name)))
+             setSubjects(uniqueNames)
+          }
+      } else {
+          // If no level, fetch all subjects
+          const { data: subjectData } = await supabase.from('subjects').select('name').order('name')
+          if (subjectData) {
+             const uniqueNames = Array.from(new Set(subjectData.map(s => s.name)))
+             setSubjects(uniqueNames)
+          }
       }
 
       const { data, error } = await query
@@ -66,23 +86,15 @@ export default function StudentMaterialsPage() {
     }
   }
 
-  const uniqueSubjects = Array.from(new Map(
-    materials
-      .filter(m => m.subject)
-      .map(m => [(m as any).subject.id, m.subject])
-  ).values())
-
-  const filteredSubjectsForDropdown = uniqueSubjects.filter((subject: any) => 
-    subject.name.toLowerCase().includes(subjectSearchQuery.toLowerCase())
+  const filteredSubjectsForDropdown = subjects.filter(name => 
+    name.toLowerCase().includes(subjectSearchQuery.toLowerCase())
   )
-
-  const selectedSubject = uniqueSubjects.find((s: any) => s.id === selectedSubjectId)
 
   const filteredMaterials = materials.filter(m => {
     const matchesSearch = m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.description?.toLowerCase().includes(searchQuery.toLowerCase())
 
-    const matchesSubject = selectedSubjectId === 'all' || m.subject?.id === selectedSubjectId
+    const matchesSubject = selectedSubjectName === 'all' || m.subject?.name === selectedSubjectName
 
     return matchesSearch && matchesSubject
   })
@@ -138,7 +150,7 @@ export default function StudentMaterialsPage() {
             className="w-full h-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 flex items-center justify-between hover:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors"
           >
             <span className="truncate">
-              {selectedSubjectId === 'all' ? 'Semua Mata Pelajaran' : (selectedSubject as any)?.name}
+              {selectedSubjectName === 'all' ? 'Semua Mata Pelajaran' : selectedSubjectName}
             </span>
             <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${isSubjectDropdownOpen ? 'rotate-180' : ''}`} />
           </button>
@@ -160,33 +172,33 @@ export default function StudentMaterialsPage() {
               <div className="max-h-60 overflow-y-auto custom-scrollbar p-1">
                 <button
                   onClick={() => {
-                    setSelectedSubjectId('all')
+                    setSelectedSubjectName('all')
                     setIsSubjectDropdownOpen(false)
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between transition-colors ${
-                    selectedSubjectId === 'all'
+                    selectedSubjectName === 'all'
                       ? 'bg-emerald-50 text-emerald-700 font-medium'
                       : 'text-slate-700 hover:bg-slate-50'
                   }`}
                 >
                   Semua Mata Pelajaran
-                  {selectedSubjectId === 'all' && <Check className="w-4 h-4 text-emerald-600" />}
+                  {selectedSubjectName === 'all' && <Check className="w-4 h-4 text-emerald-600" />}
                 </button>
-                {filteredSubjectsForDropdown.map((subject: any) => (
+                {filteredSubjectsForDropdown.map((subjectName) => (
                   <button
-                    key={subject.id}
+                    key={subjectName}
                     onClick={() => {
-                      setSelectedSubjectId(subject.id)
+                      setSelectedSubjectName(subjectName)
                       setIsSubjectDropdownOpen(false)
                     }}
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between transition-colors ${
-                      selectedSubjectId === subject.id
+                      selectedSubjectName === subjectName
                         ? 'bg-emerald-50 text-emerald-700 font-medium'
                         : 'text-slate-700 hover:bg-slate-50'
                     }`}
                   >
-                    <span className="truncate">{subject.name}</span>
-                    {selectedSubjectId === subject.id && <Check className="w-4 h-4 text-emerald-600" />}
+                    <span className="truncate">{subjectName}</span>
+                    {selectedSubjectName === subjectName && <Check className="w-4 h-4 text-emerald-600" />}
                   </button>
                 ))}
                 {filteredSubjectsForDropdown.length === 0 && (

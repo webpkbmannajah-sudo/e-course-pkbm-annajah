@@ -14,7 +14,8 @@ export default function AdminMaterialsPage() {
   const [materials, setMaterials] = useState<Material[]>([])
   const [levels, setLevels] = useState<Level[]>([])
   const [selectedLevelId, setSelectedLevelId] = useState<string>('all')
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('all')
+  const [subjects, setSubjects] = useState<string[]>([])
+  const [selectedSubjectName, setSelectedSubjectName] = useState<string>('all')
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
@@ -59,10 +60,26 @@ export default function AdminMaterialsPage() {
     }
   }, [supabase])
 
+  const fetchSubjects = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('subjects')
+        .select('name')
+        .order('name')
+      
+      if (error) throw error
+      const uniqueNames = Array.from(new Set((data || []).map(s => s.name)))
+      setSubjects(uniqueNames)
+    } catch (error) {
+      console.error('Error fetching subjects:', error)
+    }
+  }, [supabase])
+
   useEffect(() => {
     fetchLevels()
     fetchMaterials()
-  }, [fetchLevels, fetchMaterials])
+    fetchSubjects()
+  }, [fetchLevels, fetchMaterials, fetchSubjects])
 
   const handleDelete = async () => {
     const { id, fileUrl } = deleteModal
@@ -103,22 +120,10 @@ export default function AdminMaterialsPage() {
     
     const matchesLevel = selectedLevelId === 'all' || m.subject?.level_id === selectedLevelId
     
-    const matchesSubject = selectedSubjectId === 'all' || m.subject?.id === selectedSubjectId
+    const matchesSubject = selectedSubjectName === 'all' || m.subject?.name === selectedSubjectName
     
     return matchesSearch && matchesLevel && matchesSubject
   })
-
-  // Get unique subjects for dropdown
-  const uniqueSubjects = Array.from(new Map(
-    materials
-      .filter(m => m.subject)
-      .map(m => [(m as any).subject.id, m.subject])
-  ).values())
-
-  // Filter available subjects based on selected level
-  const availableSubjects = uniqueSubjects.filter((subject: any) => 
-    selectedLevelId === 'all' || subject.level_id === selectedLevelId
-  )
 
   const getTypeIcon = (type: string) => {
       switch (type) {
@@ -167,14 +172,14 @@ export default function AdminMaterialsPage() {
           </div>
 
           <select
-            value={selectedSubjectId}
-            onChange={(e) => setSelectedSubjectId(e.target.value)}
+            value={selectedSubjectName}
+            onChange={(e) => setSelectedSubjectName(e.target.value)}
             className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-[200px]"
           >
             <option value="all">Semua Mata Pelajaran</option>
-            {availableSubjects.map((subject: any) => (
-              <option key={subject.id} value={subject.id}>
-                {subject.name}
+            {subjects.map((subjectName) => (
+              <option key={subjectName} value={subjectName}>
+                {subjectName}
               </option>
             ))}
           </select>
