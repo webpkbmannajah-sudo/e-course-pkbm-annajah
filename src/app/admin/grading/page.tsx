@@ -9,6 +9,7 @@ interface ExamSummary {
   id: string
   title: string
   type: string
+  category?: string
   created_at: string
   attempt_count: number
 }
@@ -18,6 +19,7 @@ export default function GradingIndexPage() {
   const [exams, setExams] = useState<ExamSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   useEffect(() => {
     const fetchExams = async () => {
@@ -25,7 +27,7 @@ export default function GradingIndexPage() {
         // Fetch question-based exams only
         const { data: examsData, error } = await supabase
           .from('exams')
-          .select('id, title, type, created_at')
+          .select('id, title, type, category, created_at')
           .order('created_at', { ascending: false })
 
         if (error) throw error
@@ -56,9 +58,11 @@ export default function GradingIndexPage() {
     fetchExams()
   }, [supabase])
 
-  const filteredExams = exams.filter(e =>
-    e.title.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredExams = exams.filter(e => {
+    const matchesSearch = e.title.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = selectedCategory === 'all' || e.category === selectedCategory
+    return matchesSearch && matchesCategory
+  })
 
   if (loading) {
     return (
@@ -76,16 +80,36 @@ export default function GradingIndexPage() {
         <p className="text-slate-500">Nilai otomatis dan tinjau hasil ujian</p>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-        <input
-          type="text"
-          placeholder="Cari ujian..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
+      {/* Filters */}
+      <div className="flex flex-col gap-4">
+        {/* Search */}
+        <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+            <input
+            type="text"
+            placeholder="Cari ujian..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+        </div>
+
+        {/* Category Filter */}
+        <div className="flex bg-white p-1 rounded-xl border border-slate-200 overflow-x-auto w-full">
+            {['all', 'UAS', 'UTS', 'Remedial', 'Latihan Soal'].map((cat) => (
+                <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`flex-1 min-w-[120px] px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        selectedCategory === cat
+                            ? 'bg-purple-500 text-white shadow-md'
+                            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+                >
+                    {cat === 'all' ? 'Semua Kategori' : cat}
+                </button>
+            ))}
+        </div>
       </div>
 
       {/* Exams Grid */}

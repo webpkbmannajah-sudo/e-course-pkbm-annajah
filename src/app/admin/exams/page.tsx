@@ -16,6 +16,7 @@ export default function AdminExamsPage() {
   const [subjects, setSubjects] = useState<any[]>([])
   const [selectedLevelId, setSelectedLevelId] = useState<string>('all')
   const [selectedSubjectName, setSelectedSubjectName] = useState<string>('all')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [isSubjectDropdownOpen, setIsSubjectDropdownOpen] = useState(false)
   const [subjectSearchQuery, setSubjectSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
@@ -136,8 +137,9 @@ export default function AdminExamsPage() {
     
     const matchesLevel = selectedLevelId === 'all' || e.subject?.level_id === selectedLevelId
     const matchesSubject = selectedSubjectName === 'all' || e.subject?.name === selectedSubjectName
+    const matchesCategory = selectedCategory === 'all' || e.category === selectedCategory
     
-    return matchesSearch && matchesLevel && matchesSubject
+    return matchesSearch && matchesLevel && matchesSubject && matchesCategory
   })
 
   const filteredSubjectsList = subjects.filter(s => 
@@ -180,6 +182,22 @@ export default function AdminExamsPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
+        </div>
+
+        <div className="flex bg-white p-1 rounded-xl border border-slate-200 overflow-x-auto w-full">
+            {['all', 'UAS', 'UTS', 'Remedial', 'Latihan Soal'].map((cat) => (
+                <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`flex-1 min-w-[120px] px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        selectedCategory === cat
+                            ? 'bg-purple-500 text-white shadow-md'
+                            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+                >
+                    {cat === 'all' ? 'Semua Kategori' : cat}
+                </button>
+            ))}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4">

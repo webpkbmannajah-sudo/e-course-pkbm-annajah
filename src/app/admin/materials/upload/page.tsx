@@ -131,7 +131,7 @@ export default function UploadMaterialPage() {
 
   if (success) {
     return (
-      <div className="max-w-2xl mx-auto">
+      <div className="space-y-6">
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <Check className="w-16 h-16 text-green-400 mx-auto mb-6" />
           <h2 className="text-xl font-bold text-slate-900 mb-2">Materi Berhasil Dibuat!</h2>
@@ -142,7 +142,7 @@ export default function UploadMaterialPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/admin/materials" className="p-2 text-slate-500 hover:text-slate-900 hover:bg-white rounded-lg">
           <ArrowLeft className="w-5 h-5" />
