@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Users, Search, Mail, Calendar, Edit2 } from 'lucide-react'
 import { User } from '@/types'
+import { getLevelBadgeClass, getLevelLabel } from '@/lib/levelColors'
 
 export default function AdminUsersPage() {
   const supabase = createClient()
@@ -155,12 +156,7 @@ export default function AdminUsersPage() {
   )
 
   const getLevelBadgeColor = (level?: string | null) => {
-    switch (level) {
-      case 'sd': return 'bg-blue-500/20 text-blue-400'
-      case 'smp': return 'bg-orange-500/20 text-orange-400'
-      case 'sma': return 'bg-purple-500/20 text-purple-400'
-      default: return 'bg-slate-200 text-slate-500'
-    }
+    return getLevelBadgeClass(level)
   }
 
   return (
@@ -230,8 +226,8 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium uppercase ${getLevelBadgeColor(user.education_level)}`}>
-                        {user.education_level || 'Tidak diketahui'}
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getLevelBadgeColor(user.education_level)}`}>
+                        {getLevelLabel(user.education_level)}
                       </span>
                     </td>
                     <td className="px-6 py-4">

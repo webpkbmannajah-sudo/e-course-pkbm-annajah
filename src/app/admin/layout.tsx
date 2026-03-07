@@ -16,6 +16,7 @@ import {
   Users,
   ShieldCheck,
 } from 'lucide-react'
+import { isSuperAdmin } from '@/lib/roles'
 
 const adminNavItems = [
   { href: '/admin/dashboard', label: 'Beranda', icon: LayoutDashboard },
@@ -55,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   // Build nav items: add "Manajemen Admin" only for superadmin
-  const navItems = user?.role === 'superadmin'
+  const navItems = isSuperAdmin(user?.role, user?.email)
     ? [...adminNavItems, { href: '/admin/manage-admins', label: 'Manajemen Admin', icon: ShieldCheck }]
     : adminNavItems
 
@@ -92,7 +93,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-2">
             {navItems.map((item) => {
-              const isActive = pathname === item.href
+              const isActive = item.href === '/admin/dashboard'
+                ? pathname === item.href
+                : pathname.startsWith(item.href)
               return (
                 <Link
                   key={item.href}

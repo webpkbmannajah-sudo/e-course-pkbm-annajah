@@ -188,7 +188,7 @@ export default function ManageAdminsPage() {
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-all shadow-sm hover:shadow-md"
         >
           <UserPlus className="w-4 h-4" />
           Tambah Admin
@@ -201,31 +201,40 @@ export default function ManageAdminsPage() {
           <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : admins.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-          <ShieldCheck className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-slate-900 mb-2">Belum ada admin</h3>
-          <p className="text-slate-500">Tambahkan admin pertama menggunakan tombol di atas.</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm">
+          <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <ShieldCheck className="w-8 h-8 text-purple-500" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">Belum ada admin</h3>
+          <p className="text-slate-500 mb-6">Tambahkan admin pertama untuk mulai mengelola platform</p>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-all shadow-sm hover:shadow-md font-medium"
+          >
+            <UserPlus className="w-4 h-4" />
+            Tambah Admin
+          </button>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead>
+              <thead className="bg-slate-50/50">
                 <tr className="border-b border-slate-200">
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Admin</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Role</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Dibuat</th>
-                  <th className="text-right px-6 py-4 text-sm font-medium text-slate-500">Aksi</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Admin</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Role</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Dibuat</th>
+                  <th className="text-right px-6 py-4 text-sm font-semibold text-slate-600">Aksi</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-100">
                 {admins.map((admin) => (
-                  <tr key={admin.id} className="border-b border-slate-200/50 hover:bg-slate-200/30">
+                  <tr key={admin.id} className="hover:bg-slate-50/80 transition-colors group">
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      <div className="flex items-center gap-4">
+                        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-sm ring-1 ring-white/50 ${
                           admin.role === 'superadmin' 
-                            ? 'bg-gradient-to-br from-amber-500 to-orange-500' 
+                            ? 'bg-gradient-to-br from-amber-400 to-orange-500' 
                             : 'bg-gradient-to-br from-purple-500 to-indigo-500'
                         }`}>
                           <span className="text-white font-medium text-sm">
@@ -242,10 +251,10 @@ export default function ManageAdminsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
                         admin.role === 'superadmin' 
-                          ? 'bg-amber-500/20 text-amber-600' 
-                          : 'bg-purple-500/20 text-purple-600'
+                          ? 'bg-amber-100 text-amber-700 border border-amber-200' 
+                          : 'bg-purple-100 text-purple-700 border border-purple-200'
                       }`}>
                         {admin.role === 'superadmin' ? 'Super Admin' : 'Admin'}
                       </span>
@@ -257,31 +266,28 @@ export default function ManageAdminsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => { setEditTarget({ id: admin.id, name: admin.name || admin.email, email: admin.email }); setEditEmail(admin.email) }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                           title="Edit Email"
                         >
                           <Edit2 className="w-4 h-4" />
-                          Edit Email
                         </button>
                         <button
                           onClick={() => setResetTarget({ id: admin.id, name: admin.name || admin.email })}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors"
+                          className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
                           title="Reset Password"
                         >
                           <Key className="w-4 h-4" />
-                          Reset Password
                         </button>
                         {admin.role !== 'superadmin' && (
                           <button
                             onClick={() => setDeleteTarget(admin)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                             title="Hapus Admin"
                           >
                             <Trash2 className="w-4 h-4" />
-                            Hapus
                           </button>
                         )}
                       </div>

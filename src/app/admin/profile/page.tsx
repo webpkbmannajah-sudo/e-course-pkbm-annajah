@@ -56,7 +56,7 @@ export default function AdminProfilePage() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 mb-8">My Profile</h1>
+      <h1 className="text-2xl font-bold text-slate-800 mb-8">Profil Saya</h1>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-8">
@@ -83,7 +83,7 @@ export default function AdminProfilePage() {
                   </div>
                 </div>
                 <button type="button" className="text-sm text-purple-600 font-medium hover:text-purple-700">
-                  Change Photo
+                  Ubah Foto
                 </button>
               </div>
 
@@ -91,7 +91,7 @@ export default function AdminProfilePage() {
               <div className="flex-1 space-y-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Nama Lengkap</label>
                     <input
                       type="text"
                       value={profile?.name || ''}
@@ -111,7 +111,7 @@ export default function AdminProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Phone Number</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Nomor Telepon</label>
                   <input
                     type="tel"
                     value={profile?.phone || ''}
@@ -122,7 +122,7 @@ export default function AdminProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Role</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Peran</label>
                   <div className="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
                     {profile?.role}
                   </div>
@@ -139,7 +139,7 @@ export default function AdminProfilePage() {
                 {saving ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Saving...
+                    Menyimpan...
                   </>
                 ) : (
                   <>
