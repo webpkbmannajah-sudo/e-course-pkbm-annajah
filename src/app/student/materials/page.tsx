@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { FileText, Search, Calendar, ArrowRight, Image as ImageIcon, X, ChevronDown, Check } from 'lucide-react'
+import { FileText, Search, ArrowRight, Image as ImageIcon, ChevronDown, Check } from 'lucide-react'
 import { Material } from '@/types'
 import { getStudentThemeVars, getLevelLabel } from '@/lib/levelColors'
 
@@ -12,7 +13,7 @@ export default function StudentMaterialsPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [userLevel, setUserLevel] = useState<string | null>(null)
-  const [selectedImage, setSelectedImage] = useState<Material | null>(null)
+
   const [subjects, setSubjects] = useState<string[]>([])
   const [selectedSubjectName, setSelectedSubjectName] = useState<string>('all')
   const [isSubjectDropdownOpen, setIsSubjectDropdownOpen] = useState(false)
@@ -252,56 +253,19 @@ export default function StudentMaterialsPage() {
                     {material.type === 'image' ? 'Gambar' : 'PDF'}
                 </span>
                 
-                {material.type === 'image' ? (
-                     <button
-                        onClick={() => setSelectedImage(material)}
-                        className={`flex items-center gap-1 text-sm transition-colors ${themeVars.linkHover}`}
-                     >
-                         Lihat <ArrowRight className="w-4 h-4" />
-                     </button>
-                ) : (
-                     <a href={material.file_url || '#'} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-1 text-sm transition-colors ${themeVars.linkHover}`}>
-                         Buka <ArrowRight className="w-4 h-4" />
-                     </a>
-                )}
+                <Link
+                  href={`/student/materials/${material.id}`}
+                  className={`flex items-center gap-1 text-sm transition-colors ${themeVars.linkHover}`}
+                >
+                  Lihat <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Image Preview Modal */}
-      {selectedImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl">
-            <div className="flex items-center justify-between p-6 border-b border-slate-300">
-              <h2 className="text-xl font-bold text-slate-900 pr-8">{selectedImage.title}</h2>
-              <button 
-                onClick={() => setSelectedImage(null)}
-                className="p-2 hover:bg-white rounded-full text-slate-500 hover:text-slate-900 transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="p-6 overflow-y-auto custom-scrollbar flex items-center justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src={selectedImage.file_url || ''} 
-                alt={selectedImage.title}
-                className="max-w-full max-h-[60vh] object-contain rounded-lg"
-              />
-            </div>
-             <div className="p-4 border-t border-slate-300 flex justify-end">
-                <button 
-                  onClick={() => setSelectedImage(null)}
-                  className="px-4 py-2 bg-white hover:bg-slate-200 text-slate-900 rounded-lg transition-colors"
-                >
-                  Tutup
-                </button>
-             </div>
-          </div>
-        </div>
-      )}
+
     </div>
   )
 }

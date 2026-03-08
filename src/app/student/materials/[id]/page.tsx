@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowLeft, FileText, Download, ExternalLink, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react'
+import { ArrowLeft, FileText, Download, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { Material } from '@/types'
 
 interface PageProps {
@@ -15,6 +15,29 @@ export default function MaterialDetailPage({ params }: PageProps) {
   const supabase = createClient()
   const [material, setMaterial] = useState<Material | null>(null)
   const [loading, setLoading] = useState(true)
+  const [downloading, setDownloading] = useState(false)
+
+  const handleDownloadImage = async () => {
+    if (!material?.file_url) return
+    setDownloading(true)
+    try {
+      const response = await fetch(material.file_url)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = material.file_name || material.title || 'download'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error downloading image:', error)
+      window.open(material.file_url, '_blank')
+    } finally {
+      setDownloading(false)
+    }
+  }
 
   useEffect(() => {
     fetchMaterial()
@@ -79,33 +102,54 @@ export default function MaterialDetailPage({ params }: PageProps) {
           </div>
         </div>
         <div className="flex gap-2">
-          <a
-            href={material.file_url || undefined}
-            download={material.file_name}
-            target="_blank"
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            Unduh
-          </a>
+          {material.type === 'image' ? (
+            <button
+              onClick={handleDownloadImage}
+              disabled={downloading}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors disabled:opacity-50"
+            >
+              {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              {downloading ? 'Mengunduh...' : 'Unduh'}
+            </button>
+          ) : (
+            <a
+              href={material.file_url || undefined}
+              target="_blank"
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Unduh
+            </a>
+          )}
         </div>
       </div>
 
-      {/* PDF Viewer */}
+      {/* Content Viewer */}
       <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-        <div className="bg-slate-100 px-4 py-3 border-b border-slate-600 flex items-center justify-between">
+        <div className="bg-slate-100 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-2 text-slate-500">
-            <FileText className="w-5 h-5" />
+            {material.type === 'image' ? <ImageIcon className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
             <span className="text-sm">{material.file_name}</span>
           </div>
         </div>
-        <div className="aspect-[4/3] bg-slate-50">
-          <iframe
-            src={`${material.file_url}#toolbar=0&navpanes=0`}
-            className="w-full h-full"
-            title={material.title}
-          />
-        </div>
+        {material.type === 'image' ? (
+          <div className="p-6 bg-slate-50 flex items-center justify-center min-h-[300px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={material.file_url || ''}
+              alt={material.title}
+              className="max-w-full max-h-[70vh] object-contain rounded-lg"
+            />
+          </div>
+        ) : (
+          <div className="aspect-[4/3] bg-slate-50">
+            <iframe
+              src={`${material.file_url}#toolbar=0&navpanes=0`}
+              className="w-full h-full"
+              title={material.title}
+            />
+          </div>
+        )}
       </div>
     </div>
   )
