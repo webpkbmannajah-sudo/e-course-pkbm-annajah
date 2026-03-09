@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { FileText, Plus, Trash2, Eye, Search, Calendar, Image as ImageIcon } from 'lucide-react'
+import { FileText, Plus, Trash2, Eye, Search, Calendar, Image as ImageIcon, Pencil } from 'lucide-react'
 import ConfirmModal from '@/components/ConfirmModal'
 import { showToast } from '@/components/Toast'
 import { Material, Level } from '@/types'
@@ -241,9 +241,9 @@ export default function AdminMaterialsPage() {
                   <div>
                     <h3 className="font-semibold text-slate-900">{material.title}</h3>
                     <div className="flex flex-wrap items-center gap-2 mt-1">
-                        {(material as any).subject?.level?.name && (
-                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${getLevelBadgeClass((material as any).subject.level.name)}`}>
-                                {(material as any).subject.level.name}
+                        {material.subject?.level?.name && (
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${getLevelBadgeClass(material.subject.level.name)}`}>
+                                {material.subject.level.name}
                             </span>
                         )}
                         {material.subject && (
@@ -274,6 +274,14 @@ export default function AdminMaterialsPage() {
                           <Eye className="w-5 h-5" />
                       </a>
                   )}
+                  
+                  <Link
+                    href={`/admin/materials/${material.id}/edit`}
+                    className="p-2 text-slate-500 hover:text-orange-400 hover:bg-orange-500/10 rounded-lg transition-colors"
+                    title="Edit"
+                  >
+                    <Pencil className="w-5 h-5" />
+                  </Link>
                   
                   <button
                     onClick={() => setDeleteModal({ isOpen: true, id: material.id, title: material.title, fileUrl: material.file_url })}

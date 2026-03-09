@@ -394,15 +394,13 @@ export default function AdminExamsPage() {
                   >
                     <Edit className="w-5 h-5" />
                   </Link>
-                  {exam.type === 'questions' && (
-                    <Link
-                      href={`/admin/exams/${exam.id}/grading`}
-                      className="p-2 text-slate-500 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
-                      title="Penilaian"
-                    >
-                      <Award className="w-5 h-5" />
-                    </Link>
-                  )}
+                  <Link
+                    href={`/admin/exams/${exam.id}/grading`}
+                    className="p-2 text-slate-500 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
+                    title="Penilaian"
+                  >
+                    <Award className="w-5 h-5" />
+                  </Link>
                   <button
                     onClick={() => setDeleteModal({ isOpen: true, id: exam.id, title: exam.title, pdfUrl: exam.pdf_url })}
                     disabled={deleting === exam.id}
