@@ -193,7 +193,7 @@ export default function StudentProgressPage() {
         ].map((card) => (
           <div key={card.label} className="bg-white border border-slate-200 rounded-2xl p-5">
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-3`}>
-              <card.icon className="w-5 h-5 text-slate-900" />
+              <card.icon className="w-5 h-5 text-white" />
             </div>
             <p className="text-xl font-bold text-slate-900">{card.value}</p>
             <p className="text-xs text-slate-500 mt-1">{card.label}</p>
