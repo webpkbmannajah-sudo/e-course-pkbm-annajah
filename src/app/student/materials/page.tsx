@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { FileText, Search, ArrowRight, Image as ImageIcon, ChevronDown, Check } from 'lucide-react'
 import { Material } from '@/types'
 import { getStudentThemeVars, getLevelLabel } from '@/lib/levelColors'
+import Pagination from '@/components/Pagination'
 
 export default function StudentMaterialsPage() {
   const supabase = createClient()
@@ -20,6 +21,12 @@ export default function StudentMaterialsPage() {
   const [subjectSearchQuery, setSubjectSearchQuery] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const itemsPerPage = 12
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -30,9 +37,15 @@ export default function StudentMaterialsPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedSubjectName])
+
   useEffect(() => {
     fetchData()
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, searchQuery, selectedSubjectName])
 
   const fetchData = async () => {
     try {
@@ -50,9 +63,8 @@ export default function StudentMaterialsPage() {
 
       let query = supabase
         .from('materials')
-        .select('*, subjects!inner(id, name, levels!inner(slug))')
-        .order('created_at', { ascending: false })
-
+        .select('*, subjects!inner(id, name, levels!inner(slug))', { count: 'exact' })
+        
       if (level) {
           query = query.eq('subjects.levels.slug', level)
 
@@ -76,9 +88,23 @@ export default function StudentMaterialsPage() {
           }
       }
 
-      const { data, error } = await query
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
+      }
 
-      if (error) throw error
+      if (selectedSubjectName !== 'all') {
+        query = query.eq('subjects.name', selectedSubjectName)
+      }
+
+      const from = (currentPage - 1) * itemsPerPage
+      const to = from + itemsPerPage - 1
+
+      const { data, count, error } = await query
+        .order('created_at', { ascending: false })
+        .range(from, to)
+
+      // Handle Range Not Satisfiable (PGRST103) which happens when table is empty or range is out of bounds
+      if (error && error.code !== 'PGRST103') throw error
       
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const formattedData = (data || []).map((item: any) => ({
@@ -87,6 +113,8 @@ export default function StudentMaterialsPage() {
       }))
       
       setMaterials(formattedData as unknown as Material[])
+      setTotalItems(count || 0)
+      setTotalPages(Math.ceil((count || 0) / itemsPerPage))
     } catch (error) {
       console.error('Error fetching materials:', error)
     } finally {
@@ -97,15 +125,6 @@ export default function StudentMaterialsPage() {
   const filteredSubjectsForDropdown = subjects.filter(name => 
     name.toLowerCase().includes(subjectSearchQuery.toLowerCase())
   )
-
-  const filteredMaterials = materials.filter(m => {
-    const matchesSearch = m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.description?.toLowerCase().includes(searchQuery.toLowerCase())
-
-    const matchesSubject = selectedSubjectName === 'all' || m.subject?.name === selectedSubjectName
-
-    return matchesSearch && matchesSubject
-  })
 
 
 
@@ -221,7 +240,7 @@ export default function StudentMaterialsPage() {
       </div>
 
       {/* Materials Grid */}
-      {filteredMaterials.length === 0 ? (
+      {materials.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">Belum ada materi</h3>
@@ -230,8 +249,9 @@ export default function StudentMaterialsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredMaterials.map((material) => (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {materials.map((material) => (
             <div
               key={material.id}
               className={`group bg-white border border-slate-200 rounded-xl p-5 transition-all flex flex-col ${themeVars.cardHover}`}
@@ -269,9 +289,20 @@ export default function StudentMaterialsPage() {
               </div>
             </div>
           ))}
+          </div>
+
+          <div className="bg-white p-6 border border-slate-200 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-slate-500">
+              Menampilkan {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} hingga {Math.min(currentPage * itemsPerPage, totalItems)} dari {totalItems} materi
+            </p>
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
         </div>
       )}
-
 
     </div>
   )

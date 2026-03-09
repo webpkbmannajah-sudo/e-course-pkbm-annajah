@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { ClipboardList, Search, Calendar, ArrowRight, FileText, CheckCircle, ChevronDown, Check, PenTool } from 'lucide-react'
+import { ClipboardList, Search, ArrowRight, FileText, CheckCircle, ChevronDown, Check, PenTool } from 'lucide-react'
 import { Exam } from '@/types'
 import { getStudentThemeVars } from '@/lib/levelColors'
+import Pagination from '@/components/Pagination'
 
 interface ExamWithAttempt extends Exam {
   hasAttempted?: boolean
@@ -25,10 +26,23 @@ export default function StudentExamsPage() {
   const [isSubjectDropdownOpen, setIsSubjectDropdownOpen] = useState(false)
   
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [subjects, setSubjects] = useState<string[]>([])
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const itemsPerPage = 12
 
   useEffect(() => {
     fetchExams()
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, searchQuery, selectedSubjectName, selectedCategory])
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedSubjectName, selectedCategory])
 
   const fetchExams = async () => {
     try {
@@ -45,19 +59,56 @@ export default function StudentExamsPage() {
       const level = profile?.education_level
       setUserLevel(level)
 
-      // Fetch exams filtered by level
+      // Fetch subjects for this level (for the filter dropdown)
+      if (level) {
+          const { data: subjectData, error: subjectError } = await supabase
+            .from('subjects')
+            .select('name, levels!inner(slug)')
+            .eq('levels.slug', level)
+            .order('name')
+
+          if (!subjectError && subjectData) {
+             const uniqueNames = Array.from(new Set(subjectData.map(s => s.name)))
+             setSubjects(uniqueNames)
+          }
+      } else {
+          const { data: subjectData } = await supabase.from('subjects').select('name').order('name')
+          if (subjectData) {
+             const uniqueNames = Array.from(new Set(subjectData.map(s => s.name)))
+             setSubjects(uniqueNames)
+          }
+      }
+
+      // Fetch exams filtered by level and pagination
       let query = supabase
         .from('exams')
-        .select('*, subjects!inner(id, name, levels!inner(slug, name)), materials(title)')
-        .order('created_at', { ascending: false })
+        .select('*, subjects!inner(id, name, levels!inner(slug, name)), materials(title)', { count: 'exact' })
 
       if (level) {
          query = query.eq('subjects.levels.slug', level)
       }
 
-      const { data: examsData, error: examsError } = await query
+      if (searchQuery) {
+         query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
+      }
 
-      if (examsError) throw examsError
+      if (selectedSubjectName !== 'all') {
+         query = query.eq('subjects.name', selectedSubjectName)
+      }
+
+      if (selectedCategory !== 'all') {
+         query = query.eq('category', selectedCategory)
+      }
+
+      const from = (currentPage - 1) * itemsPerPage
+      const to = from + itemsPerPage - 1
+
+      const { data: examsData, error: examsError, count } = await query
+        .order('created_at', { ascending: false })
+        .range(from, to)
+
+      // Handle Range Not Satisfiable (PGRST103) which happens when table is empty or range is out of bounds
+      if (examsError && examsError.code !== 'PGRST103') throw examsError
 
       // Fetch user's attempts
       const { data: attempts, error: attemptsError } = await supabase
@@ -80,6 +131,8 @@ export default function StudentExamsPage() {
       })
 
       setExams(examsWithAttempts as unknown as ExamWithAttempt[])
+      setTotalItems(count || 0)
+      setTotalPages(Math.ceil((count || 0) / itemsPerPage))
     } catch (error) {
       console.error('Error fetching exams:', error)
     } finally {
@@ -87,16 +140,7 @@ export default function StudentExamsPage() {
     }
   }
 
-  const filteredExams = exams.filter(e => {
-    const matchesSearch = e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          e.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesSubject = selectedSubjectName === 'all' || e.subject?.name === selectedSubjectName
-    const matchesCategory = selectedCategory === 'all' || e.category === selectedCategory
-    return matchesSearch && matchesSubject && matchesCategory
-  })
-
-  const uniqueSubjects = Array.from(new Set(exams.map(e => e.subject?.name).filter(Boolean))) as string[]
-  const filteredSubjectsList = uniqueSubjects.filter(name => 
+  const filteredSubjectsList = subjects.filter(name => 
     name.toLowerCase().includes(subjectSearchQuery.toLowerCase())
   )
 
@@ -230,7 +274,7 @@ export default function StudentExamsPage() {
       </div> {/* This closes the main "flex flex-col gap-4" div for filters */}
 
       {/* Exams Grid */}
-      {filteredExams.length === 0 ? (
+      {exams.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <ClipboardList className="w-16 h-16 text-slate-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">Belum ada latihan soal</h3>
@@ -239,9 +283,10 @@ export default function StudentExamsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredExams.map((exam) => {
-            const themeVars = getStudentThemeVars(userLevel)
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {exams.map((exam) => {
+              const themeVars = getStudentThemeVars(userLevel)
             return (
             <Link
               key={exam.id}
@@ -308,6 +353,18 @@ export default function StudentExamsPage() {
             </Link>
             )
           })}
+          </div>
+
+          <div className="bg-white p-6 border border-slate-200 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-slate-500">
+              Menampilkan {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} hingga {Math.min(currentPage * itemsPerPage, totalItems)} dari {totalItems} latihan soal
+            </p>
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
         </div>
       )}
     </div>

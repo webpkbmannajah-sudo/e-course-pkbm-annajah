@@ -24,6 +24,7 @@ import {
   ChevronDown,
 } from 'lucide-react'
 import { formatPercentage } from '@/lib/analytics'
+import Pagination from '@/components/Pagination'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler)
 
@@ -53,6 +54,10 @@ export default function StudentProgressPage() {
   const [performance, setPerformance] = useState<PerformanceData | null>(null)
   const [scoreHistory, setScoreHistory] = useState<ScoreEntry[]>([])
   const [expandedExams, setExpandedExams] = useState<Record<string, boolean>>({})
+
+  // Pagination for the table
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 8
 
   const groupedScoreHistory = useMemo(() => {
     const groups: Record<string, {
@@ -154,6 +159,12 @@ export default function StudentProgressPage() {
       pointHoverRadius: 8,
     }],
   }
+
+  const totalPages = Math.ceil(groupedScoreHistory.length / itemsPerPage)
+  const paginatedGroups = groupedScoreHistory.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
 
   return (
     <div className="space-y-8">
@@ -264,7 +275,7 @@ export default function StudentProgressPage() {
                 </tr>
               </thead>
               <tbody>
-                {groupedScoreHistory.map((group) => (
+                {paginatedGroups.map((group) => (
                   <React.Fragment key={group.exam_id}>
                     <tr 
                       className="border-b border-slate-200/50 hover:bg-slate-50 transition-colors cursor-pointer"
@@ -309,6 +320,19 @@ export default function StudentProgressPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+        
+        {groupedScoreHistory.length > 0 && (
+          <div className="mt-6 border-t border-slate-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-slate-500">
+              Menampilkan {Math.min((currentPage - 1) * itemsPerPage + 1, groupedScoreHistory.length)} hingga {Math.min(currentPage * itemsPerPage, groupedScoreHistory.length)} dari {groupedScoreHistory.length} hasil ujian
+            </p>
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages || 1}
+              onPageChange={setCurrentPage}
+            />
           </div>
         )}
       </div>
