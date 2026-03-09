@@ -3,8 +3,14 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { isSuperAdmin } from '@/lib/roles'
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
+        const { searchParams } = new URL(request.url)
+        const page = parseInt(searchParams.get('page') || '1')
+        const limit = parseInt(searchParams.get('limit') || '10')
+        const from = (page - 1) * limit
+        const to = from + limit - 1
+
         const supabase = await createClient()
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -24,11 +30,12 @@ export async function GET() {
         }
 
         // Fetch all admin and superadmin users
-        const { data: admins, error } = await supabase
+        const { data: admins, count, error } = await supabase
             .from('profiles')
-            .select('id, name, email, role, created_at')
+            .select('id, name, email, role, created_at', { count: 'exact' })
             .in('role', ['admin', 'superadmin'])
             .order('created_at', { ascending: true })
+            .range(from, to)
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 })
@@ -41,7 +48,13 @@ export async function GET() {
             return admin
         })
 
-        return NextResponse.json({ admins: adminsWithRoles })
+        return NextResponse.json({
+            admins: adminsWithRoles,
+            total: count || 0,
+            page,
+            limit,
+            totalPages: Math.ceil((count || 0) / limit)
+        })
     } catch (error) {
         console.error('Error fetching admins:', error)
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

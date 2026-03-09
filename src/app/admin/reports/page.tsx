@@ -16,18 +16,17 @@ import {
   Filler
 } from 'chart.js'
 import { Bar, Doughnut } from 'react-chartjs-2'
-import { createClient } from '@/lib/supabase/client'
 import {
   BarChart3,
   Users,
   ClipboardList,
   Award,
   TrendingUp,
-  FileText,
   FileSpreadsheet,
   Percent,
   Target,
 } from 'lucide-react'
+import Pagination from '@/components/Pagination'
 import type { PlatformOverview } from '@/types'
 import { formatPercentage } from '@/lib/analytics'
 
@@ -64,7 +63,6 @@ interface TopStudent {
 }
 
 export default function AdminReportsPage() {
-  const supabase = createClient()
   const [loading, setLoading] = useState(true)
   const [overview, setOverview] = useState<PlatformOverview | null>(null)
   const [examStats, setExamStats] = useState<ExamStat[]>([])
@@ -74,53 +72,93 @@ export default function AdminReportsPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [exporting, setExporting] = useState(false)
 
-  const fetchData = useCallback(async () => {
+  // Pagination states
+  const [examsCurrentPage, setExamsCurrentPage] = useState(1)
+  const [examsTotalPages, setExamsTotalPages] = useState(1)
+  const [examsTotal, setExamsTotal] = useState(0)
+  
+  const [studentsCurrentPage, setStudentsCurrentPage] = useState(1)
+  const [studentsTotalPages, setStudentsTotalPages] = useState(1)
+  const [studentsTotal, setStudentsTotal] = useState(0)
+
+  const itemsPerPage = 8
+
+  // Initial Data Fetch (Overview & Initial Pages)
+  const fetchInitialData = useCallback(async () => {
     try {
       const res = await fetch('/api/analytics/stats')
       if (!res.ok) throw new Error('Failed to fetch')
       const data = await res.json()
 
       setOverview(data.overview)
-      setExamStats(data.exam_stats || [])
-      setTopStudents(data.top_students || [])
+      
+      // We still use these initial values to prevent blank states, but we'll fetch actual paginated data right after
     } catch (error) {
-      console.error('Failed to fetch analytics:', error)
-      // Fallback: direct query
-      const { count: totalStudents } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'student')
-
-      const { count: totalExams } = await supabase
-        .from('exams')
-        .select('*', { count: 'exact', head: true })
-
-      const { count: totalAttempts } = await supabase
-        .from('exam_attempts')
-        .select('*', { count: 'exact', head: true })
-
-      const { count: totalMaterials } = await supabase
-        .from('materials')
-        .select('*', { count: 'exact', head: true })
-
-      setOverview({
-        total_students: totalStudents || 0,
-        total_exams: totalExams || 0,
-        total_question_exams: 0,
-        total_attempts: totalAttempts || 0,
-        total_graded: 0,
-        avg_platform_score: null,
-        overall_pass_rate: null,
-        total_materials: totalMaterials || 0,
-      })
+      console.error('Failed to fetch analytics overview:', error)
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
+
+  // Fetch paginated exam stats
+  const fetchExamStats = useCallback(async () => {
+    try {
+      const url = new URL('/api/analytics/stats', window.location.origin)
+      url.searchParams.set('type', 'exam_stats')
+      url.searchParams.set('page', examsCurrentPage.toString())
+      url.searchParams.set('limit', itemsPerPage.toString())
+      if (examFilter === 'has_attempts') {
+        url.searchParams.set('has_attempts', 'true')
+      }
+
+      const res = await fetch(url)
+      if (!res.ok) throw new Error('Failed to fetch exam stats')
+      const data = await res.json()
+
+      setExamStats(data.data || [])
+      setExamsTotal(data.total || 0)
+      setExamsTotalPages(data.totalPages || 1)
+    } catch (error) {
+      console.error('Failed to fetch paginated exam stats:', error)
+    }
+  }, [examsCurrentPage, examFilter])
+
+  // Fetch paginated top students
+  const fetchTopStudents = useCallback(async () => {
+    try {
+      const url = new URL('/api/analytics/stats', window.location.origin)
+      url.searchParams.set('type', 'top_students')
+      url.searchParams.set('page', studentsCurrentPage.toString())
+      url.searchParams.set('limit', itemsPerPage.toString())
+
+      const res = await fetch(url)
+      if (!res.ok) throw new Error('Failed to fetch top students')
+      const data = await res.json()
+
+      setTopStudents(data.data || [])
+      setStudentsTotal(data.total || 0)
+      setStudentsTotalPages(data.totalPages || 1)
+    } catch (error) {
+      console.error('Failed to fetch paginated top students:', error)
+    }
+  }, [studentsCurrentPage])
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    fetchInitialData()
+  }, [fetchInitialData])
+
+  useEffect(() => {
+    fetchExamStats()
+  }, [fetchExamStats])
+
+  useEffect(() => {
+    fetchTopStudents()
+  }, [fetchTopStudents])
+
+  useEffect(() => {
+    // Reset page when filter changes
+    setExamsCurrentPage(1)
+  }, [examFilter])
 
   const handleExport = async () => {
     setExporting(true)
@@ -146,10 +184,8 @@ export default function AdminReportsPage() {
     }
   }
 
-  const filteredExams = examStats.filter(exam => {
-    if (examFilter === 'has_attempts') return exam.total_attempts > 0
-    return true
-  })
+  // Client-side filtering is reduced as it's now mainly handled via API parameters
+  const filteredExams = examStats 
 
   const sortedExams = [...filteredExams].sort((a, b) => {
     const dir = sortDir === 'asc' ? 1 : -1
@@ -232,7 +268,7 @@ export default function AdminReportsPage() {
         {[
           { label: 'Total Siswa', value: overview?.total_students || 0, icon: Users, color: 'from-blue-500 to-cyan-500' },
           { label: 'Total Ujian', value: overview?.total_exams || 0, icon: ClipboardList, color: 'from-purple-500 to-pink-500' },
-          { label: 'Total Percobaan', value: overview?.total_attempts || 0, icon: FileText, color: 'from-amber-500 to-orange-500' },
+          { label: 'Total Percobaan', value: overview?.total_attempts || 0, icon: ClipboardList, color: 'from-amber-500 to-orange-500' },
           { label: 'Sudah Dinilai', value: overview?.total_graded || 0, icon: Award, color: 'from-emerald-500 to-teal-500' },
           { label: 'Rata-rata Skor', value: formatPercentage(overview?.avg_platform_score ?? null), icon: Target, color: 'from-indigo-500 to-violet-500' },
           { label: 'Tingkat Kelulusan', value: formatPercentage(overview?.overall_pass_rate ?? null), icon: Percent, color: 'from-rose-500 to-pink-500' },
@@ -380,7 +416,7 @@ export default function AdminReportsPage() {
                     <td className="py-3 text-right">
                       <Link
                         href={`/admin/reports/exams/${exam.id}`}
-                        className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                        className="text-sm text-purple-600 hover:text-purple-500 transition-colors inline-block"
                       >
                         Lihat →
                       </Link>
@@ -389,6 +425,19 @@ export default function AdminReportsPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+        
+        {examsTotal > 0 && (
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+            <p className="text-sm text-slate-500">
+              Menampilkan {Math.min((examsCurrentPage - 1) * itemsPerPage + 1, examsTotal)} hingga {Math.min(examsCurrentPage * itemsPerPage, examsTotal)} dari {examsTotal} ujian
+            </p>
+            <Pagination 
+              currentPage={examsCurrentPage}
+              totalPages={examsTotalPages}
+              onPageChange={setExamsCurrentPage}
+            />
           </div>
         )}
       </div>
@@ -416,16 +465,18 @@ export default function AdminReportsPage() {
                 </tr>
               </thead>
               <tbody>
-                {topStudents.map((student, i) => (
+                {topStudents.map((student, i) => {
+                  const globalIndex = (studentsCurrentPage - 1) * itemsPerPage + i;
+                  return (
                   <tr key={student.user_id} className="border-b border-slate-200/50 hover:bg-slate-200/30 transition-colors">
                     <td className="py-3 pr-4">
                       <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                        i === 0 ? 'bg-amber-500/20 text-amber-400' :
-                        i === 1 ? 'bg-slate-400/20 text-slate-600' :
-                        i === 2 ? 'bg-orange-500/20 text-orange-400' :
-                        'bg-slate-200 text-slate-500'
+                        globalIndex === 0 ? 'bg-amber-100 text-amber-600 border border-amber-200' :
+                        globalIndex === 1 ? 'bg-slate-100 text-slate-600 border border-slate-200' :
+                        globalIndex === 2 ? 'bg-orange-100 text-orange-600 border border-orange-200' :
+                        'bg-slate-50 text-slate-500 border border-slate-200'
                       }`}>
-                        {i + 1}
+                        {globalIndex + 1}
                       </span>
                     </td>
                     <td className="py-3 pr-4 text-slate-900 font-medium">{student.name}</td>
@@ -445,11 +496,27 @@ export default function AdminReportsPage() {
                       </Link>
                     </td>
                   </tr>
-                ))}
+                );
+                })}
               </tbody>
             </table>
           </div>
         )}
+
+        {/* --- STUDENT PAGINATION START --- */}
+        {studentsTotal > 0 && (
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+            <p className="text-sm text-slate-500">
+              Menampilkan {Math.min((studentsCurrentPage - 1) * itemsPerPage + 1, studentsTotal)} hingga {Math.min(studentsCurrentPage * itemsPerPage, studentsTotal)} dari {studentsTotal} siswa
+            </p>
+            <Pagination 
+              currentPage={studentsCurrentPage}
+              totalPages={studentsTotalPages}
+              onPageChange={setStudentsCurrentPage}
+            />
+          </div>
+        )}
+        {/* --- STUDENT PAGINATION END --- */}
       </div>
     </div>
   )

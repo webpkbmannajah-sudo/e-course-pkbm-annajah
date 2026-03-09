@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Users, Search, Mail, Calendar, Edit2 } from 'lucide-react'
 import { User } from '@/types'
 import { getLevelBadgeClass, getLevelLabel } from '@/lib/levelColors'
+import Pagination from '@/components/Pagination'
 
 export default function AdminUsersPage() {
   const supabase = createClient()
@@ -12,6 +13,13 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedLevel, setSelectedLevel] = useState<string>('all')
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const itemsPerPage = 10
+
   
   // Edit User State
   const [editUserModal, setEditUserModal] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null })
@@ -132,31 +140,54 @@ export default function AdminUsersPage() {
   const fetchUsers = useCallback(async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('profiles')
-        .select('*')
+        .select('*', { count: 'exact' })
         .or('role.eq.student,role.is.null')
-        .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (searchQuery) {
+        query = query.or(`name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`)
+      }
+
+      if (selectedLevel !== 'all') {
+        query = query.eq('education_level', selectedLevel)
+      }
+
+      const from = (currentPage - 1) * itemsPerPage
+      const to = from + itemsPerPage - 1
+
+      const { data, count, error } = await query
+        .order('created_at', { ascending: false })
+        .range(from, to)
+
+      if (error && error.code !== 'PGRST103') throw error
+
       setUsers((data as unknown as User[]) || [])
+      setTotalItems(count || 0)
+      setTotalPages(Math.ceil((count || 0) / itemsPerPage))
     } catch (error) {
       console.error('Error fetching users:', error)
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [supabase, currentPage, searchQuery, selectedLevel])
 
   useEffect(() => {
     fetchUsers()
   }, [fetchUsers])
 
-  const filteredUsers = users.filter(u => {
-    const matchesSearch = (u.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (u.email || '').toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesLevel = selectedLevel === 'all' || u.education_level === selectedLevel
-    return matchesSearch && matchesLevel
-  })
+  // Reset to page 1 on filter/search change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedLevel])
+
+  // No longer needed: client-side filtering removed since it's handled on the server
+  // const filteredUsers = users.filter(u => {
+  //   const matchesSearch = (u.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //                         (u.email || '').toLowerCase().includes(searchQuery.toLowerCase())
+  //   const matchesLevel = selectedLevel === 'all' || u.education_level === selectedLevel
+  //   return matchesSearch && matchesLevel
+  // })
 
   const getLevelBadgeColor = (level?: string | null) => {
     return getLevelBadgeClass(level)
@@ -222,7 +253,7 @@ export default function AdminUsersPage() {
         <div className="flex items-center justify-center h-64">
           <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
         </div>
-      ) : filteredUsers.length === 0 ? (
+      ) : users.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <Users className="w-16 h-16 text-slate-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">Siswa tidak ditemukan</h3>
@@ -243,7 +274,7 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user) => (
+                {users.map((user) => (
                   <tr key={user.id} className="border-b border-slate-200/50 hover:bg-slate-200/30">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -296,6 +327,17 @@ export default function AdminUsersPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+          
+          <div className="p-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-slate-500">
+              Menampilkan {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} hingga {Math.min(currentPage * itemsPerPage, totalItems)} dari {totalItems} siswa
+            </p>
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
       )}

@@ -7,6 +7,7 @@ import { ClipboardList, Plus, Trash2, Edit, Search, Calendar, FileText, HelpCirc
 import { getLevelBadgeClass } from '@/lib/levelColors'
 import ConfirmModal from '@/components/ConfirmModal'
 import { showToast } from '@/components/Toast'
+import Pagination from '@/components/Pagination'
 import { Exam, Level, Subject } from '@/types'
 
 export default function AdminExamsPage() {
@@ -21,6 +22,13 @@ export default function AdminExamsPage() {
   const [subjectSearchQuery, setSubjectSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const itemsPerPage = 8
+  
   const [deleting, setDeleting] = useState<string | null>(null)
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string; title: string; pdfUrl: string | null }>({
     isOpen: false,
@@ -45,20 +53,46 @@ export default function AdminExamsPage() {
   }, [supabase])
 
   const fetchExams = useCallback(async () => {
+    setLoading(true)
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('exams')
-        .select('*, subject:subjects(name, level_id, level:levels(name)), material:materials(title)')
-        .order('created_at', { ascending: false })
+        .select('*, subject:subjects!inner(name, level_id, level:levels!inner(name)), material:materials(title)', { count: 'exact' })
 
-      if (error) throw error
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
+      }
+
+      if (selectedLevelId !== 'all') {
+        query = query.eq('subject.level_id', selectedLevelId)
+      }
+
+      if (selectedSubjectName !== 'all') {
+        query = query.eq('subject.name', selectedSubjectName)
+      }
+
+      if (selectedCategory !== 'all') {
+        query = query.eq('category', selectedCategory)
+      }
+
+      const from = (currentPage - 1) * itemsPerPage
+      const to = from + itemsPerPage - 1
+
+      const { data, count, error } = await query
+        .order('created_at', { ascending: false })
+        .range(from, to)
+
+      if (error && error.code !== 'PGRST103') throw error
+      
       setExams(data as unknown as Exam[] || [])
+      setTotalItems(count || 0)
+      setTotalPages(Math.ceil((count || 0) / itemsPerPage))
     } catch (error) {
       console.error('Error fetching exams:', error)
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [supabase, currentPage, searchQuery, selectedLevelId, selectedSubjectName, selectedCategory])
 
   const fetchSubjects = useCallback(async (levelId: string) => {
     try {
@@ -90,8 +124,16 @@ export default function AdminExamsPage() {
 
   useEffect(() => {
     fetchLevels()
+  }, [fetchLevels])
+
+  useEffect(() => {
     fetchExams()
-  }, [fetchLevels, fetchExams])
+  }, [fetchExams])
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedLevelId, selectedSubjectName, selectedCategory])
 
   useEffect(() => {
     fetchSubjects(selectedLevelId)
@@ -131,16 +173,17 @@ export default function AdminExamsPage() {
     }
   }
 
-  const filteredExams = exams.filter(e => {
-    const matchesSearch = e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesLevel = selectedLevelId === 'all' || e.subject?.level_id === selectedLevelId
-    const matchesSubject = selectedSubjectName === 'all' || e.subject?.name === selectedSubjectName
-    const matchesCategory = selectedCategory === 'all' || e.category === selectedCategory
-    
-    return matchesSearch && matchesLevel && matchesSubject && matchesCategory
-  })
+  // Filtering entirely handled by server-side query except for `subjectsList`
+  // const filteredExams = exams.filter(e => {
+  //   const matchesSearch = e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     e.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  //   
+  //   const matchesLevel = selectedLevelId === 'all' || e.subject?.level_id === selectedLevelId
+  //   const matchesSubject = selectedSubjectName === 'all' || e.subject?.name === selectedSubjectName
+  //   const matchesCategory = selectedCategory === 'all' || e.category === selectedCategory
+  //   
+  //   return matchesSearch && matchesLevel && matchesSubject && matchesCategory
+  // })
 
   const filteredSubjectsList = subjects.filter(s => 
     s.name.toLowerCase().includes(subjectSearchQuery.toLowerCase())
@@ -308,7 +351,7 @@ export default function AdminExamsPage() {
       </div>
 
       {/* Exams List */}
-      {filteredExams.length === 0 ? (
+      {exams.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <ClipboardList className="w-16 h-16 text-slate-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">Ujian tidak ditemukan</h3>
@@ -322,9 +365,10 @@ export default function AdminExamsPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid gap-4">
-          {filteredExams.map((exam) => {
-            const levelColorClass = getLevelBadgeClass(exam.subject?.level?.name)
+        <div className="space-y-4">
+          <div className="grid gap-4">
+            {exams.map((exam) => {
+              const levelColorClass = getLevelBadgeClass(exam.subject?.level?.name)
 
             return (
             <div
@@ -413,6 +457,18 @@ export default function AdminExamsPage() {
               </div>
             </div>
           )})}
+          </div>
+          
+          <div className="bg-white p-6 border border-slate-200 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-slate-500">
+              Menampilkan {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} hingga {Math.min(currentPage * itemsPerPage, totalItems)} dari {totalItems} ujian
+            </p>
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
         </div>
       )}
       {/* Delete Confirmation Modal */}

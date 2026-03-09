@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Award, ArrowRight, ClipboardList, Search, ChevronDown, Check } from 'lucide-react'
 import { Level, Subject } from '@/types'
 import { showToast } from '@/components/Toast'
+import Pagination from '@/components/Pagination'
 
 interface ExamSummary {
   id: string
@@ -35,6 +36,12 @@ export default function GradingIndexPage() {
   const [selectedSubjectName, setSelectedSubjectName] = useState<string>('all')
   const [isSubjectDropdownOpen, setIsSubjectDropdownOpen] = useState(false)
   const [subjectSearchQuery, setSubjectSearchQuery] = useState('')
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const itemsPerPage = 10
 
   const fetchLevels = useCallback(async () => {
     try {
@@ -80,14 +87,40 @@ export default function GradingIndexPage() {
   }, [supabase])
 
   const fetchExams = useCallback(async () => {
+    setLoading(true)
     try {
-      // Fetch question-based exams only
-      const { data: examsData, error } = await supabase
+      let query = supabase
         .from('exams')
-        .select('id, title, type, category, created_at, subject:subjects(name, level_id, level:levels(name))')
-        .order('created_at', { ascending: false })
+        .select(`
+          id, title, type, category, created_at, 
+          subject:subjects!inner(name, level_id, level:levels!inner(name))
+        `, { count: 'exact' })
 
-      if (error) throw error
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%`)
+      }
+
+      if (selectedCategory !== 'all') {
+        query = query.eq('category', selectedCategory)
+      }
+
+      if (selectedLevelId !== 'all') {
+        query = query.eq('subject.level_id', selectedLevelId)
+      }
+
+      if (selectedSubjectName !== 'all') {
+        query = query.eq('subject.name', selectedSubjectName)
+      }
+
+      const from = (currentPage - 1) * itemsPerPage
+      const to = from + itemsPerPage - 1
+
+      const { data: examsData, count, error } = await query
+        .order('created_at', { ascending: false })
+        .range(from, to)
+
+      // Handle Range Not Satisfiable (PGRST103) which happens when table is empty or range is out of bounds
+      if (error && error.code !== 'PGRST103') throw error
 
       // Fetch attempt counts
       const examsWithCounts = await Promise.all(
@@ -105,30 +138,32 @@ export default function GradingIndexPage() {
       )
 
       setExams(examsWithCounts)
+      setTotalItems(count || 0)
+      setTotalPages(Math.ceil((count || 0) / itemsPerPage))
     } catch (error) {
       console.error('Error fetching exams:', error)
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [supabase, currentPage, searchQuery, selectedCategory, selectedLevelId, selectedSubjectName])
 
   useEffect(() => {
     fetchLevels()
+  }, [fetchLevels])
+
+  useEffect(() => {
     fetchExams()
-  }, [fetchLevels, fetchExams])
+  }, [fetchExams])
 
   useEffect(() => {
     fetchSubjects(selectedLevelId)
     setSelectedSubjectName('all')
   }, [selectedLevelId, fetchSubjects])
 
-  const filteredExams = exams.filter(e => {
-    const matchesSearch = e.title.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === 'all' || e.category === selectedCategory
-    const matchesLevel = selectedLevelId === 'all' || e.subject?.level_id === selectedLevelId
-    const matchesSubject = selectedSubjectName === 'all' || e.subject?.name === selectedSubjectName
-    return matchesSearch && matchesCategory && matchesLevel && matchesSubject
-  })
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedCategory, selectedLevelId, selectedSubjectName])
 
   const filteredSubjectsList = subjects.filter(s => 
     s.name.toLowerCase().includes(subjectSearchQuery.toLowerCase())
@@ -288,15 +323,16 @@ export default function GradingIndexPage() {
       </div>
 
       {/* Exams Grid */}
-      {filteredExams.length === 0 ? (
+      {exams.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <ClipboardList className="w-16 h-16 text-slate-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">Tidak ada ujian untuk dinilai</h3>
           <p className="text-slate-500">Ujian berbasis pertanyaan dan PDF akan muncul di sini</p>
         </div>
       ) : (
-        <div className="grid gap-4">
-          {filteredExams.map((exam) => (
+        <div className="space-y-4">
+          <div className="grid gap-4">
+            {exams.map((exam) => (
             <Link
               key={exam.id}
               href={`/admin/exams/${exam.id}/grading`}
@@ -327,6 +363,18 @@ export default function GradingIndexPage() {
               <ArrowRight className="w-5 h-5 text-slate-500 group-hover:text-purple-400 group-hover:translate-x-1 transition-all" />
             </Link>
           ))}
+          </div>
+
+          <div className="bg-white p-6 border border-slate-200 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-slate-500">
+              Menampilkan {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} hingga {Math.min(currentPage * itemsPerPage, totalItems)} dari {totalItems} ujian
+            </p>
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
         </div>
       )}
     </div>

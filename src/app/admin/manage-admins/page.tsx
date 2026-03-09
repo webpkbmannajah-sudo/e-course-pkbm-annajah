@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { ShieldCheck, UserPlus, Trash2, Mail, Calendar, Key, Edit2 } from 'lucide-react'
+import Pagination from '@/components/Pagination'
 
 interface AdminUser {
   id: string
@@ -14,6 +15,12 @@ interface AdminUser {
 export default function ManageAdminsPage() {
   const [admins, setAdmins] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const itemsPerPage = 8
 
   // Add Admin Modal
   const [showAddModal, setShowAddModal] = useState(false)
@@ -42,17 +49,19 @@ export default function ManageAdminsPage() {
   const fetchAdmins = useCallback(async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/admin/manage-admins')
+      const response = await fetch(`/api/admin/manage-admins?page=${currentPage}&limit=${itemsPerPage}`)
       const data = await response.json()
       if (response.ok) {
         setAdmins(data.admins || [])
+        setTotalItems(data.total || 0)
+        setTotalPages(data.totalPages || 1)
       }
     } catch (error) {
       console.error('Error fetching admins:', error)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [currentPage])
 
   useEffect(() => {
     fetchAdmins()
@@ -296,6 +305,16 @@ export default function ManageAdminsPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="p-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-slate-500">
+              Menampilkan {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} hingga {Math.min(currentPage * itemsPerPage, totalItems)} dari {totalItems} admin
+            </p>
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
       )}

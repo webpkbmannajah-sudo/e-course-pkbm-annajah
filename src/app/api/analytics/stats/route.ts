@@ -2,8 +2,11 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { isAdminRole } from '@/lib/roles'
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
+        const { searchParams } = new URL(request.url)
+        const type = searchParams.get('type') || 'all'
+
         const supabase = await createClient()
 
         // Verify admin
@@ -22,70 +25,116 @@ export async function GET() {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
-        // Get platform overview via RPC
-        const { data: overview, error: overviewError } = await supabase.rpc('get_platform_overview')
+        // If requesting only overview
+        if (type === 'overview') {
+            const { data: overview, error: overviewError } = await supabase.rpc('get_platform_overview')
+            if (overviewError) throw overviewError
+            return NextResponse.json({ overview })
+        }
 
-        if (overviewError) {
-            // Fallback: manual query if RPC not available
-            const { count: totalStudents } = await supabase
-                .from('profiles')
-                .select('*', { count: 'exact', head: true })
-                .eq('role', 'student')
+        // If requesting top students (paginated)
+        if (type === 'top_students') {
+            const page = parseInt(searchParams.get('page') || '1')
+            const limit = parseInt(searchParams.get('limit') || '10')
+            const offset = (page - 1) * limit
 
-            const { count: totalExams } = await supabase
-                .from('exams')
-                .select('*', { count: 'exact', head: true })
+            const { data: topStudents, error: tsError } = await supabase.rpc('get_top_students', {
+                p_limit: limit,
+                p_offset: offset
+            })
+            if (tsError) throw tsError
 
-            const { count: totalQuestionExams } = await supabase
-                .from('exams')
-                .select('*', { count: 'exact', head: true })
-                .eq('type', 'questions')
-
-            const { count: totalAttempts } = await supabase
-                .from('exam_attempts')
-                .select('*', { count: 'exact', head: true })
-
-            const { count: totalGraded } = await supabase
-                .from('scores')
-                .select('*', { count: 'exact', head: true })
-
-            const { data: scoreAgg } = await supabase
-                .from('scores')
-                .select('percentage, is_passed')
-
-            let avgScore: number | null = null
-            let passRate: number | null = null
-            if (scoreAgg && scoreAgg.length > 0) {
-                const sum = scoreAgg.reduce((acc, s) => acc + (Number(s.percentage) || 0), 0)
-                avgScore = Math.round((sum / scoreAgg.length) * 100) / 100
-                const passCount = scoreAgg.filter(s => s.is_passed).length
-                passRate = Math.round((passCount / scoreAgg.length) * 100 * 100) / 100
-            }
-
-            const { count: totalMaterials } = await supabase
-                .from('materials')
-                .select('*', { count: 'exact', head: true })
+            const { data: totalCount, error: countError } = await supabase.rpc('get_top_students_count')
+            if (countError) throw countError
 
             return NextResponse.json({
-                total_students: totalStudents || 0,
-                total_exams: totalExams || 0,
-                total_question_exams: totalQuestionExams || 0,
-                total_attempts: totalAttempts || 0,
-                total_graded: totalGraded || 0,
-                avg_platform_score: avgScore,
-                overall_pass_rate: passRate,
-                total_materials: totalMaterials || 0,
+                data: topStudents || [],
+                total: totalCount || 0,
+                page,
+                limit,
+                totalPages: Math.ceil((totalCount || 0) / limit)
             })
         }
 
-        // Get exam list with stats for the table
+        // If requesting exam stats (paginated)
+        if (type === 'exam_stats') {
+            const page = parseInt(searchParams.get('page') || '1')
+            const limit = parseInt(searchParams.get('limit') || '10')
+            const offset = (page - 1) * limit
+            const hasAttemptsOnly = searchParams.get('has_attempts') === 'true'
+
+            // Note: For exam stats, since it's a bit complex with joins and we didn't write an RPC for it,
+            // we will fetch exams and then count. In a real highly-optimized scenario, we'd write an RPC for this too.
+            // For now, we will paginate the exams table and do the count per page.
+
+            let query = supabase
+                .from('exams')
+                .select('id, title, type, created_at', { count: 'exact' })
+                .eq('type', 'questions')
+                .order('created_at', { ascending: false })
+
+            query = query.range(offset, offset + limit - 1)
+
+            const { data: exams, count: totalExams, error: examsError } = await query
+            if (examsError) throw examsError
+
+            const examStats = []
+            if (exams) {
+                for (const exam of exams) {
+                    const { data: scores } = await supabase
+                        .from('scores')
+                        .select('percentage, is_passed')
+                        .eq('exam_id', exam.id)
+
+                    const totalAttempts = scores?.length || 0
+
+                    // If filter is active, skip exams with no attempts
+                    if (hasAttemptsOnly && totalAttempts === 0) continue;
+
+                    let avgScore: number | null = null
+                    let passRate: number | null = null
+
+                    if (scores && scores.length > 0) {
+                        const sum = scores.reduce((acc, s) => acc + (Number(s.percentage) || 0), 0)
+                        avgScore = Math.round((sum / scores.length) * 100) / 100
+                        const passCount = scores.filter(s => s.is_passed).length
+                        passRate = Math.round((passCount / scores.length) * 100 * 100) / 100
+                    }
+
+                    examStats.push({
+                        ...exam,
+                        total_attempts: totalAttempts,
+                        avg_score: avgScore,
+                        pass_rate: passRate,
+                    })
+                }
+            }
+
+            return NextResponse.json({
+                data: examStats,
+                total: totalExams || 0,
+                page,
+                limit,
+                totalPages: Math.ceil((totalExams || 0) / limit)
+            })
+        }
+
+        // Legacy: load everything for initial page load (backward compatible)
+        const { data: overview } = await supabase.rpc('get_platform_overview')
+
+        // We only fetch a small initial chunk of exam stats and top students for the initial render
+        const { data: topStudents } = await supabase.rpc('get_top_students', {
+            p_limit: 10,
+            p_offset: 0
+        })
+
         const { data: exams } = await supabase
             .from('exams')
             .select('id, title, type, created_at')
             .eq('type', 'questions')
             .order('created_at', { ascending: false })
+            .limit(10)
 
-        // Get scores per exam for the table
         const examStats = []
         if (exams) {
             for (const exam of exams) {
@@ -114,63 +163,10 @@ export async function GET() {
             }
         }
 
-        // Get top students
-        const { data: topStudents } = await supabase
-            .from('scores')
-            .select('user_id, percentage, is_passed')
-
-        const studentMap = new Map<string, { total: number; sum: number; pass: number }>()
-        if (topStudents) {
-            for (const s of topStudents) {
-                const existing = studentMap.get(s.user_id)
-                if (existing) {
-                    existing.total += 1
-                    existing.sum += Number(s.percentage) || 0
-                    if (s.is_passed) existing.pass += 1
-                } else {
-                    studentMap.set(s.user_id, {
-                        total: 1,
-                        sum: Number(s.percentage) || 0,
-                        pass: s.is_passed ? 1 : 0,
-                    })
-                }
-            }
-        }
-
-        const studentIds = Array.from(studentMap.keys())
-        const { data: studentProfiles } = await supabase
-            .from('profiles')
-            .select('id, name, email')
-            .in('id', studentIds.length > 0 ? studentIds : ['none'])
-
-        const topStudentsList = Array.from(studentMap.entries())
-            .map(([userId, data]) => {
-                const profile = studentProfiles?.find(p => p.id === userId)
-                return {
-                    user_id: userId,
-                    name: profile?.name || 'Unknown',
-                    email: profile?.email || '',
-                    avg_score: Math.round((data.sum / data.total) * 100) / 100,
-                    exams_taken: data.total,
-                    pass_count: data.pass,
-                }
-            })
-            .sort((a, b) => b.avg_score - a.avg_score)
-            .slice(0, 10)
-
         return NextResponse.json({
-            overview: overview || {
-                total_students: 0,
-                total_exams: 0,
-                total_question_exams: 0,
-                total_attempts: 0,
-                total_graded: 0,
-                avg_platform_score: null,
-                overall_pass_rate: null,
-                total_materials: 0,
-            },
+            overview,
             exam_stats: examStats,
-            top_students: topStudentsList,
+            top_students: topStudents,
         })
     } catch (error) {
         console.error('Analytics stats error:', error)

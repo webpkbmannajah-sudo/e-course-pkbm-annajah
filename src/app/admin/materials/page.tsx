@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { FileText, Plus, Trash2, Eye, Search, Calendar, Image as ImageIcon, Pencil } from 'lucide-react'
 import ConfirmModal from '@/components/ConfirmModal'
 import { showToast } from '@/components/Toast'
+import Pagination from '@/components/Pagination'
 import { Material, Level } from '@/types'
 import { getLevelBadgeClass } from '@/lib/levelColors'
 
@@ -18,6 +19,13 @@ export default function AdminMaterialsPage() {
   const [selectedSubjectName, setSelectedSubjectName] = useState<string>('all')
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const itemsPerPage = 10
+  
   const [deleting, setDeleting] = useState<string | null>(null)
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string; title: string; fileUrl: string | null }>({
     isOpen: false,
@@ -42,23 +50,46 @@ export default function AdminMaterialsPage() {
   }, [supabase])
 
   const fetchMaterials = useCallback(async () => {
+    setLoading(true)
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('materials')
         .select(`
           *,
-          subject:subjects(name, level_id, level:levels(name))
-        `)
-        .order('created_at', { ascending: false })
+          subject:subjects!inner(name, level_id, level:levels!inner(name))
+        `, { count: 'exact' })
 
-      if (error) throw error
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
+      }
+
+      if (selectedLevelId !== 'all') {
+        query = query.eq('subject.level_id', selectedLevelId)
+      }
+
+      if (selectedSubjectName !== 'all') {
+        query = query.eq('subject.name', selectedSubjectName)
+      }
+
+      const from = (currentPage - 1) * itemsPerPage
+      const to = from + itemsPerPage - 1
+
+      const { data, count, error } = await query
+        .order('created_at', { ascending: false })
+        .range(from, to)
+
+      // Handle Range Not Satisfiable (PGRST103) which happens when table is empty or range is out of bounds
+      if (error && error.code !== 'PGRST103') throw error
+      
       setMaterials(data as unknown as Material[] || [])
+      setTotalItems(count || 0)
+      setTotalPages(Math.ceil((count || 0) / itemsPerPage))
     } catch (error) {
       console.error('Error fetching materials:', error)
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [supabase, currentPage, searchQuery, selectedLevelId, selectedSubjectName])
 
   const fetchSubjects = useCallback(async () => {
     try {
@@ -77,9 +108,17 @@ export default function AdminMaterialsPage() {
 
   useEffect(() => {
     fetchLevels()
-    fetchMaterials()
     fetchSubjects()
-  }, [fetchLevels, fetchMaterials, fetchSubjects])
+  }, [fetchLevels, fetchSubjects])
+
+  useEffect(() => {
+    fetchMaterials()
+  }, [fetchMaterials])
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedLevelId, selectedSubjectName])
 
   const handleDelete = async () => {
     const { id, fileUrl } = deleteModal
@@ -114,16 +153,17 @@ export default function AdminMaterialsPage() {
     }
   }
 
-  const filteredMaterials = materials.filter(m => {
-    const matchesSearch = m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesLevel = selectedLevelId === 'all' || m.subject?.level_id === selectedLevelId
-    
-    const matchesSubject = selectedSubjectName === 'all' || m.subject?.name === selectedSubjectName
-    
-    return matchesSearch && matchesLevel && matchesSubject
-  })
+  // Filtering entirely handled by server-side query except for mapping initial names
+  // const filteredMaterials = materials.filter(m => {
+  //   const matchesSearch = m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     m.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  //   
+  //   const matchesLevel = selectedLevelId === 'all' || m.subject?.level_id === selectedLevelId
+  //   
+  //   const matchesSubject = selectedSubjectName === 'all' || m.subject?.name === selectedSubjectName
+  //   
+  //   return matchesSearch && matchesLevel && matchesSubject
+  // })
 
   const getTypeIcon = (type: string) => {
       switch (type) {
@@ -213,7 +253,7 @@ export default function AdminMaterialsPage() {
       </div>
 
       {/* Materials List */}
-      {filteredMaterials.length === 0 ? (
+      {materials.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
           <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">Materi tidak ditemukan</h3>
@@ -227,8 +267,9 @@ export default function AdminMaterialsPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid gap-4">
-          {filteredMaterials.map((material) => (
+        <div className="space-y-4">
+          <div className="grid gap-4">
+            {materials.map((material) => (
             <div
               key={material.id}
               className="bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-600 transition-all"
@@ -295,6 +336,18 @@ export default function AdminMaterialsPage() {
               </div>
             </div>
           ))}
+          </div>
+          
+          <div className="bg-white p-6 border border-slate-200 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-slate-500">
+              Menampilkan {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} hingga {Math.min(currentPage * itemsPerPage, totalItems)} dari {totalItems} materi
+            </p>
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
         </div>
       )}
       {/* Delete Confirmation Modal */}
