@@ -25,7 +25,11 @@ interface PageProps {
 export default function ExamResultPage({ params }: PageProps) {
   const { id: examId } = use(params)
   const supabase = createClient()
-  const [examDetail, setExamDetail] = useState<any>(null)
+  const [examDetail, setExamDetail] = useState<{
+    title: string;
+    subject?: { name: string; level_id: string; level?: { name: string } | { name: string }[] } | { name: string; level_id: string; level?: { name: string } | { name: string }[] }[];
+    material?: { title: string } | { title: string }[];
+  } | null>(null)
   const [score, setScore] = useState<ScoreData | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -85,7 +89,17 @@ export default function ExamResultPage({ params }: PageProps) {
 
   // Determine level color class based on package name
   let levelColorClass = "bg-slate-100 text-slate-600 border-slate-200"
-  const levelNameTemp = examDetail?.subject?.level?.name?.toLowerCase() || ""
+  let levelNameTemp = ""
+
+  if (examDetail?.subject) {
+    if (Array.isArray(examDetail.subject)) {
+       const sub = examDetail.subject[0];
+       levelNameTemp = (Array.isArray(sub?.level) ? sub?.level[0]?.name : sub?.level?.name)?.toLowerCase() || ""
+    } else {
+       levelNameTemp = (Array.isArray(examDetail.subject.level) ? examDetail.subject.level[0]?.name : examDetail.subject.level?.name)?.toLowerCase() || ""
+    }
+  }
+
   if (levelNameTemp.includes('paket a')) {
     levelColorClass = "bg-red-50 text-red-600 border-red-200"
   } else if (levelNameTemp.includes('paket b')) {
@@ -107,21 +121,48 @@ export default function ExamResultPage({ params }: PageProps) {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{examDetail?.title || ''}</h1>
           <div className="flex flex-wrap items-center gap-2 mt-2 mb-1">
-            {examDetail?.subject?.level?.name && (
-              <span className={`px-2 py-1 rounded-md text-xs font-medium border ${levelColorClass}`}>
-                {examDetail.subject.level.name}
-              </span>
-            )}
-            {examDetail?.subject?.name && (
-              <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
-                {examDetail.subject.name}
-              </span>
-            )}
-            {examDetail?.material?.title && (
-              <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
-                Materi: {examDetail.material.title}
-              </span>
-            )}
+            {(() => {
+              if (!examDetail?.subject) return null;
+              let levelName: string | undefined = undefined;
+              if (Array.isArray(examDetail.subject)) {
+                 const sub = examDetail.subject[0];
+                 levelName = Array.isArray(sub?.level) ? sub?.level[0]?.name : sub?.level?.name;
+              } else {
+                 levelName = Array.isArray(examDetail.subject.level) ? examDetail.subject.level[0]?.name : examDetail.subject.level?.name;
+              }
+              if (levelName) {
+                return (
+                  <span className={`px-2 py-1 rounded-md text-xs font-medium border ${levelColorClass}`}>
+                    {levelName}
+                  </span>
+                )
+              }
+              return null;
+             })()}
+            {(() => {
+              if (!examDetail?.subject) return null;
+              const subjectName = Array.isArray(examDetail.subject) ? examDetail.subject[0]?.name : examDetail.subject.name;
+              if (subjectName) {
+                return (
+                  <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                    {subjectName}
+                  </span>
+                )
+              }
+              return null;
+            })()}
+            {(() => {
+              if (!examDetail?.material) return null;
+              const materialTitle = Array.isArray(examDetail.material) ? examDetail.material[0]?.title : examDetail.material.title;
+              if (materialTitle) {
+                return (
+                  <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                    Materi: {materialTitle}
+                  </span>
+                )
+              }
+              return null;
+            })()}
           </div>
           <p className="text-slate-500 mt-1">Hasil Ujian</p>
         </div>

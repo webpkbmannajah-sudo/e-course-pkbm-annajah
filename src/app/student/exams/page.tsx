@@ -72,8 +72,8 @@ export default function StudentExamsPage() {
         const attempt = attempts?.find(a => a.exam_id === exam.id)
         return {
           ...exam,
-          subject: (exam as any).subjects,
-          material: (exam as any).materials,
+          subject: (exam as unknown as { subjects: ExamWithAttempt['subject'] }).subjects,
+          material: (exam as unknown as { materials: ExamWithAttempt['material'] }).materials,
           hasAttempted: !!attempt,
           score: attempt?.score
         }

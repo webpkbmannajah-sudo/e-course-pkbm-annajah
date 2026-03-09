@@ -7,13 +7,13 @@ import { ClipboardList, Plus, Trash2, Edit, Search, Calendar, FileText, HelpCirc
 import { getLevelBadgeClass } from '@/lib/levelColors'
 import ConfirmModal from '@/components/ConfirmModal'
 import { showToast } from '@/components/Toast'
-import { Exam, Level } from '@/types'
+import { Exam, Level, Subject } from '@/types'
 
 export default function AdminExamsPage() {
   const supabase = createClient()
   const [exams, setExams] = useState<Exam[]>([])
   const [levels, setLevels] = useState<Level[]>([])
-  const [subjects, setSubjects] = useState<any[]>([])
+  const [subjects, setSubjects] = useState<Subject[]>([])
   const [selectedLevelId, setSelectedLevelId] = useState<string>('all')
   const [selectedSubjectName, setSelectedSubjectName] = useState<string>('all')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
@@ -69,7 +69,7 @@ export default function AdminExamsPage() {
       const { data, error } = await query
       if (error) throw error
       
-      const uniqueSubjects: any[] = []
+      const uniqueSubjects: Subject[] = []
       const seenNames = new Set()
       
       if (data) {
@@ -77,7 +77,7 @@ export default function AdminExamsPage() {
           const lowerName = subject.name.toLowerCase()
           if (!seenNames.has(lowerName)) {
             seenNames.add(lowerName)
-            uniqueSubjects.push(subject)
+            uniqueSubjects.push(subject as Subject)
           }
         })
       }

@@ -16,10 +16,10 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-interface ExamWithQuestions extends Exam {
+interface ExamWithQuestions extends Omit<Exam, 'subject' | 'material'> {
   questions: (Question & { choices: Choice[] })[]
-  subject?: any
-  material?: any
+  subject?: { id: string, name: string; level_id: string; level?: { name: string }, created_at: string }
+  material?: { id: string, title: string, description: string | null, file_url: string | null, file_name: string | null, uploaded_by: string, type: 'pdf' | 'image', created_at: string }
 }
 
 interface ExistingAttempt {

@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { ExamType, QuestionFormData, Level, Subject, Material } from '@/types'
+import { ExamType, QuestionFormData, Level, Subject, Material, Question, Choice } from '@/types'
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false })
 import 'react-quill-new/dist/quill.snow.css'
@@ -104,11 +104,11 @@ export default function EditExamPage({ params }: { params: Promise<{ id: string 
             
           if (qError) throw qError
           if (qData && qData.length > 0) {
-             setQuestions(qData.map((q: any) => ({
+             setQuestions(qData.map((q: Question & { choices: Choice[] }) => ({
                id: q.id,
                question_text: q.question_text,
                explanation: q.explanation || '',
-               choices: q.choices.map((c: any) => ({
+               choices: q.choices.map((c: Choice) => ({
                   id: c.id,
                   choice_text: c.choice_text,
                   is_correct: c.is_correct

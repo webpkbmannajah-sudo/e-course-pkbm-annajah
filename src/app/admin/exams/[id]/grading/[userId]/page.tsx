@@ -23,7 +23,7 @@ interface ScoreData {
   breakdown: ScoreBreakdownItem[]
   student_name?: string
   student_email?: string
-  answers?: any;
+  answers?: { file_url?: string; file_name?: string } | Record<string, string>;
   is_graded?: boolean;
 }
 
@@ -74,7 +74,7 @@ export default function StudentReviewPage({ params }: PageProps) {
         setScore(scoreData)
         if (scoreData.is_graded !== false) {
           setManualScore(scoreData.total_score.toString())
-          const manualItem = scoreData.breakdown?.find((b: any) => b.question_id === 'manual-grading')
+          const manualItem = scoreData.breakdown?.find((b: ScoreBreakdownItem) => b.question_id === 'manual-grading')
           if (manualItem) {
             setManualFeedback(manualItem.selected_choice_text || '')
           }
@@ -119,9 +119,9 @@ export default function StudentReviewPage({ params }: PageProps) {
 
       showToast('Nilai berhasil disimpan', 'success')
       await fetchData() // refresh data
-    } catch (err: any) {
+    } catch (err) {
       console.error(err)
-      showToast(err.message || 'Gagal menyimpan nilai', 'error')
+      showToast(err instanceof Error ? err.message : 'Gagal menyimpan nilai', 'error')
     } finally {
       setSubmittingGrade(false)
     }
