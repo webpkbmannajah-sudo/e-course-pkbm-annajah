@@ -11,6 +11,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedLevel, setSelectedLevel] = useState<string>('all')
   
   // Edit User State
   const [editUserModal, setEditUserModal] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null })
@@ -150,10 +151,12 @@ export default function AdminUsersPage() {
     fetchUsers()
   }, [fetchUsers])
 
-  const filteredUsers = users.filter(u =>
-    u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredUsers = users.filter(u => {
+    const matchesSearch = (u.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (u.email || '').toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesLevel = selectedLevel === 'all' || u.education_level === selectedLevel
+    return matchesSearch && matchesLevel
+  })
 
   const getLevelBadgeColor = (level?: string | null) => {
     return getLevelBadgeClass(level)
@@ -169,16 +172,49 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-        <input
-          type="text"
-          placeholder="Cari pengguna..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
+      {/* Filters */}
+      <div className="flex flex-col gap-4">
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+          <input
+            type="text"
+            placeholder="Cari pengguna..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+        </div>
+
+        <div className="flex bg-white p-1 rounded-xl border border-slate-200 overflow-x-auto">
+          <button
+            onClick={() => setSelectedLevel('all')}
+            className={`flex-1 min-w-[100px] px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              selectedLevel === 'all'
+                ? 'bg-purple-500 text-white shadow-md'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            Semua Paket
+          </button>
+          {[
+            { id: 'sd', name: 'Paket A (Setara SD)' },
+            { id: 'smp', name: 'Paket B (Setara SMP)' },
+            { id: 'sma', name: 'Paket C (Setara SMA)' }
+          ].map(level => (
+            <button
+              key={level.id}
+              onClick={() => setSelectedLevel(level.id)}
+              className={`flex-1 min-w-[100px] px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                selectedLevel === level.id
+                  ? 'bg-purple-500 text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+              }`}
+            >
+              {level.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Users List */}
