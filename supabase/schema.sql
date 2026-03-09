@@ -266,6 +266,7 @@ CREATE TABLE IF NOT EXISTS public.scores (
 ALTER TABLE public.questions ADD COLUMN IF NOT EXISTS weight DECIMAL(5,2) DEFAULT 1.0;
 ALTER TABLE public.questions ADD COLUMN IF NOT EXISTS question_type TEXT DEFAULT 'mcq'
   CHECK (question_type IN ('mcq', 'essay'));
+ALTER TABLE public.questions ADD COLUMN IF NOT EXISTS explanation TEXT;
 
 -- Enable RLS for scores
 ALTER TABLE public.scores ENABLE ROW LEVEL SECURITY;

@@ -8,7 +8,11 @@ import {
   HelpCircle, FileUp
 } from 'lucide-react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { ExamType, QuestionFormData, Level, Subject, Material } from '@/types'
+
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false })
+import 'react-quill-new/dist/quill.snow.css'
 
 export default function CreateExamPage() {
   const router = useRouter()
@@ -32,7 +36,7 @@ export default function CreateExamPage() {
 
   const [file, setFile] = useState<File | null>(null)
   const [questions, setQuestions] = useState<QuestionFormData[]>([
-    { question_text: '', choices: [
+    { question_text: '', explanation: '', choices: [
       { choice_text: '', is_correct: true },
       { choice_text: '', is_correct: false },
       { choice_text: '', is_correct: false },
@@ -51,7 +55,7 @@ export default function CreateExamPage() {
       if (data) setLevels(data)
     }
     fetchLevels()
-  }, [])
+  }, [supabase])
 
   // Fetch Subjects
   useEffect(() => {
@@ -65,7 +69,7 @@ export default function CreateExamPage() {
       setSubjects([])
       setSelectedSubjectId('')
     }
-  }, [selectedLevelId])
+  }, [selectedLevelId, supabase])
 
   // Fetch Materials
   useEffect(() => {
@@ -79,7 +83,7 @@ export default function CreateExamPage() {
       setMaterials([])
       setSelectedMaterialId('')
     }
-  }, [selectedSubjectId])
+  }, [selectedSubjectId, supabase])
 
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -129,6 +133,7 @@ export default function CreateExamPage() {
   const addQuestion = () => {
     setQuestions(prev => [...prev, {
       question_text: '',
+      explanation: '',
       choices: [
         { choice_text: '', is_correct: true },
         { choice_text: '', is_correct: false },
@@ -147,6 +152,12 @@ export default function CreateExamPage() {
   const updateQuestion = (index: number, text: string) => {
     setQuestions(prev => prev.map((q, i) => 
       i === index ? { ...q, question_text: text } : q
+    ))
+  }
+
+  const updateExplanation = (index: number, html: string) => {
+    setQuestions(prev => prev.map((q, i) => 
+      i === index ? { ...q, explanation: html } : q
     ))
   }
 
@@ -231,6 +242,7 @@ export default function CreateExamPage() {
             .insert({
               exam_id: exam.id,
               question_text: q.question_text,
+              explanation: q.explanation || null,
               order_number: i + 1,
             })
             .select().single()
@@ -373,6 +385,25 @@ export default function CreateExamPage() {
                       <input type="text" value={choice.choice_text} onChange={(e) => updateChoice(qIndex, cIndex, e.target.value)} className="flex-1 px-4 py-2 bg-slate-100 border border-slate-600 rounded-lg text-slate-900" placeholder={`Pilihan ${String.fromCharCode(65 + cIndex)}`} />
                     </div>
                   ))}
+                </div>
+                <div className="mt-6 border-t border-slate-200 pt-4">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">Pembahasan (Opsional)</label>
+                  <div className="bg-white rounded-xl overflow-hidden [&_.ql-container]:min-h-[120px] [&_.ql-container]:text-base [&_.ql-toolbar]:border-none [&_.ql-toolbar]:bg-slate-50 [&_.ql-container]:border-none [&_.ql-editor]:min-h-[120px] border border-slate-300">
+                    <ReactQuill 
+                      theme="snow" 
+                      value={question.explanation || ''} 
+                      onChange={(val) => updateExplanation(qIndex, val)}
+                      placeholder="Masukkan penjelasan untuk jawaban yang benar (mendukung format rich text)..."
+                      modules={{
+                        toolbar: [
+                          [{ 'header': [1, 2, 3, false] }],
+                          ['bold', 'italic', 'underline'],
+                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                          ['clean']
+                        ]
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             ))}

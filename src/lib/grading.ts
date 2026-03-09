@@ -7,6 +7,7 @@ interface QuestionWithChoices {
     question_text: string
     weight: number
     question_type: string
+    explanation?: string | null
     choices: {
         id: string
         choice_text: string
@@ -95,6 +96,7 @@ export function generateScoreBreakdown(
                 correct_choice_id: correctChoice?.id || '',
                 selected_choice_text: selectedChoice?.choice_text || null,
                 correct_choice_text: correctChoice?.choice_text || '',
+                explanation: question.explanation || null,
             }
         })
 }

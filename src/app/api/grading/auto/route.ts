@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
         question_text,
         weight,
         question_type,
+        explanation,
         order_number,
         choices (
           id,

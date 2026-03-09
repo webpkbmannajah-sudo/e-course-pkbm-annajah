@@ -96,6 +96,7 @@ export interface Question {
     weight?: number
     question_type?: 'mcq' | 'essay'
     image_url?: string | null
+    explanation?: string | null
     choices?: Choice[]
 }
 
@@ -139,6 +140,7 @@ export interface ScoreBreakdownItem {
     correct_choice_id: string
     selected_choice_text: string | null
     correct_choice_text: string
+    explanation?: string | null
 }
 
 // Form types
@@ -160,6 +162,7 @@ export interface ExamFormData {
 export interface QuestionFormData {
     id?: string
     question_text: string
+    explanation?: string
     choices: ChoiceFormData[]
 }
 

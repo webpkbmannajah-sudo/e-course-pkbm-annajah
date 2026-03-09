@@ -574,6 +574,19 @@ export default function TakeExamPage({ params }: PageProps) {
                     )
                   })}
                 </div>
+
+                {/* Explanation / Pembahasan */}
+                {question.explanation && (
+                  <div className="mt-4 ml-11 p-4 rounded-xl bg-blue-50 border border-blue-200">
+                    <h4 className="flex items-center gap-2 text-sm font-semibold text-blue-900 mb-2">
+                      <span className="text-xl">💡</span> Pembahasan:
+                    </h4>
+                    <div 
+                      className="text-blue-800 text-sm prose prose-blue prose-sm max-w-none [&_p]:m-0 [&_ul]:my-1 [&_ol]:my-1"
+                      dangerouslySetInnerHTML={{ __html: question.explanation }}
+                    />
+                  </div>
+                )}
               </div>
             )
           })}
