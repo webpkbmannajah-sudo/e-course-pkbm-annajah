@@ -79,7 +79,14 @@ export default function StudentMaterialsPage() {
       const { data, error } = await query
 
       if (error) throw error
-      setMaterials(data as unknown as Material[] || [])
+      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const formattedData = (data || []).map((item: any) => ({
+        ...item,
+        subject: item.subject || item.subjects
+      }))
+      
+      setMaterials(formattedData as unknown as Material[])
     } catch (error) {
       console.error('Error fetching materials:', error)
     } finally {
