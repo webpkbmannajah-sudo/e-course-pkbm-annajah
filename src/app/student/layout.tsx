@@ -85,6 +85,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                     isActive 
                       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
