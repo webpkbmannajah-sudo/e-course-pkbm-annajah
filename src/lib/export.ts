@@ -57,7 +57,9 @@ export function generateExcel(
     ws['!cols'] = columns.map(col => ({ wch: col.width || 15 }))
 
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, title)
+    // Excel sheet names cannot exceed 31 characters
+    const safeTitle = title.length > 31 ? title.substring(0, 31) : title
+    XLSX.utils.book_append_sheet(wb, ws, safeTitle)
 
     return XLSX.write(wb, { type: 'array', bookType: 'xlsx' }) as Uint8Array
 }
