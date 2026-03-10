@@ -11,23 +11,26 @@ export interface ColumnDef {
 // Column definitions for different report types
 export const examReportColumns: ColumnDef[] = [
     { key: 'student_name', label: 'Nama Siswa', width: 25 },
-    { key: 'email', label: 'Email', width: 25 },
-    { key: 'exam_title', label: 'Judul Ujian', width: 30 },
-    { key: 'score', label: 'Nilai', width: 10 },
-    { key: 'submitted_at', label: 'Tanggal Pengerjaan', width: 20 },
+    { key: 'student_email', label: 'Email', width: 25 },
+    { key: 'score', label: 'Skor', width: 10 },
+    { key: 'percentage', label: 'Persentase', width: 15 },
+    { key: 'status', label: 'Status', width: 15 },
+    { key: 'graded_at', label: 'Tanggal Penilaian', width: 20 },
 ]
 
 export const studentReportColumns: ColumnDef[] = [
-    { key: 'name', label: 'Nama Siswa', width: 25 },
-    { key: 'email', label: 'Email', width: 25 },
-    { key: 'education_level', label: 'Jenjang', width: 15 },
-    { key: 'exams_taken', label: 'Ujian Dikerjakan', width: 18 },
-    { key: 'avg_score', label: 'Rata-rata Nilai', width: 15 },
+    { key: 'exam_title', label: 'Judul Ujian', width: 30 },
+    { key: 'total_score', label: 'Skor Total', width: 15 },
+    { key: 'percentage', label: 'Persentase', width: 15 },
+    { key: 'status', label: 'Status', width: 15 },
+    { key: 'graded_at', label: 'Tanggal Penilaian', width: 20 },
 ]
 
 export const overviewReportColumns: ColumnDef[] = [
-    { key: 'metric', label: 'Metrik', width: 30 },
-    { key: 'value', label: 'Nilai', width: 20 },
+    { key: 'exam_title', label: 'Judul Ujian', width: 30 },
+    { key: 'total_attempts', label: 'Total Peserta', width: 15 },
+    { key: 'avg_score', label: 'Rata-rata Skor', width: 15 },
+    { key: 'pass_rate', label: 'Tingkat Kelulusan', width: 20 },
 ]
 
 /**

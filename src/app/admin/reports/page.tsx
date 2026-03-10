@@ -70,8 +70,6 @@ export default function AdminReportsPage() {
   const [examFilter, setExamFilter] = useState<'all' | 'has_attempts'>('all')
   const [sortBy, setSortBy] = useState<'name' | 'avg_score' | 'pass_rate'>('avg_score')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
-  const [exporting, setExporting] = useState(false)
-
   // Pagination states
   const [examsCurrentPage, setExamsCurrentPage] = useState(1)
   const [examsTotalPages, setExamsTotalPages] = useState(1)
@@ -160,30 +158,6 @@ export default function AdminReportsPage() {
     setExamsCurrentPage(1)
   }, [examFilter])
 
-  const handleExport = async () => {
-    setExporting(true)
-    try {
-      const res = await fetch('/api/export', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ report: 'overview' }),
-      })
-      if (!res.ok) throw new Error('Export failed')
-
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'laporan-ringkasan.xlsx'
-      a.click()
-      URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error('Export error:', error)
-    } finally {
-      setExporting(false)
-    }
-  }
-
   // Client-side filtering is reduced as it's now mainly handled via API parameters
   const filteredExams = examStats 
 
@@ -250,16 +224,6 @@ export default function AdminReportsPage() {
             Laporan & Analitik
           </h1>
           <p className="text-slate-500 mt-1">Ringkasan performa platform dan ujian</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleExport()}
-            disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors disabled:opacity-50"
-          >
-            <FileSpreadsheet className="w-4 h-4" />
-            Unduh Excel
-          </button>
         </div>
       </div>
 

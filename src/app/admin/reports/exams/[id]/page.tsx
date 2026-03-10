@@ -81,20 +81,20 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
 
   useEffect(() => { fetchData() }, [fetchData])
 
-  const handleExport = async (type: 'excel' | 'pdf') => {
+  const handleExport = async () => {
     setExporting(true)
     try {
       const res = await fetch('/api/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, report: 'exam', id }),
+        body: JSON.stringify({ report: 'exam', id }),
       })
       if (!res.ok) throw new Error('Export failed')
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `laporan-ujian.${type === 'excel' ? 'xlsx' : 'pdf'}`
+      a.download = `laporan-ujian.xlsx`
       a.click()
       URL.revokeObjectURL(url)
     } catch (err) {
@@ -176,13 +176,9 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
           <p className="text-slate-500 text-sm mt-1">{exam.question_count} soal · Tipe: {exam.type}</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => handleExport('excel')} disabled={exporting}
+          <button onClick={() => handleExport()} disabled={exporting}
             className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors disabled:opacity-50">
-            <FileSpreadsheet className="w-4 h-4" /> Excel
-          </button>
-          <button onClick={() => handleExport('pdf')} disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl transition-colors disabled:opacity-50">
-            <Download className="w-4 h-4" /> PDF
+            <FileSpreadsheet className="w-4 h-4" /> Unduh Excel
           </button>
         </div>
       </div>
