@@ -9,9 +9,23 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Course Management System",
-  description: "A complete platform for learning materials and online examinations",
-  keywords: ["education", "learning", "exams", "courses", "LMS"],
+  title: "PKBM An-Najah - Solusi pendidikan kesetaraan di Fakfak",
+  description: "PKBM An-Najah memberikan solusi pendidikan kesetaraan Paket A, B, dan C di Fakfak dengan pembelajaran fleksibel.",
+  keywords: [
+    "PKBM An-Najah",
+    "pendidikan kesetaraan",
+    "sekolah kesetaraan",
+    "Fakfak",
+    "Paket A",
+    "Paket B",
+    "Paket C",
+    "setara SD",
+    "setara SMP",
+    "setara SMA",
+    "ijazah kesetaraan",
+    "belajar online",
+    "ujian online"
+  ],
 };
 
 export default function RootLayout({
