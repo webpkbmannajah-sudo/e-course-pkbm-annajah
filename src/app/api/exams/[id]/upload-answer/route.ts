@@ -17,6 +17,7 @@ export async function POST(
         const { id } = await params
         const formData = await request.formData()
         const file = formData.get('file') as File | null
+        const oldFileUrl = formData.get('oldFileUrl') as string | null
 
         if (!file) {
             return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -42,6 +43,22 @@ export async function POST(
 
         if (examError || !exam || exam.type !== 'pdf') {
             return NextResponse.json({ error: 'Invalid exam' }, { status: 400 })
+        }
+
+        // Delete old file if provided
+        if (oldFileUrl) {
+            try {
+                const urlParts = oldFileUrl.split('/public/exams/')
+                if (urlParts.length === 2) {
+                    const filePath = urlParts[1]
+                    const { error: removeError } = await supabaseAdmin.storage.from('exams').remove([filePath])
+                    if (removeError) {
+                        console.error('Failed to remove old file:', removeError)
+                    }
+                }
+            } catch (e) {
+                console.error('Error parsing old file url:', e)
+            }
         }
 
         // Upload to exams bucket

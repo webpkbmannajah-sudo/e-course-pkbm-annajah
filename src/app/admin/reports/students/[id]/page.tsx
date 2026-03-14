@@ -250,7 +250,7 @@ export default function StudentReportPage({ params }: { params: Promise<{ id: st
                     <td className="py-3 pr-4 text-center text-slate-600">{Number(score.total_score).toFixed(1)}</td>
                     <td className="py-3 pr-4 text-center">
                       <span className={`font-medium ${
-                        Number(score.percentage) >= 60 ? 'text-emerald-400' : 'text-red-400'
+                        Number(score.percentage) >= 75 ? 'text-emerald-400' : 'text-red-400'
                       }`}>
                         {Number(score.percentage).toFixed(1)}%
                       </span>

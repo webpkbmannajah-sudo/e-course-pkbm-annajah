@@ -85,6 +85,7 @@ export async function GET(
                         ...existingScore,
                         student_name: profile?.name || 'Unknown',
                         student_email: profile?.email || '',
+                        answers: attempt.answers // Include answers for admin review file
                     }
                 }
 

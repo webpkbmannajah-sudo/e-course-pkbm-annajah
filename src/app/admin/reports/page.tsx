@@ -362,7 +362,7 @@ export default function AdminReportsPage() {
                     <td className="py-3 pr-4 text-center">
                       <span className={`font-medium ${
                         exam.avg_score !== null
-                          ? exam.avg_score >= 60 ? 'text-emerald-400' : 'text-amber-400'
+                          ? exam.avg_score >= 75 ? 'text-emerald-400' : 'text-amber-400'
                           : 'text-slate-500'
                       }`}>
                         {exam.avg_score !== null ? `${exam.avg_score.toFixed(1)}%` : '-'}
@@ -447,7 +447,7 @@ export default function AdminReportsPage() {
                     <td className="py-3 pr-4 text-slate-500 text-sm">{student.email}</td>
                     <td className="py-3 pr-4 text-center text-slate-600">{student.exams_taken}</td>
                     <td className="py-3 pr-4 text-center">
-                      <span className={`font-medium ${student.avg_score >= 60 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                      <span className={`font-medium ${student.avg_score >= 75 ? 'text-emerald-400' : 'text-amber-400'}`}>
                         {student.avg_score.toFixed(1)}%
                       </span>
                     </td>

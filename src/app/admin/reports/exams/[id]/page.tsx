@@ -139,13 +139,13 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
       data: distribution.map(d => d.count),
       backgroundColor: distribution.map(d => {
         const range = parseInt(d.score_range)
-        if (range >= 60) return 'rgba(16, 185, 129, 0.6)'
+        if (range >= 75) return 'rgba(16, 185, 129, 0.6)'
         if (range >= 40) return 'rgba(245, 158, 11, 0.6)'
         return 'rgba(239, 68, 68, 0.6)'
       }),
       borderColor: distribution.map(d => {
         const range = parseInt(d.score_range)
-        if (range >= 60) return 'rgb(16, 185, 129)'
+        if (range >= 75) return 'rgb(16, 185, 129)'
         if (range >= 40) return 'rgb(245, 158, 11)'
         return 'rgb(239, 68, 68)'
       }),
@@ -273,7 +273,7 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
                     <td className="py-3 pr-4 text-center text-slate-600">{attempt.score !== null ? attempt.score : '-'}</td>
                     <td className="py-3 pr-4 text-center">
                       <span className={`font-medium ${attempt.percentage !== null
-                        ? (attempt.percentage >= 60 ? 'text-emerald-400' : 'text-red-400')
+                        ? (attempt.percentage >= 75 ? 'text-emerald-400' : 'text-red-400')
                         : 'text-slate-500'}`}>
                         {attempt.percentage !== null ? `${Number(attempt.percentage).toFixed(1)}%` : '-'}
                       </span>
@@ -312,7 +312,7 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
                   <div className="mt-1 h-2 bg-slate-200 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
-                        q.correct_rate >= 70 ? 'bg-emerald-500'
+                        q.correct_rate >= 75 ? 'bg-emerald-500'
                         : q.correct_rate >= 40 ? 'bg-amber-500'
                         : 'bg-red-500'
                       }`}
@@ -321,7 +321,7 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
                   </div>
                 </div>
                 <span className={`text-sm font-medium w-14 text-right ${
-                  q.correct_rate >= 70 ? 'text-emerald-400'
+                  q.correct_rate >= 75 ? 'text-emerald-400'
                   : q.correct_rate >= 40 ? 'text-amber-400'
                   : 'text-red-400'
                 }`}>

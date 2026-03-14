@@ -34,7 +34,7 @@ export function calculateAutoScore(
     const breakdown = generateScoreBreakdown(answers, questions)
     const { totalScore, maxScore } = calculateWeightedScore(breakdown)
     const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 10000) / 100 : 0
-    // KKM active — minimum passing score is 70%
+    // KKM active — minimum passing score is 75%
     const isPassed = determinePassStatus(percentage)
 
     return {
@@ -103,11 +103,11 @@ export function generateScoreBreakdown(
 
 /**
  * Determines pass/fail status based on KKM threshold.
- * Default passing score is 70%.
+ * Default passing score is 75%.
  */
 export function determinePassStatus(
     percentage: number,
-    passingScore: number = 70
+    passingScore: number = 75
 ): boolean {
     return percentage >= passingScore
 }

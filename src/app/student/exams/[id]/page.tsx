@@ -44,6 +44,7 @@ export default function TakeExamPage({ params }: PageProps) {
   const [answerFile, setAnswerFile] = useState<File | null>(null)
   const [uploadingAnswer, setUploadingAnswer] = useState(false)
   const [dragActive, setDragActive] = useState(false)
+  const [isEditingAnswer, setIsEditingAnswer] = useState(false)
   
   // Modals state
   const [showSubmitModal, setShowSubmitModal] = useState(false)
@@ -166,6 +167,9 @@ export default function TakeExamPage({ params }: PageProps) {
 
       const formData = new FormData()
       formData.append('file', answerFile)
+      if (existingAttempt?.answers?.file_url) {
+        formData.append('oldFileUrl', existingAttempt.answers.file_url)
+      }
       
       const uploadRes = await fetch(`/api/exams/${exam.id}/upload-answer`, {
         method: 'POST',
@@ -175,20 +179,44 @@ export default function TakeExamPage({ params }: PageProps) {
       const uploadData = await uploadRes.json()
       if (!uploadRes.ok) throw new Error(uploadData.error || 'Gagal mengunggah file')
 
-      const { data: attempt, error } = await supabase
-        .from('exam_attempts')
-        .insert({
-          user_id: user.id,
-          exam_id: exam.id,
-          answers: { file_url: uploadData.url, file_name: answerFile.name },
-        })
-        .select()
-        .single()
+      let attemptError;
+      let attemptData;
 
-      if (error) throw error
+      if (existingAttempt) {
+        // Update existing attempt
+        const { data, error } = await supabase
+          .from('exam_attempts')
+          .update({
+            answers: { file_url: uploadData.url, file_name: answerFile.name },
+            submitted_at: new Date().toISOString()
+          })
+          .eq('id', existingAttempt.id)
+          .select()
+          .single()
+        
+        attemptError = error
+        attemptData = data
+      } else {
+        // Insert new attempt
+        const { data, error } = await supabase
+          .from('exam_attempts')
+          .insert({
+            user_id: user.id,
+            exam_id: exam.id,
+            answers: { file_url: uploadData.url, file_name: answerFile.name },
+          })
+          .select()
+          .single()
 
-      setExistingAttempt(attempt as ExistingAttempt)
+        attemptError = error
+        attemptData = data
+      }
+
+      if (attemptError) throw attemptError
+
+      setExistingAttempt(attemptData as ExistingAttempt)
       setSubmitted(true)
+      setIsEditingAnswer(false)
       showToast('Jawaban berhasil dikirim', 'success')
       
     } catch (err) {
@@ -379,27 +407,39 @@ export default function TakeExamPage({ params }: PageProps) {
         {/* Answer Upload Section */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6">
           <h2 className="text-lg font-semibold text-slate-900 mb-4">Jawaban Ujian</h2>
-          {submitted ? (
-            <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-100 rounded-xl">
+          {submitted && !isEditingAnswer ? (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-emerald-50 border border-emerald-100 rounded-xl gap-4">
               <div className="flex items-center gap-3">
-                <CheckCircle className="w-6 h-6 text-emerald-500" />
+                <CheckCircle className="w-6 h-6 text-emerald-500 shrink-0" />
                 <div>
                   <p className="text-emerald-900 font-medium">Jawaban telah dikirim</p>
-                  <p className="text-emerald-700 text-sm">
+                  <p className="text-emerald-700 text-sm break-all">
                     {existingAttempt?.answers?.file_name || 'File jawaban tersimpan'}
                   </p>
                 </div>
               </div>
-              {existingAttempt?.answers?.file_url && (
-                <a 
-                  href={existingAttempt.answers.file_url} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="px-4 py-2 bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50 rounded-lg text-sm font-medium transition-colors"
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                {existingAttempt?.answers?.file_url && (
+                  <a 
+                    href={existingAttempt.answers.file_url} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="px-4 py-2 bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Lihat Jawaban
+                  </a>
+                )}
+                <button
+                  onClick={() => {
+                    setIsEditingAnswer(true)
+                    setAnswerFile(null)
+                  }}
+                  className="px-4 py-2 bg-white text-amber-600 border border-amber-200 hover:bg-amber-50 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                 >
-                  Lihat Jawaban
-                </a>
-              )}
+                  <RefreshCw className="w-4 h-4" />
+                  Ganti Jawaban
+                </button>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -432,24 +472,39 @@ export default function TakeExamPage({ params }: PageProps) {
                 </label>
               </div>
 
-              <div className="flex justify-end pt-2">
-                <button
-                  onClick={submitPdfExam}
-                  disabled={!answerFile || uploadingAnswer}
-                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {uploadingAnswer ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Mengunggah...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-5 h-5" />
-                      Kirim Jawaban
-                    </>
-                  )}
-                </button>
+              <div className="flex flex-wrap items-center justify-between pt-2 gap-4">
+                {isEditingAnswer ? (
+                  <button
+                    onClick={() => {
+                      setIsEditingAnswer(false)
+                      setAnswerFile(null)
+                    }}
+                    className="px-6 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors shrink-0"
+                  >
+                    Batal
+                  </button>
+                ) : (
+                  <div className="hidden sm:block"></div>
+                )}
+                <div className={isEditingAnswer ? '' : 'w-full flex justify-end'}>
+                  <button
+                    onClick={submitPdfExam}
+                    disabled={!answerFile || uploadingAnswer}
+                    className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {uploadingAnswer ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Mengunggah...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-5 h-5" />
+                        Kirim Jawaban
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           )}

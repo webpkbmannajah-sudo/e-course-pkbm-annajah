@@ -331,7 +331,7 @@ export default function GradingPage({ params }: PageProps) {
                       ) : (
                         <span className={`text-lg font-bold ${
                           score.percentage >= 80 ? 'text-emerald-400' :
-                          score.percentage >= 60 ? 'text-yellow-400' : 'text-red-400'
+                          score.percentage >= 75 ? 'text-yellow-400' : 'text-red-400'
                         }`}>
                           {score.percentage}%
                         </span>
